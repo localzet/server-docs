@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/generate-sitemap.js",
+    "postbuild": "node scripts/generate-sitemap.js",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "sitemap": "node scripts/generate-sitemap.js"
   },
   "browserslist": "defaults, not ie <= 11",
   "dependencies": {
