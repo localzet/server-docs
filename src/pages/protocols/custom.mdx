@@ -40,13 +40,15 @@ class SuperJSON
      * Если можно получить длину пакета в $recv_buffer, возвращается длина всего пакета
      * В противном случае возвращается 0, что означает, что необходимо дождаться дополнительных данных.
      * Если возникает ошибка в протоколе, можно вернуть false, что приведет к разрыву соединения с текущим клиентом
-     * @param string $recv_buffer
-     * @return int
+     * 
+     * @param string $recv_buffer Буфер полученных данных
+     * @param \localzet\Server\Connection\ConnectionInterface $connection Соединение с клиентом
+     * @return int|false Длина пакета, 0 если данных недостаточно, false при ошибке
      */
-    public static function input($recv_buffer)
+    public static function input(string $recv_buffer, \localzet\Server\Connection\ConnectionInterface $connection): int|false
     {
         // Получение позиции символа переноса строки "\n"
-        $pos = strpos($buffer, "\n");
+        $pos = strpos($recv_buffer, "\n");
 
         // Если его нет - невозможно получить длину пакета, вернуть 0 и ожидать дополнительных данных
         if($pos === false)
@@ -60,25 +62,33 @@ class SuperJSON
 
     /**
      * Упаковка, автоматически вызывается при отправке данных клиенту
-     * @param string $buffer
-     * @return string
+     * 
+     * @param mixed $data Данные для отправки
+     * @param \localzet\Server\Connection\ConnectionInterface $connection Соединение с клиентом
+     * @return string Закодированные данные для отправки
      */
-    public static function encode($buffer)
+    public static function encode(mixed $data, \localzet\Server\Connection\ConnectionInterface $connection): string
     {
         // Формирование JSON и добавление символа переноса строки в качестве пометки окончания запроса
-        return json_encode($buffer) . "\n";
+        return json_encode($data, JSON_THROW_ON_ERROR) . "\n";
     }
 
     /**
      * Разбор, автоматически вызывается, когда количество полученных байтов равно возвращенному значению input (значение больше 0)
      * и передается как параметр $data в обратный вызов onMessage
-     * @param string $buffer
-     * @return string
+     * 
+     * @param string $buffer Буфер данных для декодирования
+     * @param \localzet\Server\Connection\ConnectionInterface $connection Соединение с клиентом
+     * @return mixed Декодированные данные
      */
-    public static function decode($buffer)
+    public static function decode(string $buffer, \localzet\Server\Connection\ConnectionInterface $connection): mixed
     {
         // Удаление символа переноса строки и превращение в массив
-        return json_decode(trim($buffer), true);
+        $decoded = json_decode(trim($buffer), true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \RuntimeException('Ошибка декодирования JSON: ' . json_last_error_msg());
+        }
+        return $decoded;
     }
 }
 ```
