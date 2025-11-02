@@ -37,7 +37,7 @@ const modeScript = `
 
 export default function Document() {
     return (
-        <Html lang="en">
+        <Html lang="ru">
             <Head>
                 <script dangerouslySetInnerHTML={{__html: modeScript}}/>
                 <link rel="preconnect" href="https://fonts.googleapis.com"/>
