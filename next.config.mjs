@@ -15,12 +15,16 @@ const withMDX = nextMDX({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    output: "standalone",
     reactStrictMode: true,
     pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'mdx'],
     experimental: {
         scrollRestoration: true,
     },
+    output: 'export',
+    images: {
+        unoptimized: true,
+    },
+    trailingSlash: false,
 }
 
 export default withSearch(withMDX(nextConfig))
