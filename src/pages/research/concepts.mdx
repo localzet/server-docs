@@ -93,7 +93,7 @@ T_avg - среднее время обработки одного соедине
 Блокирующий:  Throughput = 1 / T_block
 Асинхронный:  Throughput = N / T_nonblock
 
-где T_nonblock << T_block
+где T_nonblock &lt;&lt; T_block
 ```
 
 ## Архитектурные паттерны
@@ -116,7 +116,7 @@ Handle:  O(K) операция обработки, где K - размер да�
 | Операция | select() | epoll/kqueue | Оптимизация |
 |----------|----------|--------------|-------------|
 | Регистрация | O(1) | O(1) | - |
-| Выбор готовых | O(N) | O(M) где M << N | epoll/kqueue |
+| Выбор готовых | O(N) | O(M) где M &lt;&lt; N | epoll/kqueue |
 | Обработка | O(K) | O(K) | Зависит от протокола |
 
 ### 2. Протокольная декомпозиция
@@ -148,7 +148,7 @@ T_business = O(K) где K - сложность бизнес-логики
 Queue_Size(t) = ∫(Input_Rate(t) - Output_Rate(t)) dt
 
 Условие стабильности:
-Input_Rate_avg < Output_Rate_max
+Input_Rate_avg &lt; Output_Rate_max
 ```
 
 **Механизм backpressure:**
@@ -157,7 +157,7 @@ Input_Rate_avg < Output_Rate_max
 if (Queue_Size > Threshold):
     Pause_Input()
     
-if (Queue_Size < Threshold):
+if (Queue_Size &lt; Threshold):
     Resume_Input()
 ```
 
