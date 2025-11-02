@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const BASE_URL = 'https://docs.localzet.com';
+const BASE_URL = 'https://server.localzet.com';
 const PAGES_DIR = path.join(__dirname, '../src/pages');
 const OUTPUT_FILE = path.join(__dirname, '../public/sitemap.xml');
 

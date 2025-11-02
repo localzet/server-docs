@@ -1,5 +1,5 @@
 # robots.txt for Localzet Server Documentation
-# https://docs.localzet.com
+# https://server.localzet.com
 
 User-agent: *
 Allow: /
@@ -34,7 +34,7 @@ Allow: /
 # Disallow: /private/
 
 # Sitemap location
-Sitemap: https://docs.localzet.com/sitemap.xml
+Sitemap: https://server.localzet.com/sitemap.xml
 
 # Crawl-delay (optional, helps with server load)
 Crawl-delay: 1
