@@ -1,0 +1,614 @@
+export const pageTitle = 'Решение проблем'
+
+# Решение проблем и отладка
+
+Подробное руководство по диагностике и решению типичных проблем в Localzet Server.
+
+## Диагностика проблем
+
+### Проверка статуса сервера
+
+```bash
+# Статус всех процессов
+php start.php status
+
+# Статус в реальном времени
+php start.php status -d
+
+# Текущие соединения
+php start.php connections
+```
+
+**Вывод статуса включает:**
+
+- Количество процессов
+- Статус каждого процесса
+- Статистику соединений и запросов
+- Использование памяти
+- Время работы
+
+### Логирование
+
+```php
+// Настройка файла лога
+Server::$logFile = '/var/log/localzet.log';
+
+// Все ошибки автоматически логируются
+// Проверка логов
+tail -f /var/log/localzet.log
+```
+
+### Отладка через код
+
+```php
+// Вывод в лог
+Server::log("Debug message");
+
+// Безопасный вывод в консоль
+Server::safeEcho("Debug: " . $data . "\n");
+
+// Dump переменных
+Server::log(var_export($data, true));
+```
+
+## Типичные проблемы
+
+### 1. Сервер не запускается
+
+**Симптомы:**
+- Процесс завершается сразу после старта
+- Ошибки в логах
+- Порт недоступен
+
+**Диагностика:**
+
+```bash
+# Проверка PID файла
+cat localzet.start.php.pid
+
+# Проверка, не запущен ли уже сервер
+ps aux | grep start.php
+
+# Проверка доступности порта
+netstat -tuln | grep 8080
+# или
+ss -tuln | grep 8080
+```
+
+**Решения:**
+
+1. **Порт занят:**
+```bash
+# Найти процесс, использующий порт
+lsof -i :8080
+# или
+fuser 8080/tcp
+
+# Остановить процесс
+kill -9 <PID>
+```
+
+2. **Отсутствуют расширения:**
+```bash
+# Проверка расширений
+php -m | grep -E 'pcntl|posix|sockets'
+
+# Установка расширений
+# Для Debian/Ubuntu:
+apt-get install php8.1-pcntl php8.1-posix php8.1-sockets
+
+# Перезапуск PHP-FPM или CLI
+```
+
+3. **Проблемы с правами:**
+```bash
+# Проверка прав на файлы
+ls -la start.php
+
+# Установка прав
+chmod +x start.php
+```
+
+### 2. Высокое использование памяти
+
+**Симптомы:**
+- Процессы потребляют много памяти
+- Утечки памяти со временем
+
+**Диагностика:**
+
+```php
+// Мониторинг памяти в коде
+$server->onMessage = function($conn, $req) {
+    $memory = memory_get_usage(true);
+    if ($memory > 100 * 1024 * 1024) { // 100MB
+        Server::log("High memory usage: " . ($memory / 1024 / 1024) . " MB");
+    }
+};
+```
+
+**Решения:**
+
+1. **Проверка на утечки:**
+```php
+// Всегда очищайте ссылки при закрытии соединения
+$server->onClose = function($conn) {
+    // Очистка данных соединения
+    $conn->onMessage = null;
+    $conn->onClose = null;
+    
+    // Удаление из глобальных массивов
+    unset($globalArray[$conn->id]);
+};
+```
+
+2. **Ограничение размеров буферов:**
+```php
+// Уменьшение максимальных размеров
+TcpConnection::$defaultMaxSendBufferSize = 524288; // 512KB
+TcpConnection::$defaultMaxPackageSize = 5242880;  // 5MB
+```
+
+3. **Принудительная сборка мусора:**
+```php
+// Периодическая сборка мусора
+Timer::repeat(60.0, function() {
+    gc_collect_cycles();
+});
+```
+
+### 3. Соединения закрываются неожиданно
+
+**Симптомы:**
+- Клиенты теряют соединение
+- Ошибки "Connection reset"
+- Таймауты
+
+**Диагностика:**
+
+```php
+// Логирование закрытий
+$server->onClose = function($conn) {
+    Server::log("Connection closed: " . $conn->getRemoteAddress());
+    Server::log("Status: " . $conn->status);
+    Server::log("Bytes read: " . $conn->bytesRead);
+    Server::log("Bytes written: " . $conn->bytesWritten);
+};
+```
+
+**Решения:**
+
+1. **Настройка Keep-Alive:**
+```php
+// Для HTTP
+$response = new Response(200, [
+    'Connection' => 'keep-alive',
+    'Keep-Alive' => 'timeout=60'
+]);
+```
+
+2. **Увеличение таймаутов:**
+```bash
+# В sysctl.conf
+net.ipv4.tcp_keepalive_time = 600
+net.ipv4.tcp_keepalive_intvl = 60
+net.ipv4.tcp_keepalive_probes = 3
+```
+
+3. **Heartbeat механизм:**
+```php
+$server->onConnect = function($conn) {
+    $conn->context->heartbeatTimer = Timer::repeat(30.0, function() use ($conn) {
+        if (!$conn->sendPing()) {
+            Timer::del($conn->context->heartbeatTimer);
+            $conn->close();
+        }
+    });
+};
+```
+
+### 4. Низкая производительность
+
+**Симптомы:**
+- Медленная обработка запросов
+- Высокая латентность
+- Низкий throughput
+
+**Диагностика:**
+
+```php
+// Профилирование запросов
+$server->onMessage = function($conn, $req) {
+    $start = microtime(true);
+    
+    // Обработка...
+    
+    $duration = microtime(true) - $start;
+    if ($duration > 0.1) {
+        Server::log("Slow request: {$duration}s - " . $req->path());
+    }
+};
+```
+
+**Решения:**
+
+1. **Использование оптимального Event Loop:**
+```bash
+# Установка libuv
+pecl install uv
+
+# Проверка использования
+php -r "echo get_event_loop_name();"
+```
+
+2. **Оптимизация количества процессов:**
+```php
+// Соответствие количеству CPU
+$server->count = cpu_count();
+```
+
+3. **Оптимизация протоколов:**
+```php
+// Использование кеша запросов
+// Минимизация парсинга
+// Оптимизация encode/decode
+```
+
+### 5. Ошибки при перезагрузке
+
+**Симптомы:**
+- Ошибки при команде `reload`
+- Потеря соединений при перезагрузке
+- Не применяются изменения кода
+
+**Решения:**
+
+1. **Graceful reload:**
+```bash
+# Плавная перезагрузка
+php start.php reload -g
+```
+
+2. **Проверка reloadable:**
+```php
+// Убедитесь, что сервер можно перезагружать
+$server->reloadable = true;
+```
+
+3. **Инициализация в onServerStart:**
+```php
+// Код, который должен выполняться при каждой перезагрузке
+$server->onServerStart = function($server) {
+    // Инициализация соединений с БД
+    // Загрузка конфигурации
+    // Инициализация ресурсов
+};
+```
+
+### 6. Проблемы с SSL/TLS
+
+**Симптомы:**
+- Ошибки рукопожатия
+- Соединения не устанавливаются
+- Ошибки сертификатов
+
+**Диагностика:**
+
+```php
+// Логирование SSL ошибок
+$server->onError = function($conn, $code, $reason) {
+    if ($conn->transport === 'ssl') {
+        Server::log("SSL Error: $code - $reason");
+    }
+};
+```
+
+**Решения:**
+
+1. **Проверка сертификатов:**
+```bash
+# Проверка сертификата
+openssl x509 -in cert.pem -text -noout
+
+# Проверка ключа
+openssl rsa -in key.pem -check
+```
+
+2. **Настройка SSL контекста:**
+```php
+$context = [
+    'ssl' => [
+        'local_cert' => '/path/to/cert.pem',
+        'local_pk' => '/path/to/key.pem',
+        'verify_peer' => false, // Для разработки
+        'allow_self_signed' => true,
+        'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_2_SERVER,
+    ]
+];
+```
+
+### 7. Проблемы с WebSocket
+
+**Симптомы:**
+- Соединения не устанавливаются
+- Данные не передаются
+- Соединения закрываются сразу
+
+**Диагностика:**
+
+```php
+// Логирование WebSocket событий
+$server->onWebSocketConnect = function($conn, $req) {
+    Server::log("WebSocket connect from: " . $conn->getRemoteAddress());
+    Server::log("Origin: " . $req->header('origin'));
+    Server::log("Sec-WebSocket-Key: " . $req->header('sec-websocket-key'));
+    return null; // Принять соединение
+};
+```
+
+**Решения:**
+
+1. **Проверка Origin:**
+```php
+$server->onWebSocketConnect = function($conn, $req) {
+    $origin = $req->header('origin');
+    $allowedOrigins = ['https://example.com', 'https://app.example.com'];
+    
+    if (!in_array($origin, $allowedOrigins)) {
+        Server::log("Rejected WebSocket from: $origin");
+        return new Response(403); // Отклонение
+    }
+    
+    return null; // Принятие
+};
+```
+
+2. **Проверка протокола:**
+```php
+// Убедитесь, что используется правильный протокол
+$server = new Server('websocket://0.0.0.0:2000');
+// НЕ 'http://' или 'tcp://'
+```
+
+## Отладка производительности
+
+### Профилирование запросов
+
+```php
+class RequestProfiler {
+    private static array $profiles = [];
+    
+    public static function start(string $requestId): void {
+        self::$profiles[$requestId] = [
+            'start' => microtime(true),
+            'memory' => memory_get_usage(true),
+            'peak_memory' => memory_get_peak_usage(true)
+        ];
+    }
+    
+    public static function checkpoint(string $requestId, string $name): void {
+        if (!isset(self::$profiles[$requestId])) {
+            return;
+        }
+        
+        $now = microtime(true);
+        $memory = memory_get_usage(true);
+        
+        $timing = $now - self::$profiles[$requestId]['start'];
+        $memoryDelta = $memory - self::$profiles[$requestId]['memory'];
+        
+        Server::log("[$requestId] $name: {$timing}s, memory: +{$memoryDelta}b");
+    }
+    
+    public static function end(string $requestId): array {
+        if (!isset(self::$profiles[$requestId])) {
+            return [];
+        }
+        
+        $profile = self::$profiles[$requestId];
+        $duration = microtime(true) - $profile['start'];
+        $memory = memory_get_usage(true) - $profile['memory'];
+        
+        unset(self::$profiles[$requestId]);
+        
+        return [
+            'duration' => $duration,
+            'memory' => $memory,
+            'peak_memory' => memory_get_peak_usage(true) - $profile['peak_memory']
+        ];
+    }
+}
+
+// Использование
+$server->onMessage = function($conn, $req) {
+    $requestId = uniqid();
+    RequestProfiler::start($requestId);
+    
+    RequestProfiler::checkpoint($requestId, 'after_decode');
+    
+    // Обработка...
+    $result = processRequest($req);
+    
+    RequestProfiler::checkpoint($requestId, 'after_process');
+    
+    $conn->send($result);
+    
+    $stats = RequestProfiler::end($requestId);
+    if ($stats['duration'] > 1.0) {
+        Server::log("Slow request: {$stats['duration']}s");
+    }
+};
+```
+
+### Отслеживание соединений
+
+```php
+class ConnectionTracker {
+    private static array $connections = [];
+    
+    public static function track(TcpConnection $conn): void {
+        self::$connections[$conn->id] = [
+            'address' => $conn->getRemoteAddress(),
+            'connected_at' => microtime(true),
+            'bytes_read' => 0,
+            'bytes_written' => 0,
+            'requests' => 0
+        ];
+    }
+    
+    public static function update(TcpConnection $conn): void {
+        if (!isset(self::$connections[$conn->id])) {
+            return;
+        }
+        
+        self::$connections[$conn->id]['bytes_read'] = $conn->bytesRead;
+        self::$connections[$conn->id]['bytes_written'] = $conn->bytesWritten;
+        self::$connections[$conn->id]['requests']++;
+    }
+    
+    public static function untrack(TcpConnection $conn): void {
+        if (isset(self::$connections[$conn->id])) {
+            $stats = self::$connections[$conn->id];
+            $duration = microtime(true) - $stats['connected_at'];
+            
+            Server::log(sprintf(
+                "Connection %d closed: duration=%.2fs, requests=%d, read=%d, written=%d",
+                $conn->id,
+                $duration,
+                $stats['requests'],
+                $stats['bytes_read'],
+                $stats['bytes_written']
+            ));
+            
+            unset(self::$connections[$conn->id]);
+        }
+    }
+    
+    public static function getStats(): array {
+        return self::$connections;
+    }
+}
+
+// Использование
+$server->onConnect = [ConnectionTracker::class, 'track'];
+$server->onMessage = function($conn, $data) {
+    ConnectionTracker::update($conn);
+    // Обработка...
+};
+$server->onClose = [ConnectionTracker::class, 'untrack'];
+```
+
+## Инструменты отладки
+
+### 1. Встроенные команды
+
+```bash
+# Статус процессов
+php start.php status
+
+# Соединения
+php start.php connections
+
+# Перезагрузка с выводом отладочной информации
+php start.php reload -d
+```
+
+### 2. Внешние инструменты
+
+**strace** - отслеживание системных вызовов:
+```bash
+strace -p $(cat localzet.start.php.pid) -e trace=network
+```
+
+**tcpdump** - анализ сетевого трафика:
+```bash
+tcpdump -i any port 8080 -A
+```
+
+**lsof** - проверка открытых файлов:
+```bash
+lsof -p $(cat localzet.start.php.pid)
+```
+
+### 3. Мониторинг в реальном времени
+
+```php
+// Endpoint для мониторинга
+$server->onMessage = function($conn, $req) {
+    if ($req->path() === '/debug/stats') {
+        $stats = [
+            'connections' => count($conn->server->connections),
+            'memory' => memory_get_usage(true),
+            'peak_memory' => memory_get_peak_usage(true),
+            'global_stats' => ConnectionInterface::$statistics
+        ];
+        
+        $conn->send(json_encode($stats, JSON_PRETTY_PRINT));
+    }
+};
+```
+
+## Чеклист для диагностики
+
+### При проблемах с запуском
+
+- [ ] PHP версия >= 8.1
+- [ ] Расширения pcntl, posix, sockets установлены
+- [ ] Функции не в disable_functions
+- [ ] Порт не занят другим процессом
+- [ ] Права на файлы корректны
+- [ ] PID файл не заблокирован
+
+### При проблемах с производительностью
+
+- [ ] Оптимальный Event Loop выбран
+- [ ] Количество процессов соответствует CPU
+- [ ] Буферы настроены правильно
+- [ ] Нет блокирующих операций
+- [ ] Операционная система оптимизирована
+
+### При проблемах с соединениями
+
+- [ ] Keep-Alive настроен
+- [ ] Heartbeat работает
+- [ ] Таймауты установлены
+- [ ] Rate limiting не слишком строгий
+- [ ] Firewall не блокирует соединения
+
+## Получение помощи
+
+### Полезная информация для баг-репортов
+
+При сообщении о проблеме укажите:
+
+1. Версию Localzet Server
+2. Версию PHP и расширения
+3. Операционную систему
+4. Вывод команды `status`
+5. Релевантные логи
+6. Шаги для воспроизведения
+
+### Логирование для отладки
+
+```php
+// Включение подробного логирования
+Server::$logFile = '/var/log/localzet-debug.log';
+
+// Логирование всех событий
+$server->onConnect = function($conn) {
+    Server::log("Connect: " . $conn->getRemoteAddress());
+};
+
+$server->onMessage = function($conn, $data) {
+    Server::log("Message from " . $conn->getRemoteAddress() . ": " . substr($data, 0, 100));
+};
+
+$server->onClose = function($conn) {
+    Server::log("Close: " . $conn->getRemoteAddress());
+};
+
+$server->onError = function($conn, $code, $reason) {
+    Server::log("Error on " . $conn->getRemoteAddress() . ": $code - $reason");
+};
+```
+

@@ -1,0 +1,576 @@
+export const pageTitle = 'API: Server'
+
+# API Reference: Server
+
+Полный справочник по классу `Server` - основному классу Localzet Server.
+
+## Класс Server
+
+```php
+namespace localzet;
+
+class Server
+```
+
+Основной класс для создания и управления сервером.
+
+## Конструктор
+
+### `__construct()`
+
+```php
+public function __construct(
+    ?string $socketName = null,
+    array $context = []
+)
+```
+
+**Параметры:**
+
+- `$socketName` (string|null) - Адрес для прослушивания в формате `protocol://address:port`
+  - Примеры: `"http://0.0.0.0:8080"`, `"tcp://127.0.0.1:2347"`, `"websocket://0.0.0.0:2000"`
+- `$context` (array) - Контекст сокета (SSL настройки, опции сокета и т.д.)
+
+**Примеры:**
+
+```php
+// HTTP сервер
+$server = new Server('http://0.0.0.0:8080');
+
+// HTTPS сервер
+$context = [
+    'ssl' => [
+        'local_cert' => '/path/to/cert.pem',
+        'local_pk' => '/path/to/key.pem',
+        'verify_peer' => false,
+    ]
+];
+$server = new Server('https://0.0.0.0:8443', $context);
+
+// TCP сервер
+$server = new Server('tcp://0.0.0.0:2347');
+
+// WebSocket сервер
+$server = new Server('websocket://0.0.0.0:2000');
+```
+
+## Статические методы
+
+### `runAll()`
+
+Запуск всех зарегистрированных серверов.
+
+```php
+public static function runAll(): void
+```
+
+**Описание:**
+
+Инициализирует и запускает все экземпляры серверов. Этот метод блокирует выполнение и запускает event loop.
+
+**Пример:**
+
+```php
+$server1 = new Server('http://0.0.0.0:8080');
+$server2 = new Server('tcp://0.0.0.0:2347');
+
+Server::runAll(); // Блокирующий вызов
+```
+
+### `getAllServers()`
+
+Получение всех экземпляров серверов.
+
+```php
+public static function getAllServers(): array<Server>
+```
+
+**Возвращает:**
+
+Массив всех зарегистрированных экземпляров Server.
+
+**Пример:**
+
+```php
+$servers = Server::getAllServers();
+foreach ($servers as $server) {
+    echo $server->name . "\n";
+}
+```
+
+### `getEventLoop()`
+
+Получение глобального event loop.
+
+```php
+public static function getEventLoop(): EventInterface
+```
+
+**Возвращает:**
+
+Экземпляр EventInterface - глобальный цикл событий.
+
+**Пример:**
+
+```php
+$eventLoop = Server::getEventLoop();
+$eventLoop->delay(1.0, function() {
+    echo "Delayed execution\n";
+});
+```
+
+### `getVersion()`
+
+Получение версии Localzet Server.
+
+```php
+public static function getVersion(): ?string
+```
+
+**Возвращает:**
+
+Строку с версией или null если не установлена через Composer.
+
+## Свойства экземпляра
+
+### Основные свойства
+
+```php
+// Идентификатор сервера
+public int $id = 0;
+
+// Название сервера (отображается в статусе)
+public string $name = 'none';
+
+// Количество worker процессов
+public int $count = 1;
+
+// Unix пользователь для worker процессов
+public string $user = '';
+
+// Unix группа для worker процессов
+public string $group = '';
+
+// Можно ли перезагружать сервер
+public bool $reloadable = true;
+
+// Использование SO_REUSEPORT
+public bool $reusePort = false;
+
+// Протокол транспортного уровня (tcp, udp, ssl, unix)
+public string $transport = 'tcp';
+
+// Протокол прикладного уровня (http, websocket, text, frame, null)
+public ?string $protocol = null;
+```
+
+### Callback свойства
+
+```php
+// Вызывается при старте сервера
+public ?callable $onServerStart = null;
+
+// Вызывается при подключении клиента
+public ?callable $onConnect = null;
+
+// Вызывается при WebSocket подключении
+public ?callable $onWebSocketConnect = null;
+
+// Вызывается при получении данных
+public ?callable $onMessage = null;
+
+// Вызывается при закрытии соединения
+public ?callable $onClose = null;
+
+// Вызывается при ошибке соединения
+public ?callable $onError = null;
+
+// Вызывается при переполнении буфера отправки
+public ?callable $onBufferFull = null;
+
+// Вызывается при освобождении буфера отправки
+public ?callable $onBufferDrain = null;
+
+// Вызывается при остановке сервера
+public ?callable $onServerStop = null;
+
+// Вызывается при перезагрузке сервера
+public ?callable $onServerReload = null;
+```
+
+**Примеры использования:**
+
+```php
+// Обработка подключений
+$server->onConnect = function(TcpConnection $connection) {
+    echo "Новое подключение: " . $connection->getRemoteAddress() . "\n";
+};
+
+// Обработка сообщений
+$server->onMessage = function(TcpConnection $connection, $data) {
+    $connection->send('Echo: ' . $data);
+};
+
+// Обработка закрытия
+$server->onClose = function(TcpConnection $connection) {
+    echo "Соединение закрыто: " . $connection->getRemoteAddress() . "\n";
+};
+
+// Обработка ошибок
+$server->onError = function(TcpConnection $connection, int $code, string $reason) {
+    echo "Ошибка: $code - $reason\n";
+};
+```
+
+### Соединения
+
+```php
+// Все активные соединения сервера
+public array $connections = []; // [id => TcpConnection, ...]
+```
+
+**Пример:**
+
+```php
+// Отправка сообщения всем подключенным клиентам
+foreach ($server->connections as $connection) {
+    $connection->send('Broadcast message');
+}
+```
+
+## Методы экземпляра
+
+### `listen()`
+
+Начало прослушивания входящих соединений.
+
+```php
+public function listen(): void
+```
+
+**Описание:**
+
+Создает слушающий сокет и начинает принимать входящие соединения.
+
+**Пример:**
+
+```php
+$server = new Server('tcp://0.0.0.0:2347');
+$server->listen();
+```
+
+### `unlisten()`
+
+Прекращение прослушивания.
+
+```php
+public function unlisten(): void
+```
+
+**Описание:**
+
+Закрывает слушающий сокет и прекращает прием новых соединений. Существующие соединения остаются активными.
+
+### `pauseAccept()`
+
+Приостановка приема новых соединений.
+
+```php
+public function pauseAccept(): void
+```
+
+**Описание:**
+
+Временно приостанавливает прием новых соединений. Полезно для плавной перезагрузки.
+
+### `resumeAccept()`
+
+Возобновление приема новых соединений.
+
+```php
+public function resumeAccept(): void
+```
+
+**Описание:**
+
+Возобновляет прием новых соединений после `pauseAccept()`.
+
+### `stop()`
+
+Остановка сервера.
+
+```php
+public function stop(bool $force = false): void
+```
+
+**Параметры:**
+
+- `$force` (bool) - Принудительная остановка без ожидания завершения соединений
+
+**Описание:**
+
+Останавливает сервер и закрывает все соединения.
+
+**Пример:**
+
+```php
+// Плавная остановка
+$server->stop(false);
+
+// Принудительная остановка
+$server->stop(true);
+```
+
+### `getSocketName()`
+
+Получение имени сокета.
+
+```php
+public function getSocketName(): string
+```
+
+**Возвращает:**
+
+Строку с адресом сокета в формате `protocol://address:port`.
+
+**Пример:**
+
+```php
+$server = new Server('http://0.0.0.0:8080');
+echo $server->getSocketName(); // "http://0.0.0.0:8080"
+```
+
+### `getMainSocket()`
+
+Получение ресурса слушающего сокета.
+
+```php
+public function getMainSocket(): resource
+```
+
+**Возвращает:**
+
+Ресурс слушающего сокета.
+
+**Пример:**
+
+```php
+$socket = $server->getMainSocket();
+socket_set_option($socket, SOL_SOCKET, SO_REUSEPORT, 1);
+```
+
+### `setUserAndGroup()`
+
+Установка пользователя и группы для процесса.
+
+```php
+public function setUserAndGroup(): void
+```
+
+**Описание:**
+
+Переключает процесс на указанного пользователя и группу. Требует привилегий root при запуске.
+
+**Пример:**
+
+```php
+$server->user = 'www-data';
+$server->group = 'www-data';
+$server->setUserAndGroup(); // Вызывается автоматически в worker процессе
+```
+
+## Статические свойства
+
+### Конфигурация
+
+```php
+// Режим демона
+public static bool $daemonize = false;
+
+// Поток вывода
+public static $outputStream;
+
+// Файл для stdout (в режиме демона)
+public static string $stdoutFile = '/dev/null';
+
+// Файл для PID мастера
+public static string $pidFile = '';
+
+// Файл для статуса
+public static string $statusFile = '';
+
+// Файл лога
+public static string $logFile = '';
+
+// Глобальный event loop
+public static ?EventInterface $globalEvent = null;
+
+// Класс event loop
+public static ?string $eventLoopClass = null;
+
+// Таймаут остановки (секунды)
+public static int $stopTimeout = 2;
+```
+
+### Callback для событий системы
+
+```php
+// Вызывается при перезагрузке мастера
+public static ?callable $onMasterReload = null;
+
+// Вызывается при остановке мастера
+public static ?callable $onMasterStop = null;
+
+// Вызывается при выходе процесса сервера
+public static ?callable $onServerExit = null;
+```
+
+**Пример:**
+
+```php
+Server::$onServerExit = function(Server $server, int $status, int $pid) {
+    echo "Server {$server->name} exited with status $status (PID: $pid)\n";
+};
+```
+
+## Константы
+
+### Статусы сервера
+
+```php
+public const STATUS_INITIAL = 0;      // Инициализация
+public const STATUS_STARTING = 1;    // Запуск
+public const STATUS_RUNNING = 2;     // Работа
+public const STATUS_SHUTDOWN = 4;    // Остановка
+public const STATUS_RELOADING = 8;   // Перезагрузка
+```
+
+### Транспорты
+
+```php
+public const BUILD_IN_TRANSPORTS = [
+    'tcp' => 'tcp',
+    'udp' => 'udp',
+    'unix' => 'unix',
+    'ssl' => 'tcp',
+];
+```
+
+## Примеры использования
+
+### Пример 1: Простой HTTP сервер
+
+```php
+use localzet\Server;
+use localzet\Server\Connection\TcpConnection;
+use localzet\Server\Protocols\Http\Request;
+
+$server = new Server('http://0.0.0.0:8080');
+$server->count = 4;
+
+$server->onMessage = function(TcpConnection $connection, Request $request) {
+    $path = $request->path();
+    
+    if ($path === '/') {
+        $connection->send('Hello World');
+    } elseif ($path === '/api/data') {
+        $connection->send(json_encode(['status' => 'ok']));
+    } else {
+        $connection->send(new Response(404, [], 'Not Found'));
+    }
+};
+
+Server::runAll();
+```
+
+### Пример 2: WebSocket сервер
+
+```php
+use localzet\Server;
+use localzet\Server\Connection\TcpConnection;
+
+$server = new Server('websocket://0.0.0.0:2000');
+$server->count = 4;
+
+$server->onWebSocketConnect = function(TcpConnection $connection, Request $request) {
+    // Валидация подключения
+    if ($request->header('origin') !== 'https://example.com') {
+        return new Response(403); // Отклонение
+    }
+    return null; // Принятие
+};
+
+$server->onMessage = function(TcpConnection $connection, $data) {
+    // Отправка всем подключенным
+    foreach ($connection->server->connections as $conn) {
+        $conn->send($data);
+    }
+};
+
+Server::runAll();
+```
+
+### Пример 3: Множественные серверы
+
+```php
+use localzet\Server;
+
+// HTTP сервер
+$httpServer = new Server('http://0.0.0.0:8080');
+$httpServer->name = 'HTTP Server';
+$httpServer->onMessage = function($conn, $req) {
+    $conn->send('HTTP Response');
+};
+
+// TCP сервер
+$tcpServer = new Server('tcp://0.0.0.0:2347');
+$tcpServer->name = 'TCP Server';
+$tcpServer->onMessage = function($conn, $data) {
+    $conn->send('Echo: ' . $data);
+};
+
+// Запуск всех серверов
+Server::runAll();
+```
+
+### Пример 4: Настройка пользователя процесса
+
+```php
+$server = new Server('http://0.0.0.0:8080');
+
+// Запуск worker процессов от пользователя www-data
+$server->user = 'www-data';
+$server->group = 'www-data';
+
+// Требуется запуск от root для смены пользователя
+Server::runAll();
+```
+
+## Обработка ошибок
+
+### Логирование
+
+```php
+// Установка файла лога
+Server::$logFile = '/var/log/localzet.log';
+
+// Логирование встроено автоматически
+// Все ошибки записываются в лог
+```
+
+### Обработка исключений
+
+```php
+$server->onError = function(TcpConnection $connection, int $code, string $reason) {
+    // Обработка ошибок соединения
+    Server::log("Error on connection {$connection->id}: $code - $reason");
+};
+
+// Обработка глобальных ошибок через onServerExit
+Server::$onServerExit = function(Server $server, int $status, int $pid) {
+    if ($status !== 0) {
+        Server::log("Server {$server->name} crashed (PID: $pid, Status: $status)");
+    }
+};
+```
+

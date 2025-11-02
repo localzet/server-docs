@@ -1,0 +1,711 @@
+export const pageTitle = 'Развертывание в production'
+
+# Развертывание в production
+
+Профессиональное руководство по развертыванию Localzet Server в production окружении.
+
+## Подготовка к развертыванию
+
+### Системные требования
+
+**Минимальные требования:**
+
+- PHP >= 8.1
+- Расширения: pcntl, posix, sockets, json
+- Операционная система: Linux (рекомендуется), macOS, Windows
+- RAM: минимум 512MB, рекомендуется 2GB+
+- CPU: минимум 2 ядра, рекомендуется 4+
+
+**Рекомендуемые расширения:**
+
+- `ext-uv` или `ext-ev` или `ext-event` - для оптимальной производительности
+- `ext-redis` - для сессий и кеширования
+- `opcache` - для оптимизации PHP
+
+### Установка зависимостей
+
+```bash
+# Обновление системы
+apt-get update && apt-get upgrade -y
+
+# Установка PHP и расширений
+apt-get install -y \
+    php8.1-cli \
+    php8.1-common \
+    php8.1-pcntl \
+    php8.1-posix \
+    php8.1-sockets \
+    php8.1-json \
+    php8.1-opcache
+
+# Установка рекомендуемых расширений
+apt-get install -y \
+    php8.1-redis \
+    php8.1-mongodb
+
+# Установка libuv для оптимальной производительности
+apt-get install -y libuv1-dev
+pecl install uv
+```
+
+## Структура проекта
+
+### Рекомендуемая структура каталогов
+
+```
+/var/www/myapp/
+├── app/                    # Код приложения
+│   ├── Handlers/           # Обработчики запросов
+│   ├── Services/           # Бизнес-логика
+│   └── Models/             # Модели данных
+├── config/                 # Конфигурация
+│   ├── server.php          # Настройки сервера
+│   └── database.php        # Настройки БД
+├── storage/                # Хранилище
+│   ├── logs/               # Логи
+│   ├── sessions/           # Сессии (если используется файловое хранилище)
+│   └── cache/              # Кеш
+├── public/                 # Публичные файлы (если используется Nginx)
+├── vendor/                 # Composer зависимости
+├── start.php              # Точка входа
+└── composer.json
+```
+
+### Файл запуска (start.php)
+
+```php
+<?php
+declare(strict_types=1);
+
+use localzet\Server;
+use localzet\ServerAbstract;
+use localzet\Server\Connection\TcpConnection;
+use localzet\Server\Protocols\Http\Request;
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+// Загрузка конфигурации
+$config = require __DIR__ . '/config/server.php';
+
+// Создание сервера
+$server = new Server($config['listen'], $config['context'] ?? []);
+$server->name = $config['name'] ?? 'MyApp';
+$server->count = $config['count'] ?? cpu_count();
+$server->user = $config['user'] ?? '';
+$server->group = $config['group'] ?? '';
+$server->reloadable = $config['reloadable'] ?? true;
+
+// Настройка логирования
+Server::$logFile = $config['log_file'] ?? __DIR__ . '/storage/logs/server.log';
+Server::$stdoutFile = $config['stdout_file'] ?? __DIR__ . '/storage/logs/stdout.log';
+Server::$pidFile = $config['pid_file'] ?? __DIR__ . '/storage/server.pid';
+Server::$statusFile = $config['status_file'] ?? __DIR__ . '/storage/status';
+
+// Создание обработчика
+$handler = new AppHandler();
+
+// Привязка обработчиков
+localzet_bind($server, $handler);
+
+// Запуск
+Server::runAll();
+```
+
+## Конфигурация
+
+### Конфигурационный файл
+
+```php
+// config/server.php
+return [
+    'listen' => 'http://0.0.0.0:8080',
+    
+    'context' => [
+        // SSL настройки (если используется HTTPS)
+        'ssl' => [
+            'local_cert' => '/etc/ssl/certs/server.pem',
+            'local_pk' => '/etc/ssl/private/server.key',
+            'verify_peer' => false,
+            'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_2_SERVER,
+        ],
+    ],
+    
+    'name' => 'MyApp Server',
+    'count' => cpu_count(),
+    
+    // Запуск от непривилегированного пользователя
+    'user' => 'www-data',
+    'group' => 'www-data',
+    
+    'reloadable' => true,
+    'reusePort' => true, // Для лучшего распределения нагрузки
+    
+    // Файлы
+    'log_file' => __DIR__ . '/../storage/logs/server.log',
+    'stdout_file' => __DIR__ . '/../storage/logs/stdout.log',
+    'pid_file' => __DIR__ . '/../storage/server.pid',
+    'status_file' => __DIR__ . '/../storage/status',
+];
+```
+
+## Process Management
+
+### Systemd Service
+
+Создание systemd unit файла:
+
+```ini
+# /etc/systemd/system/localzet.service
+[Unit]
+Description=Localzet Server
+After=network.target
+
+[Service]
+Type=forking
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/myapp
+ExecStart=/usr/bin/php /var/www/myapp/start.php start -d
+ExecReload=/bin/kill -USR1 $MAINPID
+ExecStop=/bin/kill -SIGINT $MAINPID
+Restart=always
+RestartSec=5
+
+# Лимиты
+LimitNOFILE=65535
+LimitNPROC=4096
+
+# Безопасность
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/myapp/storage
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**Управление сервисом:**
+
+```bash
+# Загрузка конфигурации
+systemctl daemon-reload
+
+# Запуск
+systemctl start localzet
+
+# Остановка
+systemctl stop localzet
+
+# Перезапуск
+systemctl restart localzet
+
+# Перезагрузка кода (graceful)
+systemctl reload localzet
+
+# Статус
+systemctl status localzet
+
+# Автозапуск при загрузке
+systemctl enable localzet
+
+# Логи
+journalctl -u localzet -f
+```
+
+### Supervisor
+
+Альтернатива systemd для управления процессами:
+
+```ini
+# /etc/supervisor/conf.d/localzet.conf
+[program:localzet]
+command=/usr/bin/php /var/www/myapp/start.php start -d
+directory=/var/www/myapp
+user=www-data
+autostart=true
+autorestart=true
+startretries=3
+stopwaitsecs=10
+stdout_logfile=/var/www/myapp/storage/logs/supervisor.log
+stderr_logfile=/var/www/myapp/storage/logs/supervisor_error.log
+environment=HOME="/var/www/myapp"
+```
+
+**Управление:**
+
+```bash
+# Перезагрузка конфигурации
+supervisorctl reread
+supervisorctl update
+
+# Управление
+supervisorctl start localzet
+supervisorctl stop localzet
+supervisorctl restart localzet
+supervisorctl status localzet
+```
+
+## Reverse Proxy Setup
+
+### Nginx конфигурация
+
+```nginx
+# /etc/nginx/sites-available/myapp
+upstream localzet_backend {
+    least_conn;
+    server 127.0.0.1:8080 max_fails=3 fail_timeout=30s;
+    server 127.0.0.1:8081 max_fails=3 fail_timeout=30s backup;
+    keepalive 32;
+}
+
+# HTTP сервер
+server {
+    listen 80;
+    server_name example.com www.example.com;
+    
+    # Редирект на HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+# HTTPS сервер
+server {
+    listen 443 ssl http2;
+    server_name example.com www.example.com;
+    
+    # SSL сертификаты
+    ssl_certificate /etc/ssl/certs/example.com.crt;
+    ssl_certificate_key /etc/ssl/private/example.com.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    
+    # Оптимизация
+    client_max_body_size 10M;
+    client_body_buffer_size 128k;
+    
+    # Проксирование на Localzet Server
+    location / {
+        proxy_pass http://localzet_backend;
+        proxy_http_version 1.1;
+        
+        # Заголовки
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # WebSocket поддержка
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        
+        # Таймауты
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+        
+        # Буферизация
+        proxy_buffering off;
+        proxy_request_buffering off;
+    }
+    
+    # Статические файлы (опционально)
+    location /static/ {
+        alias /var/www/myapp/public/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+### HAProxy конфигурация
+
+```haproxy
+# /etc/haproxy/haproxy.cfg
+global
+    daemon
+    maxconn 4096
+
+defaults
+    mode http
+    timeout connect 5000ms
+    timeout client 50000ms
+    timeout server 50000ms
+
+frontend http_frontend
+    bind *:80
+    bind *:443 ssl crt /etc/ssl/certs/example.com.pem
+    redirect scheme https if !{ ssl_fc }
+    
+    default_backend localzet_backend
+
+backend localzet_backend
+    balance leastconn
+    option httpchk GET /health
+    http-check expect status 200
+    
+    server server1 127.0.0.1:8080 check inter 2s
+    server server2 127.0.0.1:8081 check inter 2s backup
+```
+
+## Мониторинг
+
+### Health Check Endpoint
+
+```php
+$server->onMessage = function(TcpConnection $connection, Request $request) {
+    if ($request->path() === '/health') {
+        $health = [
+            'status' => 'ok',
+            'timestamp' => time(),
+            'uptime' => time() - $_SERVER['SERVER_START_TIME'],
+            'connections' => count($connection->server->connections),
+            'memory' => [
+                'used' => memory_get_usage(true),
+                'peak' => memory_get_peak_usage(true),
+            ],
+        ];
+        
+        $connection->send(new Response(200, [
+            'Content-Type' => 'application/json'
+        ], json_encode($health)));
+        return;
+    }
+    
+    // Обработка других запросов...
+};
+```
+
+### Интеграция с Prometheus
+
+```php
+class PrometheusExporter {
+    public static function export(): string {
+        $stats = ConnectionInterface::$statistics;
+        
+        $metrics = [];
+        
+        // Метрики соединений
+        $metrics[] = '# HELP localzet_connections_total Total number of connections';
+        $metrics[] = '# TYPE localzet_connections_total counter';
+        $metrics[] = "localzet_connections_total {$stats['connection_count']}";
+        
+        // Метрики запросов
+        $metrics[] = '# HELP localzet_requests_total Total number of requests';
+        $metrics[] = '# TYPE localzet_requests_total counter';
+        $metrics[] = "localzet_requests_total {$stats['total_request']}";
+        
+        // Метрики ошибок
+        $metrics[] = '# HELP localzet_errors_total Total number of errors';
+        $metrics[] = '# TYPE localzet_errors_total counter';
+        $metrics[] = "localzet_errors_total {$stats['throw_exception']}";
+        
+        return implode("\n", $metrics) . "\n";
+    }
+}
+
+// Endpoint для Prometheus
+$server->onMessage = function($conn, $req) {
+    if ($req->path() === '/metrics') {
+        $conn->send(PrometheusExporter::export());
+    }
+};
+```
+
+### Логирование
+
+```php
+// Настройка ротации логов
+class LogRotator {
+    public static function rotate(string $logFile): void {
+        if (!file_exists($logFile)) {
+            return;
+        }
+        
+        $size = filesize($logFile);
+        
+        // Ротация при достижении 100MB
+        if ($size > 100 * 1024 * 1024) {
+            $backup = $logFile . '.' . date('Y-m-d');
+            rename($logFile, $backup);
+            
+            // Сжатие старого лога
+            if (function_exists('gzencode')) {
+                file_put_contents($backup . '.gz', gzencode(file_get_contents($backup)));
+                unlink($backup);
+            }
+            
+            // Удаление логов старше 30 дней
+            $files = glob($logFile . '.*');
+            foreach ($files as $file) {
+                if (filemtime($file) < time() - 30 * 86400) {
+                    unlink($file);
+                }
+            }
+        }
+    }
+}
+
+// Периодическая ротация
+Timer::repeat(3600.0, function() {
+    LogRotator::rotate(Server::$logFile);
+});
+```
+
+## Безопасность в production
+
+### Ограничение доступа
+
+```php
+// Whitelist IP адресов
+$allowedIPs = [
+    '192.168.1.0/24',
+    '10.0.0.0/8'
+];
+
+$server->onConnect = function(TcpConnection $connection) {
+    $ip = $connection->getRemoteIp();
+    
+    $allowed = false;
+    foreach ($allowedIPs as $range) {
+        if (ipInRange($ip, $range)) {
+            $allowed = true;
+            break;
+        }
+    }
+    
+    if (!$allowed) {
+        Server::log("Blocked connection from: $ip");
+        $connection->close();
+    }
+};
+```
+
+### Rate Limiting
+
+```php
+// Глобальный rate limiter
+class GlobalRateLimiter {
+    private static array $clients = [];
+    private const MAX_REQUESTS = 100;
+    private const WINDOW = 1;
+    
+    public static function check(string $ip): bool {
+        $now = time();
+        $window = floor($now / self::WINDOW);
+        $key = "$ip:$window";
+        
+        $count = self::$clients[$key] ?? 0;
+        
+        if (++$count > self::MAX_REQUESTS) {
+            return false;
+        }
+        
+        self::$clients[$key] = $count;
+        
+        // Очистка старых записей
+        foreach (self::$clients as $k => $v) {
+            $w = (int)explode(':', $k)[1];
+            if ($w < $window - 10) {
+                unset(self::$clients[$k]);
+            }
+        }
+        
+        return true;
+    }
+}
+
+$server->onMessage = function($conn, $req) {
+    if (!GlobalRateLimiter::check($conn->getRemoteIp())) {
+        $conn->close(new Response(429, [], 'Too Many Requests'));
+        return;
+    }
+    
+    // Обработка запроса...
+};
+```
+
+### Защита от DDoS
+
+```php
+// Простая защита от DDoS
+class DDoSProtection {
+    private static array $connections = [];
+    private const MAX_CONNECTIONS_PER_IP = 10;
+    
+    public static function check(string $ip): bool {
+        $count = self::$connections[$ip] ?? 0;
+        
+        if ($count >= self::MAX_CONNECTIONS_PER_IP) {
+            return false;
+        }
+        
+        self::$connections[$ip] = $count + 1;
+        return true;
+    }
+    
+    public static function release(string $ip): void {
+        if (isset(self::$connections[$ip])) {
+            self::$connections[$ip]--;
+            if (self::$connections[$ip] <= 0) {
+                unset(self::$connections[$ip]);
+            }
+        }
+    }
+}
+
+$server->onConnect = function($conn) {
+    if (!DDoSProtection::check($conn->getRemoteIp())) {
+        $conn->close();
+        return;
+    }
+    
+    $conn->context->ip = $conn->getRemoteIp();
+};
+
+$server->onClose = function($conn) {
+    if (isset($conn->context->ip)) {
+        DDoSProtection::release($conn->context->ip);
+    }
+};
+```
+
+## Backup и восстановление
+
+### Backup конфигурации
+
+```bash
+#!/bin/bash
+# backup.sh
+
+BACKUP_DIR="/var/backups/localzet"
+DATE=$(date +%Y%m%d_%H%M%S)
+
+mkdir -p $BACKUP_DIR
+
+# Backup конфигурации
+tar -czf $BACKUP_DIR/config_$DATE.tar.gz \
+    /var/www/myapp/config \
+    /var/www/myapp/start.php
+
+# Backup логов (опционально)
+tar -czf $BACKUP_DIR/logs_$DATE.tar.gz \
+    /var/www/myapp/storage/logs
+
+# Удаление старых бэкапов (старше 30 дней)
+find $BACKUP_DIR -name "*.tar.gz" -mtime +30 -delete
+```
+
+### Автоматический backup
+
+```bash
+# Добавление в crontab
+0 2 * * * /var/www/myapp/scripts/backup.sh
+```
+
+## Обновление в production
+
+### Процедура обновления
+
+```bash
+#!/bin/bash
+# deploy.sh
+
+set -e
+
+echo "Starting deployment..."
+
+# 1. Backup текущей версии
+echo "Creating backup..."
+./scripts/backup.sh
+
+# 2. Получение обновлений
+echo "Pulling updates..."
+git pull origin main
+
+# 3. Обновление зависимостей
+echo "Updating dependencies..."
+composer install --no-dev --optimize-autoloader
+
+# 4. Применение миграций (если есть)
+# php artisan migrate
+
+# 5. Очистка кеша
+echo "Clearing cache..."
+rm -rf storage/cache/*
+
+# 6. Graceful reload
+echo "Reloading server..."
+php start.php reload -g
+
+echo "Deployment completed!"
+```
+
+### Zero-downtime deployment
+
+```bash
+# Плавное обновление без простоя
+php start.php reload -g
+
+# Или через systemd
+systemctl reload localzet
+```
+
+## Оптимизация для production
+
+### PHP настройки
+
+```ini
+; php.ini оптимизации для production
+
+; Отключение отладочной информации
+display_errors = Off
+display_startup_errors = Off
+log_errors = On
+error_log = /var/www/myapp/storage/logs/php_errors.log
+
+; Оптимизация OPcache
+opcache.enable = 1
+opcache.memory_consumption = 256
+opcache.interned_strings_buffer = 16
+opcache.max_accelerated_files = 20000
+opcache.validate_timestamps = 0 ; Для production
+opcache.revalidate_freq = 0
+
+; Увеличение лимитов
+memory_limit = 256M
+max_execution_time = 0 ; Без ограничений для long-running
+```
+
+### Оптимизация Localzet Server
+
+```php
+// Оптимальные настройки для production
+TcpConnection::$defaultMaxSendBufferSize = 2097152; // 2MB
+TcpConnection::$defaultMaxPackageSize = 10485760;  // 10MB
+
+// Оптимизация кешей
+// Автоматически управляется в протоколах
+
+// Выбор оптимального Event Loop
+// Автоматически при наличии расширений
+```
+
+## Чеклист развертывания
+
+- [ ] Системные требования выполнены
+- [ ] Все зависимости установлены
+- [ ] Конфигурация настроена
+- [ ] Логирование настроено
+- [ ] Мониторинг настроен
+- [ ] Backup процедуры настроены
+- [ ] Reverse proxy настроен
+- [ ] SSL сертификаты установлены
+- [ ] Firewall настроен
+- [ ] Rate limiting настроен
+- [ ] Process manager настроен (systemd/supervisor)
+- [ ] Health checks работают
+- [ ] Протестировано под нагрузкой
+- [ ] Документация обновлена
+

@@ -1,0 +1,513 @@
+export const pageTitle = 'API: Connection'
+
+# API Reference: Connection
+
+Полный справочник по классам соединений в Localzet Server.
+
+## Класс TcpConnection
+
+```php
+namespace localzet\Server\Connection;
+
+class TcpConnection extends ConnectionInterface
+```
+
+Класс для представления TCP соединения.
+
+## Конструктор
+
+### `__construct()`
+
+```php
+public function __construct(
+    EventInterface $event,
+    resource $socket,
+    string $remoteAddress = ''
+)
+```
+
+**Параметры:**
+
+- `$event` - EventInterface, цикл событий
+- `$socket` - resource, файловый дескриптор сокета
+- `$remoteAddress` - string, адрес клиента в формате "IP:PORT"
+
+## Свойства
+
+### Идентификаторы
+
+```php
+public int $id = 0;              // Уникальный ID соединения
+protected int $realId = 0;       // ID для связи с Server
+```
+
+### Адреса
+
+```php
+protected resource $socket;          // Сокет соединения
+protected string $remoteAddress = ''; // Адрес клиента
+```
+
+### Протоколы
+
+```php
+public string $transport = 'tcp';  // Транспорт (tcp, ssl, udp)
+public ?string $protocol = null;   // Протокол прикладного уровня
+```
+
+### Буферы и производительность
+
+```php
+protected string $sendBuffer = '';      // Буфер отправки
+protected string $recvBuffer = '';      // Буфер приема
+protected int $currentPackageLength = 0; // Длина ожидаемого пакета
+
+public int $bytesRead = 0;           // Прочитано байт
+public int $bytesWritten = 0;         // Записано байт
+public int $maxSendBufferSize = 1048576;    // Максимальный размер буфера отправки (1MB)
+public int $maxPackageSize = 10485760;      // Максимальный размер пакета (10MB)
+```
+
+### Статус
+
+```php
+protected int $status = STATUS_ESTABLISHED;
+```
+
+**Константы статуса:**
+
+```php
+public const STATUS_INITIAL = 0;
+public const STATUS_CONNECTING = 1;
+public const STATUS_ESTABLISHED = 2;
+public const STATUS_CLOSING = 4;
+public const STATUS_CLOSED = 8;
+```
+
+### События
+
+```php
+public ?callable $onConnect = null;
+public ?callable $onMessage = null;
+public ?callable $onClose = null;
+public ?callable $onError = null;
+public ?callable $onBufferFull = null;
+public ?callable $onBufferDrain = null;
+public ?callable $onWebSocketConnect = null;
+```
+
+## Методы
+
+### `send()`
+
+Отправка данных клиенту.
+
+```php
+public function send(mixed $sendBuffer, bool $raw = false): bool|null
+```
+
+**Параметры:**
+
+- `$sendBuffer` - Данные для отправки (строка, объект Response и т.д.)
+- `$raw` - Отправлять в сыром виде без кодирования протоколом
+
+**Возвращает:**
+
+- `true` - Данные отправлены полностью
+- `false` - Ошибка отправки
+- `null` - Данные добавлены в буфер, отправка асинхронная
+
+**Примеры:**
+
+```php
+// Отправка строки
+$connection->send('Hello');
+
+// Отправка HTTP ответа
+$connection->send(new Response(200, ['Content-Type' => 'application/json'], json_encode($data)));
+
+// Сырая отправка (без кодирования протоколом)
+$connection->send($binaryData, true);
+```
+
+### `close()`
+
+Закрытие соединения.
+
+```php
+public function close(mixed $data = null, bool $raw = false): void
+```
+
+**Параметры:**
+
+- `$data` - Данные для отправки перед закрытием
+- `$raw` - Отправлять в сыром виде
+
+**Пример:**
+
+```php
+// Закрытие без данных
+$connection->close();
+
+// Закрытие с данными
+$connection->close('Goodbye');
+$connection->close(new Response(403, [], 'Forbidden'));
+```
+
+### `getRemoteIp()`
+
+Получение IP-адреса клиента.
+
+```php
+public function getRemoteIp(): string
+```
+
+**Возвращает:**
+
+IP-адрес клиента (IPv4 или IPv6).
+
+**Пример:**
+
+```php
+$ip = $connection->getRemoteIp();
+// "192.168.1.1" или "::1"
+```
+
+### `getRemotePort()`
+
+Получение порта клиента.
+
+```php
+public function getRemotePort(): int
+```
+
+**Возвращает:**
+
+Порт клиента.
+
+**Пример:**
+
+```php
+$port = $connection->getRemotePort();
+// 54321
+```
+
+### `getRemoteAddress()`
+
+Получение полного адреса клиента.
+
+```php
+public function getRemoteAddress(): string
+```
+
+**Возвращает:**
+
+Адрес в формате "IP:PORT".
+
+**Пример:**
+
+```php
+$address = $connection->getRemoteAddress();
+// "192.168.1.1:54321"
+```
+
+### `getLocalIp()`
+
+Получение локального IP-адреса сервера.
+
+```php
+public function getLocalIp(): string
+```
+
+**Возвращает:**
+
+IP-адрес сервера на стороне соединения.
+
+### `getLocalPort()`
+
+Получение локального порта сервера.
+
+```php
+public function getLocalPort(): int
+```
+
+**Возвращает:**
+
+Порт сервера.
+
+### `getLocalAddress()`
+
+Получение полного локального адреса.
+
+```php
+public function getLocalAddress(): string
+```
+
+**Возвращает:**
+
+Адрес в формате "IP:PORT".
+
+### `isIpV4()`
+
+Проверка, является ли адрес IPv4.
+
+```php
+public function isIpV4(): bool
+```
+
+**Возвращает:**
+
+`true` если адрес IPv4, иначе `false`.
+
+### `isIpV6()`
+
+Проверка, является ли адрес IPv6.
+
+```php
+public function isIpV6(): bool
+```
+
+**Возвращает:**
+
+`true` если адрес IPv6, иначе `false`.
+
+### `getSendBufferQueueSize()`
+
+Получение размера буфера отправки.
+
+```php
+public function getSendBufferQueueSize(): int
+```
+
+**Возвращает:**
+
+Размер буфера отправки в байтах.
+
+**Пример:**
+
+```php
+$bufferSize = $connection->getSendBufferQueueSize();
+if ($bufferSize > 0) {
+    echo "В буфере отправки: $bufferSize байт\n";
+}
+```
+
+### `getRecvBufferQueueSize()`
+
+Получение размера буфера приема.
+
+```php
+public function getRecvBufferQueueSize(): int
+```
+
+**Возвращает:**
+
+Размер буфера приема в байтах.
+
+### `pauseRecv()`
+
+Приостановка приема данных.
+
+```php
+public function pauseRecv(): void
+```
+
+**Описание:**
+
+Временно приостанавливает прием данных. Полезно при переполнении буфера отправки.
+
+**Пример:**
+
+```php
+$connection->onBufferFull = function($connection) {
+    $connection->pauseRecv(); // Приостанавливаем прием до освобождения буфера
+};
+```
+
+### `resumeRecv()`
+
+Возобновление приема данных.
+
+```php
+public function resumeRecv(): void
+```
+
+**Пример:**
+
+```php
+$connection->onBufferDrain = function($connection) {
+    $connection->resumeRecv(); // Возобновляем прием после освобождения буфера
+};
+```
+
+### `pipe()`
+
+Перенаправление данных в другое соединение.
+
+```php
+public function pipe(TcpConnection $dest, bool $raw = false): void
+```
+
+**Параметры:**
+
+- `$dest` - Целевое соединение для перенаправления данных
+- `$raw` - Отправлять в сыром виде
+
+**Описание:**
+
+Все данные из текущего соединения автоматически отправляются в целевое.
+
+**Пример:**
+
+```php
+// Перенаправление данных клиента на другой сервер
+$clientConnection->pipe($serverConnection);
+// Все данные от клиента пойдут на сервер
+```
+
+## Статические свойства
+
+### Статистика
+
+```php
+public static array $statistics = [
+    'connection_count' => 0,  // Общее количество соединений
+    'total_request' => 0,     // Общее количество запросов
+    'throw_exception' => 0,   // Количество исключений
+    'send_fail' => 0,         // Неудачных отправок
+];
+```
+
+**Пример:**
+
+```php
+$stats = TcpConnection::$statistics;
+echo "Активных соединений: {$stats['connection_count']}\n";
+echo "Всего запросов: {$stats['total_request']}\n";
+```
+
+### Все соединения
+
+```php
+public static array $connections = [];
+```
+
+**Пример:**
+
+```php
+// Отправка сообщения всем соединениям
+foreach (TcpConnection::$connections as $connection) {
+    $connection->send('Broadcast message');
+}
+```
+
+### Настройки по умолчанию
+
+```php
+public static int $defaultMaxSendBufferSize = 1048576;  // 1MB
+public static int $defaultMaxPackageSize = 10485760;    // 10MB
+```
+
+**Пример изменения:**
+
+```php
+// Увеличение размера буфера для всех новых соединений
+TcpConnection::$defaultMaxSendBufferSize = 2097152; // 2MB
+```
+
+## Константы
+
+### Статусы
+
+```php
+public const STATUS_INITIAL = 0;
+public const STATUS_CONNECTING = 1;
+public const STATUS_ESTABLISHED = 2;
+public const STATUS_CLOSING = 4;
+public const STATUS_CLOSED = 8;
+
+public const STATUS_TO_STRING = [
+    self::STATUS_INITIAL => 'INITIAL',
+    self::STATUS_CONNECTING => 'CONNECTING',
+    self::STATUS_ESTABLISHED => 'ESTABLISHED',
+    self::STATUS_CLOSING => 'CLOSING',
+    self::STATUS_CLOSED => 'CLOSED',
+];
+```
+
+### Буферы
+
+```php
+public const READ_BUFFER_SIZE = 87380;              // Размер буфера чтения
+public const MAX_CACHE_STRING_LENGTH = 2048;       // Максимальная длина для кеша
+public const MAX_CACHE_SIZE = 512;                  // Максимальный размер кеша
+public const TCP_KEEPALIVE_INTERVAL = 55;           // Интервал keepalive
+```
+
+## Примеры использования
+
+### Пример 1: Обработка соединения
+
+```php
+$server->onConnect = function(TcpConnection $connection) {
+    echo "Подключение: " . $connection->getRemoteAddress() . "\n";
+    
+    // Установка таймаута
+    Timer::delay(30.0, function() use ($connection) {
+        if ($connection->status === TcpConnection::STATUS_ESTABLISHED) {
+            $connection->close('Timeout');
+        }
+    });
+};
+
+$server->onMessage = function(TcpConnection $connection, $data) {
+    // Отправка эха
+    $connection->send('Echo: ' . $data);
+};
+
+$server->onClose = function(TcpConnection $connection) {
+    echo "Отключение: " . $connection->getRemoteAddress() . "\n";
+};
+```
+
+### Пример 2: Управление буфером
+
+```php
+$connection->onBufferFull = function(TcpConnection $connection) {
+    echo "Буфер полон: " . $connection->getSendBufferQueueSize() . " байт\n";
+    $connection->pauseRecv(); // Приостанавливаем прием
+};
+
+$connection->onBufferDrain = function(TcpConnection $connection) {
+    echo "Буфер освобожден\n";
+    $connection->resumeRecv(); // Возобновляем прием
+};
+```
+
+### Пример 3: Мониторинг соединения
+
+```php
+$server->onConnect = function(TcpConnection $connection) {
+    $connection->context->startTime = microtime(true);
+    $connection->context->bytesReceived = 0;
+};
+
+$server->onMessage = function(TcpConnection $connection, $data) {
+    $connection->context->bytesReceived += strlen($data);
+    
+    // Проверка лимита данных
+    if ($connection->context->bytesReceived > 10485760) { // 10MB
+        $connection->close('Data limit exceeded');
+    }
+};
+
+$server->onClose = function(TcpConnection $connection) {
+    $duration = microtime(true) - $connection->context->startTime;
+    echo sprintf(
+        "Соединение закрыто. Длительность: %.2fs, Получено: %d байт\n",
+        $duration,
+        $connection->context->bytesReceived
+    );
+};
+```
+

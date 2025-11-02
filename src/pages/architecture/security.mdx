@@ -1,0 +1,475 @@
+export const pageTitle = 'Безопасность и валидация'
+
+# Безопасность и валидация данных
+
+Localzet Server включает множество механизмов безопасности для защиты от атак и обеспечения целостности данных.
+
+## Принципы безопасности
+
+### 1. Изоляция процессов
+
+Каждый worker процесс работает изолированно:
+
+- **Отказоустойчивость**: Сбой одного процесса не влияет на другие
+- **Память**: Полная изоляция памяти между процессами
+- **Привилегии**: Возможность запуска от непривилегированного пользователя
+
+### 2. Принцип наименьших привилегий
+
+**Запуск от непривилегированного пользователя:**
+
+```php
+$server->user = 'www-data';
+$server->group = 'www-data';
+
+// После привязки к порту процессы переключаются на этого пользователя
+```
+
+**Преимущества:**
+
+- Минимальные привилегии процесса
+- Ограничение доступа к системным ресурсам
+- Снижение риска при компрометации
+
+### 3. Валидация входных данных
+
+Все входящие данные валидируются на нескольких уровнях.
+
+## Валидация на уровне протокола
+
+### HTTP протокол
+
+**1. Валидация методов:**
+
+```php
+// Проверка поддерживаемых HTTP методов
+const SUPPORTED_METHODS = [
+    'GET', 'POST', 'OPTIONS', 
+    'HEAD', 'DELETE', 'PUT', 'PATCH'
+];
+
+foreach (SUPPORTED_METHODS as $method) {
+    if (str_starts_with($header, $method . ' ')) {
+        $methodValid = true;
+        break;
+    }
+}
+
+if (!$methodValid) {
+    $connection->close(format_http_response(400));
+    return 0;
+}
+```
+
+**2. Ограничение размера заголовков:**
+
+```php
+const MAX_HEADER_SIZE = 16384; // 16KB
+
+if (strlen($buffer) >= MAX_HEADER_SIZE) {
+    $connection->close(format_http_response(413, 'Request Header Too Large'));
+    return 0;
+}
+```
+
+**3. Валидация Content-Length:**
+
+```php
+if (preg_match('/Content-Length:\s*(\d+)/is', $header, $matches)) {
+    $contentLength = (int)$matches[1];
+    
+    // Проверка на отрицательные значения
+    if ($contentLength < 0) {
+        $connection->close(format_http_response(400));
+        return 0;
+    }
+    
+    // Проверка максимального размера
+    if ($length > $connection->maxPackageSize) {
+        $connection->close(format_http_response(413));
+        return 0;
+    }
+}
+```
+
+### WebSocket протокол
+
+**1. Валидация рукопожатия:**
+
+```php
+// Проверка обязательных заголовков
+if (!preg_match("/Sec-WebSocket-Key:\s*(.*?)\r\n/i", $header)) {
+    return false; // Не WebSocket запрос
+}
+
+// Валидация Origin (если требуется)
+$origin = $request->header('origin');
+if (!isAllowedOrigin($origin)) {
+    $connection->close(new Response(403));
+    return 0;
+}
+```
+
+**2. Защита от фрагментированных атак:**
+
+```php
+// Ограничение размера фрейма
+if ($frameLength > MAX_FRAME_SIZE) {
+    $connection->close();
+    return false;
+}
+
+// Ограничение количества фрагментов
+if ($fragmentCount > MAX_FRAGMENTS) {
+    $connection->close();
+    return false;
+}
+```
+
+## Защита от переполнения буферов
+
+### Ограничение размеров
+
+**Буфер отправки:**
+
+```php
+public int $maxSendBufferSize = 1048576; // 1MB по умолчанию
+
+// Проверка перед добавлением
+if (strlen($this->sendBuffer) + strlen($data) > $this->maxSendBufferSize) {
+    // Буфер переполнен
+    if ($this->onBufferFull) {
+        ($this->onBufferFull)($this);
+    }
+    return false;
+}
+```
+
+**Размер пакета:**
+
+```php
+public int $maxPackageSize = 10485760; // 10MB по умолчанию
+
+// Валидация в протоколе
+if ($packageLength > $connection->maxPackageSize) {
+    $connection->close(format_http_response(413));
+    return false;
+}
+```
+
+### Backpressure механизм
+
+При переполнении буфера:
+
+1. Вызывается `onBufferFull` callback
+2. Приостанавливается прием данных (`pauseRecv()`)
+3. Когда буфер освобождается (`onBufferDrain`)
+4. Возобновляется прием данных (`resumeRecv()`)
+
+Это предотвращает неконтролируемое использование памяти.
+
+## Защита от атак
+
+### 1. Защита от DoS
+
+**Ограничение соединений:**
+
+```php
+// Ограничение количества соединений на процесс
+if (count($server->connections) > MAX_CONNECTIONS_PER_PROCESS) {
+    $newConnection->close();
+    return;
+}
+```
+
+**Rate limiting:**
+
+```php
+// Подсчет запросов от IP
+$ip = $connection->getRemoteIp();
+$requests[$ip] = ($requests[$ip] ?? 0) + 1;
+
+if ($requests[$ip] > MAX_REQUESTS_PER_SECOND) {
+    $connection->close();
+    return;
+}
+
+// Сброс счетчика через таймер
+Timer::delay(1.0, function() use ($ip) {
+    unset($requests[$ip]);
+});
+```
+
+### 2. Защита от инъекций
+
+**Валидация заголовков HTTP:**
+
+```php
+// Проверка на опасные заголовки
+$dangerousHeaders = [
+    'Content-Length' => function($value) {
+        return is_numeric($value) && $value >= 0;
+    },
+    'Host' => function($value) {
+        return filter_var($value, FILTER_VALIDATE_DOMAIN) !== false;
+    }
+];
+
+foreach ($request->header() as $name => $value) {
+    if (isset($dangerousHeaders[$name])) {
+        if (!$dangerousHeaders[$name]($value)) {
+            $connection->close(new Response(400));
+            return;
+        }
+    }
+}
+```
+
+### 3. Защита от Path Traversal
+
+**Валидация путей файлов:**
+
+```php
+public static function encodeFileResponse($response, $connection) {
+    $file = $data->file['file'];
+    
+    // Нормализация пути
+    $file = realpath($file);
+    
+    // Проверка на выход за пределы разрешенной директории
+    $allowedPath = realpath('/var/www/uploads');
+    
+    if (strpos($file, $allowedPath) !== 0) {
+        $connection->close(new Response(403));
+        return '';
+    }
+    
+    // Остальная логика...
+}
+```
+
+## Безопасная обработка данных
+
+### Устранение небезопасных практик
+
+**1. Избежание extract():**
+
+```php
+// НЕБЕЗОПАСНО:
+extract($data); // Может перезаписать переменные
+
+// БЕЗОПАСНО:
+$server = $data['server'] ?? null;
+$status = $data['status'] ?? 0;
+$pid = $data['pid'] ?? 0;
+```
+
+**2. Валидация типов:**
+
+```php
+// Всегда проверяйте типы перед использованием
+if (!is_string($file) || !is_file($file)) {
+    throw new InvalidArgumentException('Invalid file');
+}
+
+// Проверка массивов
+if (!is_array($data->file)) {
+    return; // Игнорируем неверный формат
+}
+```
+
+**3. Обработка граничных случаев:**
+
+```php
+// Проверка на null и пустые строки
+$bodyLen = ($body !== null && $body !== '') 
+    ? strlen($body) 
+    : null;
+
+// Валидация диапазонов
+if ($offset < 0 || $offset >= $fileSize || $bodyLen <= 0) {
+    $connection->close(new Response(416));
+    return '';
+}
+```
+
+## SSL/TLS безопасность
+
+### Настройка безопасного SSL
+
+**Рекомендуемые параметры:**
+
+```php
+$context = [
+    'ssl' => [
+        'local_cert' => '/path/to/cert.pem',
+        'local_pk' => '/path/to/key.pem',
+        
+        // Безопасность
+        'verify_peer' => true,
+        'verify_peer_name' => true,
+        'allow_self_signed' => false,
+        
+        // Минимальная версия TLS
+        'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_2_SERVER,
+        
+        // Отключение слабых шифров
+        'ciphers' => 'HIGH:!aNULL:!MD5',
+        
+        // SNI поддержка
+        'SNI_enabled' => true,
+        
+        // Отключение сжатия (защита от CRIME)
+        'disable_compression' => true,
+    ]
+];
+
+$server = new Server('ssl://0.0.0.0:443', $context);
+```
+
+### Валидация сертификатов
+
+```php
+// Проверка сертификата клиента
+if ($connection->transport === 'ssl') {
+    $cert = stream_context_get_params($socket)['options']['ssl']['peer_certificate'];
+    
+    // Валидация сертификата
+    if (!validateCertificate($cert)) {
+        $connection->close();
+        return;
+    }
+}
+```
+
+## Безопасность сессий
+
+### Управление сессиями
+
+**Безопасные настройки:**
+
+```php
+// HTTP-only cookies (защита от XSS)
+$response->cookie('session_id', $sessionId, [
+    'httponly' => true,
+    'secure' => true, // Только HTTPS
+    'samesite' => 'Strict'
+]);
+
+// Валидация session ID
+function validateSessionId($sessionId) {
+    // Проверка формата
+    if (!preg_match('/^[a-zA-Z0-9]{32,128}$/', $sessionId)) {
+        return false;
+    }
+    
+    // Проверка существования
+    return sessionExists($sessionId);
+}
+```
+
+### Защита от Session Fixation
+
+```php
+// Регенерация session ID при аутентификации
+if ($authenticated) {
+    $oldSessionId = session_id();
+    session_regenerate_id(true);
+    
+    // Удаление старой сессии
+    deleteSession($oldSessionId);
+}
+```
+
+## Логирование и мониторинг безопасности
+
+### Логирование подозрительной активности
+
+```php
+// Логирование подозрительных запросов
+function logSuspiciousActivity($connection, $reason) {
+    $log = sprintf(
+        "[%s] Suspicious activity from %s: %s",
+        date('Y-m-d H:i:s'),
+        $connection->getRemoteAddress(),
+        $reason
+    );
+    
+    file_put_contents('/var/log/security.log', $log . "\n", FILE_APPEND);
+}
+
+// Использование
+if ($requestSize > MAX_REASONABLE_SIZE) {
+    logSuspiciousActivity($connection, 'Oversized request');
+    $connection->close(new Response(413));
+}
+```
+
+### Мониторинг атак
+
+```php
+// Подсчет атак от IP
+static $attackCounts = [];
+
+function detectAttack($connection, $attackType) {
+    $ip = $connection->getRemoteIp();
+    $attackCounts[$ip][$attackType] = ($attackCounts[$ip][$attackType] ?? 0) + 1;
+    
+    // Блокировка при превышении порога
+    if ($attackCounts[$ip][$attackType] > ATTACK_THRESHOLD) {
+        blockIP($ip);
+        $connection->close();
+    }
+}
+```
+
+## Рекомендации по безопасности
+
+### 1. Регулярные обновления
+
+- Обновляйте Localzet Server до последней версии
+- Следите за security advisories
+- Применяйте патчи безопасности своевременно
+
+### 2. Минимальная конфигурация
+
+- Отключайте неиспользуемые протоколы
+- Ограничивайте доступ по IP где возможно
+- Используйте firewall для дополнительной защиты
+
+### 3. Мониторинг
+
+- Логируйте все подозрительные действия
+- Настройте алерты на аномалии
+- Регулярно анализируйте логи
+
+### 4. Тестирование безопасности
+
+- Проводите penetration testing
+- Используйте инструменты сканирования уязвимостей
+- Тестируйте на перегрузку (stress testing)
+
+## Соответствие стандартам
+
+### OWASP Top 10
+
+Localzet Server помогает защититься от:
+
+1. **Injection** - Валидация всех входных данных
+2. **Broken Authentication** - Безопасные сессии
+3. **Sensitive Data Exposure** - Поддержка SSL/TLS
+4. **XML External Entities** - Валидация парсинга
+5. **Broken Access Control** - Изоляция процессов
+6. **Security Misconfiguration** - Безопасные настройки по умолчанию
+7. **XSS** - Санитизация вывода
+8. **Insecure Deserialization** - Валидация данных
+9. **Using Components with Known Vulnerabilities** - Регулярные обновления
+10. **Insufficient Logging & Monitoring** - Встроенное логирование
+
+<Button
+    href="/api/reference"
+    variant="text"
+    arrow="right"
+    children="Справочник API"
+/>
+

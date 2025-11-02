@@ -1,0 +1,417 @@
+export const pageTitle = 'API: Timer'
+
+# API Reference: Timer
+
+Полный справочник по классу `Timer` для работы с таймерами и отложенным выполнением.
+
+## Класс Timer
+
+```php
+namespace localzet;
+
+class Timer
+```
+
+Класс для управления таймерами и отложенным выполнением задач.
+
+## Статические методы
+
+### `add()`
+
+Добавление таймера.
+
+```php
+public static function add(
+    float $timeInterval,
+    callable $func,
+    ?array $args = [],
+    bool $persistent = true
+): int
+```
+
+**Параметры:**
+
+- `$timeInterval` - Интервал выполнения в секундах (float, >= 0)
+- `$func` - Callback функция для выполнения
+- `$args` - Массив аргументов для передачи в callback
+- `$persistent` - Повторяющийся таймер (true) или одноразовый (false)
+
+**Возвращает:**
+
+ID таймера (int) для последующего удаления.
+
+**Примеры:**
+
+```php
+// Повторяющийся таймер (каждую секунду)
+$timerId = Timer::add(1.0, function() {
+    echo "Tick\n";
+});
+
+// Одноразовый таймер (через 5 секунд)
+$timerId = Timer::add(5.0, function($message) {
+    echo $message . "\n";
+}, ['Delayed message'], false);
+
+// Таймер с несколькими аргументами
+$timerId = Timer::add(2.0, function($name, $age) {
+    echo "$name is $age years old\n";
+}, ['John', 30], false);
+```
+
+### `del()`
+
+Удаление таймера.
+
+```php
+public static function del(int $timerId): bool
+```
+
+**Параметры:**
+
+- `$timerId` - ID таймера для удаления
+
+**Возвращает:**
+
+`true` если таймер найден и удален, иначе `false`.
+
+**Пример:**
+
+```php
+$timerId = Timer::add(10.0, function() {
+    echo "Это не выполнится\n";
+});
+
+// Удаление таймера до его выполнения
+Timer::del($timerId);
+```
+
+### `delAll()`
+
+Удаление всех таймеров.
+
+```php
+public static function delAll(): void
+```
+
+**Описание:**
+
+Удаляет все активные таймеры. Полезно при остановке сервера.
+
+**Пример:**
+
+```php
+// Очистка всех таймеров
+Timer::delAll();
+```
+
+### `repeat()`
+
+Создание повторяющегося таймера.
+
+```php
+public static function repeat(
+    float $timeInterval,
+    callable $func,
+    array $args = []
+): int
+```
+
+**Параметры:**
+
+- `$timeInterval` - Интервал повторения в секундах
+- `$func` - Callback функция
+- `$args` - Аргументы для callback
+
+**Возвращает:**
+
+ID таймера.
+
+**Пример:**
+
+```php
+// Heartbeat каждые 30 секунд
+$heartbeatId = Timer::repeat(30.0, function() use ($connection) {
+    $connection->sendPing();
+});
+
+// Остановка heartbeat
+Timer::del($heartbeatId);
+```
+
+### `delay()`
+
+Создание одноразового таймера (задержка).
+
+```php
+public static function delay(
+    float $timeInterval,
+    callable $func,
+    array $args = []
+): int
+```
+
+**Параметры:**
+
+- `$timeInterval` - Задержка в секундах
+- `$func` - Callback функция
+- `$args` - Аргументы для callback
+
+**Возвращает:**
+
+ID таймера.
+
+**Пример:**
+
+```php
+// Выполнение через 3 секунды
+Timer::delay(3.0, function($message) {
+    echo $message . "\n";
+}, ['Delayed execution']);
+```
+
+### `sleep()`
+
+Приостановка выполнения на указанное время (для корутин).
+
+```php
+public static function sleep(float $delay): void
+```
+
+**Параметры:**
+
+- `$delay` - Время приостановки в секундах (>= 0)
+
+**Описание:**
+
+Асинхронная приостановка выполнения. Не блокирует обработку других запросов.
+
+**Примеры:**
+
+```php
+// В Fiber или корутине
+use localzet\Timer;
+
+// Правильно - асинхронная задержка
+Timer::sleep(1.0); // Не блокирует процесс
+
+// НЕПРАВИЛЬНО - блокирует весь процесс
+sleep(1);
+```
+
+**Пример использования:**
+
+```php
+$server->onMessage = function(TcpConnection $connection, $data) {
+    // Асинхронная задержка перед ответом
+    Timer::sleep(0.5);
+    $connection->send('Delayed response');
+};
+```
+
+### `init()`
+
+Инициализация таймера.
+
+```php
+public static function init(?EventInterface $event = null): void
+```
+
+**Параметры:**
+
+- `$event` - EventInterface, цикл событий (опционально)
+
+**Описание:**
+
+Инициализирует систему таймеров. Вызывается автоматически при запуске сервера.
+
+**Пример:**
+
+```php
+// Ручная инициализация (обычно не требуется)
+Timer::init(Server::getEventLoop());
+```
+
+## Примеры использования
+
+### Пример 1: Таймаут для операции
+
+```php
+$server->onMessage = function(TcpConnection $connection, $data) {
+    // Установка таймаута
+    $timeoutId = Timer::delay(10.0, function() use ($connection) {
+        $connection->close('Operation timeout');
+    });
+    
+    // Асинхронная операция
+    performAsyncOperation(function($result) use ($connection, $timeoutId) {
+        // Отмена таймаута при успешном завершении
+        Timer::del($timeoutId);
+        
+        $connection->send($result);
+    });
+};
+```
+
+### Пример 2: Heartbeat для соединений
+
+```php
+$server->onConnect = function(TcpConnection $connection) {
+    // Создание heartbeat таймера
+    $connection->context->heartbeatTimer = Timer::repeat(30.0, function() use ($connection) {
+        if (!$connection->sendPing()) {
+            // Не удалось отправить - закрываем соединение
+            Timer::del($connection->context->heartbeatTimer);
+            $connection->close();
+        }
+    });
+};
+
+$server->onClose = function(TcpConnection $connection) {
+    // Удаление heartbeat при закрытии
+    if (isset($connection->context->heartbeatTimer)) {
+        Timer::del($connection->context->heartbeatTimer);
+    }
+};
+```
+
+### Пример 3: Периодическая очистка
+
+```php
+// Очистка временных данных каждые 5 минут
+Timer::repeat(300.0, function() {
+    $now = time();
+    
+    // Удаление старых записей
+    foreach ($temporaryData as $key => $data) {
+        if ($data['expires'] < $now) {
+            unset($temporaryData[$key]);
+        }
+    }
+});
+```
+
+### Пример 4: Отложенная отправка
+
+```php
+$server->onMessage = function(TcpConnection $connection, $data) {
+    // Отправка ответа с задержкой
+    Timer::delay(1.0, function() use ($connection, $data) {
+        $connection->send('Delayed: ' . $data);
+    });
+};
+```
+
+### Пример 5: Ограничение частоты запросов
+
+```php
+$requestCounts = [];
+
+$server->onMessage = function(TcpConnection $connection, $data) {
+    $ip = $connection->getRemoteIp();
+    $now = time();
+    
+    // Инициализация счетчика
+    if (!isset($requestCounts[$ip])) {
+        $requestCounts[$ip] = ['count' => 0, 'resetTime' => $now + 1];
+    }
+    
+    // Сброс счетчика каждую секунду
+    if ($requestCounts[$ip]['resetTime'] <= $now) {
+        $requestCounts[$ip] = ['count' => 0, 'resetTime' => $now + 1];
+    }
+    
+    // Проверка лимита
+    if (++$requestCounts[$ip]['count'] > 100) {
+        $connection->close('Rate limit exceeded');
+        return;
+    }
+    
+    // Обработка запроса
+    $connection->send('OK');
+};
+```
+
+### Пример 6: Автоматическое переподключение
+
+```php
+function connectWithRetry($address, $maxRetries = 3) {
+    $retryCount = 0;
+    
+    $tryConnect = function() use ($address, &$retryCount, $maxRetries, &$tryConnect) {
+        $connection = new AsyncTcpConnection($address);
+        
+        $connection->onConnect = function() {
+            echo "Connected successfully\n";
+            $retryCount = 0; // Сброс счетчика
+        };
+        
+        $connection->onClose = function() use (&$retryCount, $maxRetries, &$tryConnect) {
+            if (++$retryCount <= $maxRetries) {
+                echo "Reconnecting in 5 seconds... ($retryCount/$maxRetries)\n";
+                Timer::delay(5.0, $tryConnect);
+            } else {
+                echo "Max retries reached\n";
+            }
+        };
+        
+        $connection->connect();
+    };
+    
+    $tryConnect();
+}
+```
+
+## Лучшие практики
+
+### 1. Всегда удаляйте таймеры при необходимости
+
+```php
+// Плохо - утечка таймера
+$server->onConnect = function($conn) {
+    Timer::repeat(1.0, function() use ($conn) {
+        // Таймер продолжит работать даже после закрытия соединения
+    });
+};
+
+// Хорошо - удаление таймера
+$server->onConnect = function($conn) {
+    $conn->context->timerId = Timer::repeat(1.0, function() use ($conn) {
+        // Логика
+    });
+};
+
+$server->onClose = function($conn) {
+    if (isset($conn->context->timerId)) {
+        Timer::del($conn->context->timerId);
+    }
+};
+```
+
+### 2. Используйте Timer::sleep() вместо sleep()
+
+```php
+// Плохо - блокирует весь процесс
+sleep(1);
+
+// Хорошо - асинхронная задержка
+Timer::sleep(1.0);
+```
+
+### 3. Валидация параметров
+
+```php
+// Всегда проверяйте параметры перед использованием
+if ($delay < 0) {
+    throw new InvalidArgumentException('Delay must be >= 0');
+}
+
+Timer::delay($delay, $callback);
+```
+
+## Ограничения
+
+- Таймеры работают только в контексте Localzet Server
+- Минимальный интервал зависит от точности системного таймера (обычно ~1ms)
+- Максимальный интервал ограничен типом `float` в PHP
+

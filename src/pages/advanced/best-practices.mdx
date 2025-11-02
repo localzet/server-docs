@@ -1,0 +1,484 @@
+export const pageTitle = 'Лучшие практики'
+
+# Лучшие практики разработки
+
+Руководство по написанию эффективного и надежного кода на Localzet Server.
+
+## Архитектурные паттерны
+
+### 1. Разделение ответственности
+
+**Плохо:**
+```php
+$server->onMessage = function($conn, $req) {
+    // Вся логика в одном месте
+    $db = new PDO(...);
+    $user = $db->query("SELECT * FROM users...");
+    $result = processUser($user);
+    $conn->send(json_encode($result));
+};
+```
+
+**Хорошо:**
+```php
+// app/Handlers/UserHandler.php
+class UserHandler extends ServerAbstract {
+    private UserService $userService;
+    
+    public function __construct(UserService $userService) {
+        $this->userService = $userService;
+    }
+    
+    public function onMessage(ConnectionInterface $connection, mixed $request): void {
+        if ($request instanceof Request) {
+            $this->handleHttp($connection, $request);
+        }
+    }
+    
+    private function handleHttp(TcpConnection $conn, Request $req): void {
+        $result = $this->userService->processRequest($req);
+        $conn->send($result);
+    }
+}
+
+// Использование
+$handler = new UserHandler(new UserService());
+localzet_bind($server, $handler);
+```
+
+### 2. Dependency Injection
+
+```php
+class AppHandler extends ServerAbstract {
+    public function __construct(
+        private Database $db,
+        private Cache $cache,
+        private Logger $logger
+    ) {}
+    
+    public function onMessage(ConnectionInterface $conn, mixed $req): void {
+        // Использование внедренных зависимостей
+    }
+}
+
+// Создание с зависимостями
+$handler = new AppHandler(
+    new Database($config['database']),
+    new Cache($config['cache']),
+    new Logger($config['logger'])
+);
+localzet_bind($server, $handler);
+```
+
+### 3. Обработка ошибок
+
+**Централизованная обработка:**
+
+```php
+class ErrorHandler {
+    public static function handle(Throwable $e, TcpConnection $conn): void {
+        // Логирование
+        Server::log("Error: " . $e->getMessage());
+        Server::log($e->getTraceAsString());
+        
+        // Отправка ошибки клиенту (для разработки)
+        if ($_ENV['APP_ENV'] === 'development') {
+            $conn->send(new Response(500, [], $e->getMessage()));
+        } else {
+            $conn->send(new Response(500, [], 'Internal Server Error'));
+        }
+    }
+}
+
+$server->onError = function($conn, $code, $reason) {
+    ErrorHandler::handle(new Exception($reason), $conn);
+};
+```
+
+## Управление ресурсами
+
+### 1. Подключения к БД
+
+**Плохо - создание нового соединения для каждого запроса:**
+
+```php
+$server->onMessage = function($conn, $req) {
+    $db = new PDO('mysql:host=localhost;dbname=test', $user, $pass);
+    // Использование...
+};
+```
+
+**Хорошо - переиспользование соединений:**
+
+```php
+class DatabaseManager {
+    private static ?PDO $connection = null;
+    
+    public static function getConnection(): PDO {
+        if (self::$connection === null) {
+            self::$connection = new PDO(
+                'mysql:host=localhost;dbname=test',
+                $user,
+                $pass,
+                [
+                    PDO::ATTR_PERSISTENT => true,
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                ]
+            );
+        }
+        
+        // Проверка соединения
+        try {
+            self::$connection->query('SELECT 1');
+        } catch (PDOException $e) {
+            self::$connection = null;
+            return self::getConnection(); // Переподключение
+        }
+        
+        return self::$connection;
+    }
+}
+
+$server->onMessage = function($conn, $req) {
+    $db = DatabaseManager::getConnection();
+    // Использование...
+};
+```
+
+### 2. Кеширование
+
+```php
+class CacheManager {
+    private static array $cache = [];
+    private static array $timestamps = [];
+    private const TTL = 300; // 5 минут
+    
+    public static function get(string $key): mixed {
+        if (!isset(self::$cache[$key])) {
+            return null;
+        }
+        
+        // Проверка TTL
+        if (time() - self::$timestamps[$key] > self::TTL) {
+            unset(self::$cache[$key], self::$timestamps[$key]);
+            return null;
+        }
+        
+        return self::$cache[$key];
+    }
+    
+    public static function set(string $key, mixed $value): void {
+        self::$cache[$key] = $value;
+        self::$timestamps[$key] = time();
+        
+        // Ограничение размера кеша
+        if (count(self::$cache) > 1000) {
+            // Удаление самых старых записей
+            asort(self::$timestamps);
+            $oldest = array_keys(self::$timestamps)[0];
+            unset(self::$cache[$oldest], self::$timestamps[$oldest]);
+        }
+    }
+}
+```
+
+### 3. Управление соединениями
+
+```php
+// Всегда очищайте соединения при закрытии
+$server->onClose = function(TcpConnection $conn) {
+    // Очистка таймеров
+    if (isset($conn->context->timerId)) {
+        Timer::del($conn->context->timerId);
+    }
+    
+    // Очистка из глобальных массивов
+    if (isset($globalConnections[$conn->id])) {
+        unset($globalConnections[$conn->id]);
+    }
+    
+    // Обнуление ссылок
+    $conn->context = null;
+};
+```
+
+## Безопасность
+
+### 1. Валидация входных данных
+
+```php
+class Validator {
+    public static function validateRequest(Request $req): array {
+        $errors = [];
+        
+        // Валидация параметров
+        $name = $req->post('name');
+        if (empty($name) || strlen($name) > 100) {
+            $errors[] = 'Invalid name';
+        }
+        
+        // Валидация email
+        $email = $req->post('email');
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Invalid email';
+        }
+        
+        // Защита от XSS
+        $message = htmlspecialchars($req->post('message'), ENT_QUOTES, 'UTF-8');
+        
+        return ['errors' => $errors, 'data' => compact('name', 'email', 'message')];
+    }
+}
+
+$server->onMessage = function($conn, $req) {
+    $validation = Validator::validateRequest($req);
+    
+    if (!empty($validation['errors'])) {
+        $conn->send(new Response(400, [], json_encode($validation['errors'])));
+        return;
+    }
+    
+    // Обработка валидных данных
+};
+```
+
+### 2. Защита от SQL Injection
+
+```php
+// Всегда используйте подготовленные запросы
+$stmt = $db->prepare('SELECT * FROM users WHERE id = :id');
+$stmt->execute(['id' => $req->get('id')]);
+$user = $stmt->fetch();
+
+// НИКОГДА не делайте так:
+// $db->query("SELECT * FROM users WHERE id = " . $req->get('id'));
+```
+
+### 3. Защита сессий
+
+```php
+// Генерация безопасного session ID
+function generateSessionId(): string {
+    return bin2hex(random_bytes(32));
+}
+
+// Установка безопасных cookies
+$response->cookie('session_id', $sessionId, [
+    'httponly' => true,
+    'secure' => true,
+    'samesite' => 'Strict',
+    'max-age' => 3600
+]);
+```
+
+## Производительность
+
+### 1. Избегайте блокирующих операций
+
+**Плохо:**
+```php
+$server->onMessage = function($conn, $req) {
+    // Блокирует весь процесс!
+    $data = file_get_contents('large_file.txt');
+    $conn->send($data);
+};
+```
+
+**Хорошо:**
+```php
+$server->onMessage = function($conn, $req) {
+    // Асинхронное чтение файла
+    $file = fopen('large_file.txt', 'r');
+    
+    $eventLoop = Server::getEventLoop();
+    $eventLoop->onReadable($file, function($file) use ($conn, $eventLoop) {
+        $chunk = fread($file, 8192);
+        
+        if ($chunk === false || feof($file)) {
+            $eventLoop->offReadable($file);
+            fclose($file);
+        } else {
+            $conn->send($chunk, true); // raw mode
+        }
+    });
+};
+```
+
+### 2. Оптимизация протоколов
+
+```php
+// Кеширование результатов парсинга
+class OptimizedProtocol implements ProtocolInterface {
+    private static array $decodeCache = [];
+    
+    public static function decode(string $buffer, ConnectionInterface $conn): mixed {
+        // Использование кеша для повторяющихся данных
+        if (isset(self::$decodeCache[$buffer])) {
+            return clone self::$decodeCache[$buffer];
+        }
+        
+        $result = self::parseBuffer($buffer);
+        
+        // Кеширование (с ограничением размера)
+        if (count(self::$decodeCache) < 512) {
+            self::$decodeCache[$buffer] = $result;
+        }
+        
+        return $result;
+    }
+}
+```
+
+### 3. Минимизация аллокаций
+
+```php
+// Переиспользование объектов
+class ObjectPool {
+    private array $pool = [];
+    
+    public function get(): object {
+        if (empty($this->pool)) {
+            return new MyObject();
+        }
+        return array_pop($this->pool);
+    }
+    
+    public function release(object $obj): void {
+        $obj->reset(); // Сброс состояния
+        $this->pool[] = $obj;
+    }
+}
+```
+
+## Тестирование
+
+### Unit тестирование
+
+```php
+// tests/Unit/UserServiceTest.php
+class UserServiceTest extends TestCase {
+    public function testGetUser(): void {
+        $service = new UserService(new MockDatabase());
+        $user = $service->getUser(1);
+        
+        $this->assertNotNull($user);
+        $this->assertEquals(1, $user->id);
+    }
+}
+```
+
+### Интеграционное тестирование
+
+```php
+// tests/Integration/ServerTest.php
+class ServerTest extends TestCase {
+    public function testHttpRequest(): void {
+        $server = new Server('http://127.0.0.1:0'); // Динамический порт
+        $server->count = 1;
+        
+        $server->onMessage = function($conn, $req) {
+            $conn->send('OK');
+        };
+        
+        $server->listen();
+        $address = $server->getSocketName();
+        
+        // Тестирование через клиент
+        $client = stream_socket_client($address);
+        fwrite($client, "GET / HTTP/1.1\r\n\r\n");
+        $response = fread($client, 1024);
+        
+        $this->assertStringContainsString('OK', $response);
+    }
+}
+```
+
+## Логирование
+
+### Структурированное логирование
+
+```php
+class Logger {
+    public static function info(string $message, array $context = []): void {
+        $log = [
+            'timestamp' => date('c'),
+            'level' => 'info',
+            'message' => $message,
+            'context' => $context
+        ];
+        
+        Server::log(json_encode($log));
+    }
+    
+    public static function error(Throwable $e, array $context = []): void {
+        $log = [
+            'timestamp' => date('c'),
+            'level' => 'error',
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'context' => $context
+        ];
+        
+        Server::log(json_encode($log));
+    }
+}
+
+// Использование
+Logger::info('User connected', ['user_id' => 123, 'ip' => $conn->getRemoteIp()]);
+```
+
+## Код-стиль
+
+### PSR стандарты
+
+- **PSR-1**: Basic Coding Standard
+- **PSR-12**: Extended Coding Style
+- **PSR-4**: Autoloading Standard
+
+### Рекомендации
+
+1. **Используйте strict types:**
+```php
+<?php declare(strict_types=1);
+```
+
+2. **Типизация:**
+```php
+// Всегда указывайте типы
+public function process(Request $request): Response
+```
+
+3. **Именование:**
+```php
+// CamelCase для методов
+public function getUserById(int $id): User
+
+// snake_case для констант
+const MAX_CONNECTIONS = 1000;
+```
+
+4. **Документация:**
+```php
+/**
+ * Обрабатывает HTTP запрос.
+ *
+ * @param TcpConnection $connection Соединение с клиентом
+ * @param Request $request HTTP запрос
+ * @throws InvalidArgumentException Если запрос невалиден
+ */
+public function onMessage(ConnectionInterface $connection, mixed $request): void
+```
+
+## Чеклист разработки
+
+- [ ] Код следует PSR стандартам
+- [ ] Все методы имеют типизацию
+- [ ] Входные данные валидируются
+- [ ] Ошибки обрабатываются централизованно
+- [ ] Ресурсы правильно управляются
+- [ ] Нет блокирующих операций
+- [ ] Код покрыт тестами
+- [ ] Документация актуальна
+- [ ] Логирование настроено
+- [ ] Безопасность учтена
+

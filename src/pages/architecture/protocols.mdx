@@ -1,0 +1,589 @@
+export const pageTitle = 'Протоколы прикладного уровня'
+
+# Протоколы прикладного уровня
+
+Протоколы прикладного уровня определяют формат данных и правила их обработки в Localzet Server. Система использует двухуровневую модель: транспортный уровень (TCP/UDP) и прикладной уровень (HTTP/WebSocket/Custom).
+
+## Интерфейс протокола
+
+Все протоколы реализуют единый интерфейс `ProtocolInterface`:
+
+```php
+interface ProtocolInterface {
+    // Проверка целостности пакета
+    public static function input(
+        string $buffer, 
+        ConnectionInterface $connection
+    ): int; // Возвращает длину пакета, 0 если недостаточно данных, false при ошибке
+    
+    // Кодирование данных для отправки
+    public static function encode(
+        mixed $data, 
+        ConnectionInterface $connection
+    ): string;
+    
+    // Декодирование данных из буфера
+    public static function decode(
+        string $buffer, 
+        ConnectionInterface $connection
+    ): mixed;
+}
+```
+
+## Механизм работы протоколов
+
+### Процесс обработки данных
+
+```
+┌─────────────────────────────────────────┐
+│  Входящие данные в recvBuffer          │
+└─────────────────┬───────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────┐
+│  Protocol::input($buffer, $connection)  │
+│  ┌───────────────────────────────────┐  │
+│  │ Проверка целостности пакета       │  │
+│  │ - Проверка заголовков             │  │
+│  │ - Вычисление длины пакета         │  │
+│  │ - Валидация данных                │  │
+│  └───────────────────────────────────┘  │
+│  Возвращает: int (длина) | 0 | false   │
+└─────────────────┬───────────────────────┘
+                  │
+        ┌─────────┴─────────┐
+        │                   │
+    length > 0         length == 0
+    (пакет полный)      (ждем данные)
+        │                   │
+        ▼                   │
+┌───────────────────────────┘
+│  Извлечение пакета из буфера
+│  $package = substr($recvBuffer, 0, $length)
+└─────────────────┬───────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────┐
+│  Protocol::decode($package, $connection)│
+│  ┌───────────────────────────────────┐  │
+│  │ Парсинг данных                    │  │
+│  │ - Декодирование формата           │  │
+│  │ - Валидация структуры             │  │
+│  │ - Создание объекта запроса        │  │
+│  └───────────────────────────────────┘  │
+│  Возвращает: mixed (объект запроса)     │
+└─────────────────┬───────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────┐
+│  onMessage($connection, $decodedData)   │
+│  ┌───────────────────────────────────┐  │
+│  │ Бизнес-логика приложения          │  │
+│  │ - Обработка запроса               │  │
+│  │ - Генерация ответа                │  │
+│  └───────────────────────────────────┘  │
+└─────────────────┬───────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────┐
+│  $connection->send($response)           │
+└─────────────────┬───────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────┐
+│  Protocol::encode($data, $connection)   │
+│  ┌───────────────────────────────────┐  │
+│  │ Кодирование ответа                │  │
+│  │ - Форматирование данных           │  │
+│  │ - Добавление заголовков           │  │
+│  └───────────────────────────────────┘  │
+│  Возвращает: string (закодированные)   │
+└─────────────────┬───────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────┐
+│  Отправка через транспортный уровень   │
+└─────────────────────────────────────────┘
+```
+
+## HTTP протокол
+
+### Структура HTTP протокола
+
+HTTP протокол обрабатывает стандартные HTTP запросы и ответы.
+
+#### Метод input() - Проверка целостности запроса
+
+```php
+public static function input(string $buffer, ConnectionInterface $connection): int
+{
+    // 1. Поиск конца заголовков HTTP (\r\n\r\n)
+    $crlfPos = strpos($buffer, "\r\n\r\n");
+    
+    if ($crlfPos === false) {
+        // Заголовки не полные
+        
+        // Проверка размера заголовка (защита от переполнения)
+        if (strlen($buffer) >= MAX_HEADER_SIZE) {
+            $connection->close(format_http_response(413));
+            return 0;
+        }
+        
+        return 0; // Ждем еще данные
+    }
+    
+    // 2. Вычисление базовой длины (заголовки + разделитель)
+    $length = $crlfPos + 4;
+    $header = substr($buffer, 0, $crlfPos);
+    
+    // 3. Валидация HTTP метода
+    $methodValid = false;
+    foreach (SUPPORTED_METHODS as $method) {
+        if (str_starts_with($header, $method . ' ')) {
+            $methodValid = true;
+            break;
+        }
+    }
+    
+    if (!$methodValid) {
+        $connection->close(format_http_response(400));
+        return 0;
+    }
+    
+    // 4. Парсинг Content-Length
+    if (preg_match('/Content-Length:\s*(\d+)/is', $header, $matches)) {
+        $contentLength = (int)$matches[1];
+        
+        // Валидация размера
+        if ($contentLength < 0) {
+            $connection->close(format_http_response(400));
+            return 0;
+        }
+        
+        // Добавление длины тела к заголовкам
+        $length += $contentLength;
+    }
+    
+    // 5. Проверка максимального размера пакета
+    if ($length > $connection->maxPackageSize) {
+        $connection->close(format_http_response(413));
+        return 0;
+    }
+    
+    return $length; // Полный размер HTTP запроса
+}
+```
+
+#### Метод decode() - Парсинг HTTP запроса
+
+```php
+public static function decode(string $buffer, ConnectionInterface $connection): Request
+{
+    // 1. Проверка кеша запросов (оптимизация)
+    static $requests = [];
+    if (isset($requests[$buffer]) && 
+        !isset($buffer[TcpConnection::MAX_CACHE_STRING_LENGTH])) {
+        $request = clone $requests[$buffer];
+        $request->connection = $connection;
+        $connection->request = $request;
+        return $request;
+    }
+    
+    // 2. Создание объекта Request
+    $request = new Request($buffer);
+    
+    // 3. Кеширование для повторного использования
+    if (!isset($buffer[TcpConnection::MAX_CACHE_STRING_LENGTH])) {
+        $requests[$buffer] = $request;
+        
+        // LRU: удаление старых при переполнении
+        if (count($requests) > TcpConnection::MAX_CACHE_SIZE) {
+            unset($requests[key($requests)]);
+        }
+        
+        $request = clone $request;
+    }
+    
+    // 4. Привязка к соединению
+    $request->connection = $connection;
+    $connection->request = $request;
+    
+    // 5. Заполнение суперглобальных переменных PHP
+    foreach ($request->header() as $name => $value) {
+        $_SERVER['HTTP_' . strtoupper(str_replace('-', '_', $name))] = $value;
+    }
+    
+    $_GET = $request->get();
+    $_POST = $request->post();
+    $_COOKIE = $request->cookie();
+    $_REQUEST = $_GET + $_POST + $_COOKIE;
+    $_SESSION = $request->session();
+    
+    return $request;
+}
+```
+
+#### Метод encode() - Формирование HTTP ответа
+
+```php
+public static function encode(mixed $data, ConnectionInterface $connection): string
+{
+    // 1. Очистка ссылок на предыдущий запрос
+    if ($connection->request instanceof Request) {
+        $connection->request->connection = null;
+        $connection->request = null;
+    }
+    
+    // 2. Преобразование в объект Response
+    if (!is_object($data) || !($data instanceof Response)) {
+        $data = new Response(200, [], (string)$data);
+    }
+    
+    // 3. Добавление заголовков соединения
+    if ($connection->headers && method_exists($data, 'withHeaders')) {
+        $data->withHeaders($connection->headers);
+        $connection->headers = [];
+    }
+    
+    // 4. Обработка файловых ответов
+    if (!empty($data->file) && is_array($data->file)) {
+        return static::encodeFileResponse($data, $connection);
+    }
+    
+    // 5. Возврат строкового представления Response
+    return (string)$data;
+}
+```
+
+**Обработка файловых ответов:**
+
+```php
+encodeFileResponse($response, $connection) {
+    $file = $data->file['file'];
+    $offset = $data->file['offset'] ?? 0;
+    $length = $data->file['length'] ?? 0;
+    
+    // Валидация файла
+    if (!is_string($file) || !is_file($file)) {
+        $connection->close(new Response(404));
+        return '';
+    }
+    
+    $fileSize = filesize($file);
+    $bodyLen = $length > 0 ? $length : ($fileSize - $offset);
+    
+    // Валидация диапазона
+    if ($bodyLen <= 0 || $offset < 0 || $offset >= $fileSize) {
+        $connection->close(new Response(416));
+        return '';
+    }
+    
+    // Установка заголовков
+    $data->withHeaders([
+        'Content-Length' => $bodyLen,
+        'Accept-Ranges' => 'bytes',
+    ]);
+    
+    if ($offset > 0 || $length > 0) {
+        $offsetEnd = $offset + $bodyLen - 1;
+        $data->header('Content-Range', "bytes $offset-$offsetEnd/$fileSize");
+    }
+    
+    // Для файлов < 2MB - отправка сразу
+    if ($bodyLen < 2 * 1024 * 1024) {
+        $fileContents = file_get_contents($file, false, null, $offset, $bodyLen);
+        $connection->send((string)$data . $fileContents, true);
+        return '';
+    }
+    
+    // Для больших файлов - потоковая передача
+    $handler = fopen($file, 'rb');
+    $connection->send((string)$data, true);
+    static::sendStream($connection, $handler, $offset, $length);
+    return '';
+}
+```
+
+## WebSocket протокол
+
+### Структура WebSocket протокола
+
+WebSocket обеспечивает двунаправленную коммуникацию между клиентом и сервером.
+
+#### Рукопожатие (Handshake)
+
+**Серверная сторона (Websocket.php):**
+
+```php
+input($buffer, $connection) {
+    // 1. Проверка наличия полных заголовков
+    $headerEnd = strpos($buffer, "\r\n\r\n");
+    
+    if ($headerEnd === false) {
+        return 0; // Ждем заголовки
+    }
+    
+    // 2. Парсинг HTTP заголовков для рукопожатия
+    $header = substr($buffer, 0, $headerEnd);
+    
+    // 3. Проверка наличия ключевых заголовков WebSocket
+    if (!preg_match("/Sec-WebSocket-Key:\s*(.*?)\r\n/i", $header, $matches)) {
+        return false; // Не WebSocket запрос
+    }
+    
+    // 4. Вычисление Accept ключа
+    $secWebSocketKey = trim($matches[1]);
+    $secWebSocketAccept = base64_encode(
+        sha1($secWebSocketKey . '258EAFA5-E914-47DA-95CA-C5AB0DC85B11', true)
+    );
+    
+    // 5. Формирование ответа рукопожатия
+    $responseHeader = "HTTP/1.1 101 Switching Protocols\r\n";
+    $responseHeader .= "Upgrade: websocket\r\n";
+    $responseHeader .= "Connection: Upgrade\r\n";
+    $responseHeader .= "Sec-WebSocket-Accept: $secWebSocketAccept\r\n";
+    
+    // 6. Вызов onWebSocketConnect callback
+    if ($connection->onWebSocketConnect) {
+        $result = ($connection->onWebSocketConnect)($connection, $request);
+        if ($result instanceof Response && $result->getStatusCode() >= 400) {
+            // Отклонение соединения
+            $connection->close((string)$result, true);
+            return 0;
+        }
+    }
+    
+    return strlen($responseHeader) + 4; // Длина ответа рукопожатия
+}
+```
+
+#### Обработка фреймов WebSocket
+
+WebSocket использует фреймовую структуру данных:
+
+```
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-------+-+-------------+-------------------------------+
+|F|R|R|R| opcode|M| Payload len |    Extended payload length    |
+|I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
+|N|V|V|V|       |S|             |   (if payload len==126/127)   |
+| |1|2|3|       |K|             |                               |
++-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
+|     Extended payload length continued, if payload len == 127  |
++ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+|                               |Masking-key, if MASK set to 1  |
++-------------------------------+-------------------------------+
+| Masking-key (continued)       |          Payload Data         |
++-------------------------------- - - - - - - - - - - - - - - - +
+:                     Payload Data continued ...                :
++ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+|                     Payload Data continued ...                |
++---------------------------------------------------------------+
+```
+
+**Декодирование фрейма:**
+
+```php
+decode($buffer, $connection) {
+    $len = ord($buffer[1]) & 127;
+    $masks = null;
+    $data = null;
+    $firstMaskOffset = 0;
+    
+    // Определение длины данных
+    if ($len === 126) {
+        $masks = substr($buffer, 4, 4);
+        $data = substr($buffer, 8);
+        $firstMaskOffset = 4;
+    } elseif ($len === 127) {
+        $masks = substr($buffer, 10, 4);
+        $data = substr($buffer, 14);
+        $firstMaskOffset = 10;
+    } else {
+        $masks = substr($buffer, 2, 4);
+        $data = substr($buffer, 6);
+        $firstMaskOffset = 2;
+    }
+    
+    // Демскирование данных (от клиента всегда маскированы)
+    $decoded = '';
+    for ($i = 0; $i < strlen($data); ++$i) {
+        $decoded .= $data[$i] ^ $masks[$i % 4];
+    }
+    
+    return $decoded;
+}
+```
+
+**Кодирование фрейма:**
+
+```php
+encode($data, $connection) {
+    $data = (string)$data;
+    $len = strlen($data);
+    
+    // Построение заголовка фрейма
+    $firstByte = 0x81; // FIN=1, opcode=text
+    $mask = 0; // Сервер не маскирует данные
+    
+    if ($len < 126) {
+        $frame = chr($firstByte) . chr($len);
+    } elseif ($len < 65536) {
+        $frame = chr($firstByte) . chr(126) . pack('n', $len);
+    } else {
+        $frame = chr($firstByte) . chr(127) . pack('xxxxN', $len);
+    }
+    
+    return $frame . $data;
+}
+```
+
+## Text протокол
+
+Простой текстовый протокол с разделителем строк.
+
+```php
+class Text implements ProtocolInterface {
+    public static function input(string $buffer, ConnectionInterface $connection): int {
+        $pos = strpos($buffer, "\n");
+        
+        if ($pos === false) {
+            return 0; // Ждем символ новой строки
+        }
+        
+        return $pos + 1; // Включая \n
+    }
+    
+    public static function encode(mixed $data, ConnectionInterface $connection): string {
+        return (string)$data . "\n";
+    }
+    
+    public static function decode(string $buffer, ConnectionInterface $connection): string {
+        return trim($buffer);
+    }
+}
+```
+
+## Frame протокол
+
+Протокол с явной длиной пакета в заголовке.
+
+```php
+class Frame implements ProtocolInterface {
+    public static function input(string $buffer, ConnectionInterface $connection): int {
+        if (strlen($buffer) < 4) {
+            return 0; // Ждем минимум 4 байта (заголовок)
+        }
+        
+        $unpacked = unpack('Ntotal_length', substr($buffer, 0, 4));
+        $totalLength = $unpacked['total_length'];
+        
+        if ($totalLength > $connection->maxPackageSize) {
+            return false; // Превышен размер
+        }
+        
+        if (strlen($buffer) < $totalLength) {
+            return 0; // Ждем полный пакет
+        }
+        
+        return $totalLength;
+    }
+    
+    public static function encode(mixed $data, ConnectionInterface $connection): string {
+        $data = (string)$data;
+        return pack('N', strlen($data)) . $data;
+    }
+    
+    public static function decode(string $buffer, ConnectionInterface $connection): string {
+        return substr($buffer, 4); // Пропускаем заголовок длины
+    }
+}
+```
+
+## Создание пользовательского протокола
+
+### Шаблон протокола
+
+```php
+namespace Protocols;
+
+use localzet\Server\Protocols\ProtocolInterface;
+use localzet\Server\Connection\ConnectionInterface;
+
+class CustomProtocol implements ProtocolInterface {
+    // Константы протокола
+    private const HEADER_SIZE = 8;
+    private const MAX_BODY_SIZE = 1048576; // 1MB
+    
+    public static function input(string $buffer, ConnectionInterface $connection): int|false {
+        // 1. Проверка минимального размера заголовка
+        if (strlen($buffer) < self::HEADER_SIZE) {
+            return 0; // Ждем заголовок
+        }
+        
+        // 2. Извлечение данных из заголовка
+        $header = unpack('Nmagic/Nlength', substr($buffer, 0, self::HEADER_SIZE));
+        
+        // 3. Валидация магического числа
+        if ($header['magic'] !== 0x12345678) {
+            return false; // Неверный формат протокола
+        }
+        
+        // 4. Валидация размера тела
+        if ($header['length'] > self::MAX_BODY_SIZE) {
+            return false; // Превышен максимальный размер
+        }
+        
+        $totalLength = self::HEADER_SIZE + $header['length'];
+        
+        // 5. Проверка полного пакета
+        if (strlen($buffer) < $totalLength) {
+            return 0; // Ждем полный пакет
+        }
+        
+        return $totalLength;
+    }
+    
+    public static function encode(mixed $data, ConnectionInterface $connection): string {
+        // 1. Сериализация данных
+        $body = serialize($data);
+        $bodyLength = strlen($body);
+        
+        // 2. Формирование заголовка
+        $header = pack('NN', 0x12345678, $bodyLength);
+        
+        return $header . $body;
+    }
+    
+    public static function decode(string $buffer, ConnectionInterface $connection): mixed {
+        // 1. Извлечение тела из пакета
+        $body = substr($buffer, self::HEADER_SIZE);
+        
+        // 2. Десериализация
+        $data = unserialize($body);
+        
+        if ($data === false) {
+            throw new \RuntimeException('Ошибка десериализации');
+        }
+        
+        return $data;
+    }
+}
+```
+
+### Лучшие практики
+
+1. **Валидация входных данных**: Всегда проверяйте данные перед обработкой
+2. **Обработка ошибок**: Возвращайте `false` при критических ошибках протокола
+3. **Защита от переполнения**: Проверяйте максимальные размеры пакетов
+4. **Оптимизация**: Кешируйте результаты парсинга где возможно
+5. **Безопасность**: Валидируйте все входные данные от клиента
+
+<Button
+    href="/architecture/performance"
+    variant="text"
+    arrow="right"
+    children="Производительность и оптимизация"
+/>
+

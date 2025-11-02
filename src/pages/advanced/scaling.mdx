@@ -1,0 +1,482 @@
+export const pageTitle = 'Масштабирование и высокие нагрузки'
+
+# Масштабирование и работа под высокой нагрузкой
+
+Руководство по масштабированию Localzet Server для обработки высоких нагрузок и больших объемов трафика.
+
+## Стратегии масштабирования
+
+### Вертикальное масштабирование
+
+Увеличение производительности одного сервера.
+
+#### Оптимальное количество процессов
+
+```php
+// Автоматическое определение по количеству CPU
+$server->count = cpu_count();
+
+// Или явное указание
+$server->count = 8; // Для 8-core сервера
+```
+
+**Рекомендации:**
+
+- Для CPU-intensive задач: `count = CPU cores`
+- Для I/O-intensive задач: `count = CPU cores × 2`
+- Максимум: `count = CPU cores × 4` (больше уже неэффективно)
+
+#### Настройка буферов
+
+```php
+// Увеличение размеров буферов для высокой нагрузки
+TcpConnection::$defaultMaxSendBufferSize = 4194304; // 4MB
+TcpConnection::$defaultMaxPackageSize = 20971520;   // 20MB
+```
+
+### Горизонтальное масштабирование
+
+Распределение нагрузки между несколькими серверами.
+
+#### Архитектура с Load Balancer
+
+```
+                    ┌─────────────┐
+                    │  Load       │
+                    │  Balancer   │
+                    │ (Nginx/HA)   │
+                    └──────┬───────┘
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+   ┌────▼────┐       ┌────▼────┐       ┌────▼────┐
+   │ Server 1│       │ Server 2│       │ Server 3│
+   │ :8080   │       │ :8080   │       │ :8080   │
+   └─────────┘       └─────────┘       └─────────┘
+```
+
+#### Настройка Nginx как Load Balancer
+
+```nginx
+upstream localzet_backend {
+    least_conn;  # Балансировка по количеству соединений
+    
+    server 127.0.0.1:8080 weight=1 max_fails=3 fail_timeout=30s;
+    server 127.0.0.1:8081 weight=1 max_fails=3 fail_timeout=30s;
+    server 127.0.0.1:8082 weight=1 max_fails=3 fail_timeout=30s;
+}
+
+server {
+    listen 80;
+    
+    location / {
+        proxy_pass http://localzet_backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        
+        # WebSocket поддержка
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+```
+
+## Оптимизация для высокой нагрузки
+
+### 1. Настройка операционной системы
+
+#### Linux оптимизации
+
+```bash
+# Увеличение лимитов
+echo "* soft nofile 65535" >> /etc/security/limits.conf
+echo "* hard nofile 65535" >> /etc/security/limits.conf
+
+# Оптимизация TCP
+cat >> /etc/sysctl.conf << EOF
+# Максимальное количество соединений в очереди
+net.core.somaxconn = 65535
+
+# Переиспользование TIME_WAIT сокетов
+net.ipv4.tcp_tw_reuse = 1
+net.ipv4.tcp_fin_timeout = 30
+
+# Увеличение диапазона портов
+net.ipv4.ip_local_port_range = 1024 65535
+
+# Оптимизация буферов
+net.core.rmem_max = 16777216
+net.core.wmem_max = 16777216
+net.ipv4.tcp_rmem = 4096 87380 16777216
+net.ipv4.tcp_wmem = 4096 65536 16777216
+
+# Отключение синхронизации для производительности
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_syn_retries = 2
+net.ipv4.tcp_synack_retries = 2
+EOF
+
+sysctl -p
+```
+
+### 2. Использование SO_REUSEPORT
+
+```php
+$server = new Server('http://0.0.0.0:8080');
+$server->reusePort = true; // Распределение на уровне ядра
+$server->count = cpu_count();
+```
+
+**Преимущества:**
+
+- Распределение соединений на уровне ядра Linux
+- Исключение конкуренции между процессами
+- Улучшенная производительность при высокой нагрузке
+
+### 3. Выбор оптимального Event Loop
+
+**Приоритет выбора:**
+
+1. **libuv** (ext-uv) - максимальная производительность
+2. **libev** (ext-ev) - высокая производительность
+3. **libevent** (ext-event) - стабильная производительность
+4. **stream_select** - универсальный fallback
+
+**Установка расширений:**
+
+```bash
+# libuv
+pecl install uv
+
+# libev
+pecl install ev
+
+# libevent
+pecl install event
+```
+
+### 4. Оптимизация памяти
+
+#### Управление кешами
+
+```php
+// Настройка размера кеша запросов
+// В Http.php уже реализовано автоматическое управление
+
+// Для пользовательских протоколов:
+static $cache = [];
+const MAX_CACHE_SIZE = 512;
+
+if (count($cache) > MAX_CACHE_SIZE) {
+    // LRU удаление
+    unset($cache[key($cache)]);
+}
+```
+
+#### Минимизация аллокаций
+
+```php
+// Переиспользование объектов
+static $pool = [];
+
+function getConnection() {
+    if (empty($pool)) {
+        return new Connection();
+    }
+    return array_pop($pool);
+}
+
+function releaseConnection($conn) {
+    $conn->reset();
+    $pool[] = $conn;
+}
+```
+
+## Мониторинг и метрики
+
+### Встроенная статистика
+
+```php
+// Статистика соединений
+$stats = ConnectionInterface::$statistics;
+// [
+//     'connection_count' => 1234,
+//     'total_request' => 56789,
+//     'throw_exception' => 5,
+//     'send_fail' => 2
+// ]
+
+// Получение статуса серверов
+$servers = Server::getAllServers();
+foreach ($servers as $server) {
+    echo "Server: {$server->name}\n";
+    echo "Connections: " . count($server->connections) . "\n";
+}
+```
+
+### Кастомный мониторинг
+
+```php
+// Сбор метрик
+class Metrics {
+    private static array $metrics = [];
+    
+    public static function increment(string $metric, int $value = 1): void {
+        self::$metrics[$metric] = (self::$metrics[$metric] ?? 0) + $value;
+    }
+    
+    public static function get(string $metric): int {
+        return self::$metrics[$metric] ?? 0;
+    }
+    
+    public static function getAll(): array {
+        return self::$metrics;
+    }
+}
+
+// Использование
+$server->onMessage = function($conn, $req) {
+    Metrics::increment('requests.total');
+    Metrics::increment('requests.by_path.' . $req->path());
+    
+    // Обработка...
+};
+```
+
+### Экспорт метрик
+
+```php
+// Endpoint для Prometheus
+$server->onMessage = function($conn, $req) {
+    if ($req->path() === '/metrics') {
+        $metrics = Metrics::getAll();
+        $prometheus = '';
+        
+        foreach ($metrics as $name => $value) {
+            $prometheus .= "$name $value\n";
+        }
+        
+        $conn->send($prometheus);
+    }
+};
+```
+
+## Обработка пиковых нагрузок
+
+### Rate Limiting
+
+```php
+class RateLimiter {
+    private static array $requests = [];
+    private const MAX_REQUESTS = 100;
+    private const WINDOW = 1; // секунда
+    
+    public static function check(string $key): bool {
+        $now = time();
+        $window = floor($now / self::WINDOW);
+        $windowKey = "$key:$window";
+        
+        if (!isset(self::$requests[$windowKey])) {
+            self::$requests[$windowKey] = 0;
+        }
+        
+        if (++self::$requests[$windowKey] > self::MAX_REQUESTS) {
+            return false; // Превышен лимит
+        }
+        
+        return true;
+    }
+    
+    public static function cleanup(): void {
+        $now = time();
+        $currentWindow = floor($now / self::WINDOW);
+        
+        foreach (self::$requests as $key => $value) {
+            $window = (int)explode(':', $key)[1];
+            if ($window < $currentWindow - 10) {
+                unset(self::$requests[$key]);
+            }
+        }
+    }
+}
+
+// Очистка каждые 60 секунд
+Timer::repeat(60.0, [RateLimiter::class, 'cleanup']);
+
+// Использование
+$server->onMessage = function($conn, $req) {
+    $ip = $conn->getRemoteIp();
+    
+    if (!RateLimiter::check($ip)) {
+        $conn->close(new Response(429, [], 'Too Many Requests'));
+        return;
+    }
+    
+    // Обработка запроса...
+};
+```
+
+### Connection Pooling
+
+```php
+class ConnectionPool {
+    private array $pool = [];
+    private int $maxSize;
+    private string $address;
+    
+    public function __construct(string $address, int $maxSize = 100) {
+        $this->address = $address;
+        $this->maxSize = $maxSize;
+    }
+    
+    public function get(): AsyncTcpConnection {
+        if (!empty($this->pool)) {
+            return array_pop($this->pool);
+        }
+        
+        $conn = new AsyncTcpConnection($this->address);
+        $conn->connect();
+        
+        return $conn;
+    }
+    
+    public function release(AsyncTcpConnection $conn): void {
+        if (count($this->pool) < $this->maxSize && 
+            $conn->getStatus() === AsyncTcpConnection::STATUS_ESTABLISHED) {
+            $this->pool[] = $conn;
+        } else {
+            $conn->close();
+        }
+    }
+}
+```
+
+## Распределенное развертывание
+
+### Redis для общих данных
+
+```php
+use Redis;
+
+class SharedState {
+    private static Redis $redis;
+    
+    public static function init(): void {
+        self::$redis = new Redis();
+        self::$redis->connect('127.0.0.1', 6379);
+    }
+    
+    public static function increment(string $key, int $value = 1): int {
+        return self::$redis->incrBy($key, $value);
+    }
+    
+    public static function set(string $key, mixed $value, int $ttl = 0): bool {
+        return self::$redis->setex($key, $ttl, serialize($value));
+    }
+    
+    public static function get(string $key): mixed {
+        $data = self::$redis->get($key);
+        return $data ? unserialize($data) : null;
+    }
+}
+
+// Инициализация при старте сервера
+$server->onServerStart = function($server) {
+    SharedState::init();
+};
+```
+
+### Pub/Sub для межсерверной коммуникации
+
+```php
+class MessageBus {
+    private static Redis $redis;
+    
+    public static function publish(string $channel, mixed $message): void {
+        self::$redis->publish($channel, serialize($message));
+    }
+    
+    public static function subscribe(string $channel, callable $callback): void {
+        $pubsub = self::$redis->pubSubLoop(['subscribe' => [$channel]]);
+        
+        foreach ($pubsub as $message) {
+            if ($message->kind === 'message') {
+                $data = unserialize($message->payload);
+                $callback($data);
+            }
+        }
+    }
+}
+
+// Отправка сообщения на все серверы
+MessageBus::publish('notifications', [
+    'type' => 'user_online',
+    'user_id' => 123
+]);
+```
+
+## Профилирование и отладка
+
+### Профилирование производительности
+
+```php
+class Profiler {
+    private static array $timings = [];
+    
+    public static function start(string $name): void {
+        self::$timings[$name] = [
+            'start' => microtime(true),
+            'memory' => memory_get_usage()
+        ];
+    }
+    
+    public static function end(string $name): array {
+        if (!isset(self::$timings[$name])) {
+            return [];
+        }
+        
+        $timing = self::$timings[$name];
+        unset(self::$timings[$name]);
+        
+        return [
+            'time' => microtime(true) - $timing['start'],
+            'memory' => memory_get_usage() - $timing['memory']
+        ];
+    }
+}
+
+// Использование
+$server->onMessage = function($conn, $req) {
+    Profiler::start('request_processing');
+    
+    // Обработка запроса
+    $result = processRequest($req);
+    
+    $stats = Profiler::end('request_processing');
+    if ($stats['time'] > 1.0) {
+        Server::log("Slow request: {$stats['time']}s");
+    }
+    
+    $conn->send($result);
+};
+```
+
+## Рекомендации
+
+### Для высоких нагрузок
+
+1. Используйте `SO_REUSEPORT` для лучшего распределения
+2. Установите оптимальный Event Loop (libuv/libev)
+3. Настройте операционную систему для высокой нагрузки
+4. Мониторьте метрики и настраивайте алерты
+5. Используйте горизонтальное масштабирование при необходимости
+
+### Для низкой латентности
+
+1. Минимизируйте обработку в `onMessage`
+2. Используйте асинхронные операции для I/O
+3. Оптимизируйте протоколы прикладного уровня
+4. Кешируйте часто используемые данные
+5. Используйте быстрый Event Loop
+
