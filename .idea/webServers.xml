@@ -2,8 +2,8 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="9c9baff1-0d29-4c79-b3e3-5f0dae2d62b8" name="server-docs" url="https://docs.localzet.com/">
-        <fileTransfer rootFolder="/var/www/fastuser/data/www/docs.localzet.com/" accessType="SFTP" host="msk-1.net.zorin.space" port="22" sshConfigId="5eb98f9a-6078-4f63-9a93-67d9a2f79296" sshConfig="root@msk-1.net.zorin.space:22 agent" authAgent="true">
+      <webServer id="9c9baff1-0d29-4c79-b3e3-5f0dae2d62b8" name="server-docs" url="https://server.localzet.com/">
+        <fileTransfer rootFolder="/var/www/fastuser/data/www/server.localzet.com/" accessType="SFTP" host="msk-1.net.zorin.space" port="22" sshConfigId="5eb98f9a-6078-4f63-9a93-67d9a2f79296" sshConfig="root@msk-1.net.zorin.space:22 agent" authAgent="true">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
