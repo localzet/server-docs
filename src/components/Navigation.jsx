@@ -241,9 +241,9 @@ export const navigation = [
     {
         title: 'API Reference',
         links: [
-            {title: 'Server', href: '/api/server'},
-            {title: 'Connection', href: '/api/connection'},
-            {title: 'Timer', href: '/api/timer'},
+            {title: 'Server', href: '/api-ref/server'},
+            {title: 'Connection', href: '/api-ref/connection'},
+            {title: 'Timer', href: '/api-ref/timer'},
         ],
     },
     {
