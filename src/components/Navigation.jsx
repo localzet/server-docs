@@ -226,16 +226,44 @@ export const navigation = [
             {title: 'SSE', href: '/http/SSE'},
         ],
     },
-    // {
-    //   title: 'Resources',
-    //   links: [
-    //     { title: 'Contacts', href: '/contacts' },
-    //     { title: 'Conversations', href: '/conversations' },
-    //     { title: 'Messages', href: '/messages' },
-    //     { title: 'Groups', href: '/groups' },
-    //     { title: 'Attachments', href: '/attachments' },
-    //   ],
-    // },
+    {
+        title: 'Архитектура',
+        links: [
+            {title: 'Обзор архитектуры', href: '/architecture/overview'},
+            {title: 'Модель процессов', href: '/architecture/process-model'},
+            {title: 'Событийные циклы', href: '/architecture/event-loops'},
+            {title: 'Обработка соединений', href: '/architecture/connections'},
+            {title: 'Протоколы', href: '/architecture/protocols'},
+            {title: 'Производительность', href: '/architecture/performance'},
+            {title: 'Безопасность', href: '/architecture/security'},
+        ],
+    },
+    {
+        title: 'API Reference',
+        links: [
+            {title: 'Server', href: '/api/server'},
+            {title: 'Connection', href: '/api/connection'},
+            {title: 'Timer', href: '/api/timer'},
+        ],
+    },
+    {
+        title: 'Продвинутые темы',
+        links: [
+            {title: 'Масштабирование', href: '/advanced/scaling'},
+            {title: 'Развертывание', href: '/advanced/deployment'},
+            {title: 'Решение проблем', href: '/advanced/troubleshooting'},
+            {title: 'Лучшие практики', href: '/advanced/best-practices'},
+        ],
+    },
+    {
+        title: 'Исследования',
+        links: [
+            {title: 'Обзор исследований', href: '/research'},
+            {title: 'Научные концепции', href: '/research/concepts'},
+            {title: 'Бенчмарки', href: '/research/benchmarks'},
+            {title: 'Сравнение', href: '/research/comparison'},
+        ],
+    },
 ]
 
 export function Navigation(props) {
