@@ -55,6 +55,7 @@ export default function App({Component, pageProps}) {
                 <meta property="og:locale" content="ru_RU"/>
                 <meta property="og:type" content={router.pathname === '/' ? 'website' : 'article'}/>
                 <meta property="og:url" content={`https://server.localzet.com${router.asPath}`}/>
+                <meta property="og:site" content="Localzet Server Documentation"/>
                 <meta property="og:site_name" content="Localzet Server Documentation"/>
                 <meta property="og:title"
                       content={(pageProps.pageTitle ?? pageProps.title) ? `${pageProps.pageTitle ?? pageProps.title} - Localzet Server` : 'Localzet Server - Высокопроизводительный асинхронный PHP сервер'}/>
@@ -71,12 +72,15 @@ export default function App({Component, pageProps}) {
                 <meta name="twitter:card" content="summary_large_image"/>
                 <meta name="twitter:creator" content="@localzet"/>
                 <meta name="twitter:site" content="@localzet"/>
+                <meta name="twitter:site_name" content="Localzet Server"/>
                 <meta name="twitter:url" content={`https://server.localzet.com${router.asPath}`}/>
                 <meta name="twitter:title"
                       content={(pageProps.pageTitle ?? pageProps.title) ? `${pageProps.pageTitle ?? pageProps.title} - Localzet Server` : 'Localzet Server - Высокопроизводительный асинхронный PHP сервер'}/>
                 <meta name="twitter:description"
                       content={pageProps.description ?? 'Localzet Server — высокопроизводительный асинхронный event-driven сервер для PHP. Полная документация по архитектуре, установке и разработке.'}/>
                 <meta name="twitter:image"
+                      content={`https://cover.pr-cy.io/api/og?logo=${encodeURIComponent('https://server.localzet.com/favicon.png')}&bgColor=0f172a&color=E6E7E8&title=${encodeURIComponent(pageProps.title ?? 'Localzet Server')}&category=${encodeURIComponent('Документация - Localzet Server')}`}/>
+                <meta name="twitter:image:src"
                       content={`https://cover.pr-cy.io/api/og?logo=${encodeURIComponent('https://server.localzet.com/favicon.png')}&bgColor=0f172a&color=E6E7E8&title=${encodeURIComponent(pageProps.title ?? 'Localzet Server')}&category=${encodeURIComponent('Документация - Localzet Server')}`}/>
                 <meta name="twitter:image:alt" content={`${pageProps.pageTitle ?? pageProps.title ?? 'Localzet Server'} - Документация`}/>
 
@@ -99,7 +103,7 @@ export default function App({Component, pageProps}) {
                 <meta name="application-name" content="Localzet Server"/>
                 <meta name="subject"
                       content="Localzet Server — высокопроизводительный асинхронный event-driven сервер для PHP с поддержкой WebSocket, HTTP, TCP/UDP протоколов, Master-Worker архитектурой и многопроцессорностью"/>
-                <meta name="generator" content="Next.js 15"/>
+                <meta name="generator" content="Zorin Docs"/>
                 <meta name="category" content="Software, Programming, PHP, Server, Async, WebSocket"/>
 
                 {/* Theme */}
