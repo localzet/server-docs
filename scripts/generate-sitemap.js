@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Ivan Zorin <creator@localzet.com>
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Source: https://github.com/localzet/server-docs
+
 const fs = require('fs');
 const path = require('path');
 
@@ -112,3 +116,8 @@ function main() {
 
 main();
 
+
+const exportDirectory = path.join(__dirname, '../out');
+if (fs.existsSync(exportDirectory)) {
+    fs.copyFileSync(OUTPUT_FILE, path.join(exportDirectory, 'sitemap.xml'));
+}

@@ -132,7 +132,7 @@ ID таймера.
 ```php
 // Heartbeat каждые 30 секунд
 $heartbeatId = Timer::repeat(30.0, function() use ($connection) {
-    $connection->sendPing();
+    $connection->send('ping');
 });
 
 // Остановка heartbeat
@@ -255,11 +255,13 @@ $server->onMessage = function(TcpConnection $connection, $data) {
 
 ### Пример 2: Heartbeat для соединений
 
+Здесь `ping` — сообщение прикладного протокола, которое должен понимать клиент. Это не WebSocket control frame. Метод `sendPing()` в `TcpConnection` отсутствует.
+
 ```php
 $server->onConnect = function(TcpConnection $connection) {
     // Создание heartbeat таймера
     $connection->context->heartbeatTimer = Timer::repeat(30.0, function() use ($connection) {
-        if (!$connection->sendPing()) {
+        if (!$connection->send('ping')) {
             // Не удалось отправить - закрываем соединение
             Timer::del($connection->context->heartbeatTimer);
             $connection->close();

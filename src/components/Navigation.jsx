@@ -1,4 +1,8 @@
-import {useRef} from 'react'
+// SPDX-FileCopyrightText: 2026 Ivan Zorin <creator@localzet.com>
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Source: https://github.com/localzet/server-docs
+
+import {useState} from 'react'
 import Link from 'next/link'
 import {useRouter} from 'next/router'
 import clsx from 'clsx'
@@ -9,7 +13,7 @@ import {Tag} from '@/components/Tag'
 import {remToPx} from '@/lib/remToPx'
 
 function useInitialValue(value, condition = true) {
-    let initialValue = useRef(value).current
+    let [initialValue] = useState(() => value)
     return condition ? initialValue : value
 }
 

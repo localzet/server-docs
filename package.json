@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node scripts/generate-sitemap.js",
+    "build": "next build",
     "postbuild": "node scripts/generate-sitemap.js",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint src scripts --max-warnings=0",
     "sitemap": "node scripts/generate-sitemap.js"
   },
   "browserslist": "defaults, not ie <= 11",
@@ -16,7 +16,7 @@
     "@headlessui/react": "^1.7.13",
     "@mdx-js/loader": "^2.1.5",
     "@mdx-js/react": "^2.1.5",
-    "@next/mdx": "^13.0.3",
+    "@next/mdx": "15.5.27",
     "@sindresorhus/slugify": "^2.1.1",
     "@tailwindcss/typography": "^0.5.8",
     "acorn": "^8.8.1",
@@ -28,7 +28,7 @@
     "framer-motion": "7.8.1",
     "mdast-util-to-string": "^3.1.0",
     "mdx-annotations": "^0.1.1",
-    "next": "15.4.7",
+    "next": "15.5.27",
     "postcss-focus-visible": "^6.0.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -46,10 +46,18 @@
     "zustand": "^4.3.2"
   },
   "devDependencies": {
-    "eslint": "8.26.0",
-    "eslint-config-next": "13.0.2",
+    "eslint": "8.57.1",
+    "eslint-config-next": "15.5.27",
     "prettier": "^2.8.7",
     "prettier-plugin-tailwindcss": "^0.2.6"
   },
-  "packageManager": "pnpm@9.1.0+sha512.67f5879916a9293e5cf059c23853d571beaf4f753c707f40cb22bed5fb1578c6aad3b6c4107ccb3ba0b35be003eb621a16471ac836c87beb53f9d54bb4612724"
+  "author": {
+    "name": "Ivan Zorin",
+    "email": "creator@localzet.com",
+    "url": "https://www.localzet.com"
+  },
+  "license": "AGPL-3.0-or-later",
+  "overrides": {
+    "postcss": "8.5.29"
+  }
 }
