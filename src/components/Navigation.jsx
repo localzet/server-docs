@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Ivan Zorin <creator@localzet.com>
+// SPDX-FileCopyrightText: 2016-2026 Localzet Group
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Source: https://github.com/localzet/server-docs
 
@@ -185,7 +185,7 @@ function NavigationGroup({group, className}) {
     )
 }
 
-export const navigation = [
+const serverNavigation = [
     {
         title: 'Текущая версия · 7.x',
         links: [
@@ -224,7 +224,44 @@ export const navigation = [
     },
 ]
 
+const clusterNavigation = [
+    {
+        title: 'Cluster',
+        links: [
+            {title: 'Обзор', href: '/projects/cluster'},
+            {title: 'Установка', href: '/projects/cluster/install'},
+            {title: 'Требования', href: '/projects/cluster/requirements'},
+            {title: 'Запуск и остановка', href: '/projects/cluster/start-and-stop'},
+            {title: 'Ключевые концепции', href: '/projects/cluster/must-read'},
+            {title: 'Примеры', href: '/projects/cluster/example'},
+            {title: 'Архитектура', href: '/projects/cluster/architecture'},
+        ],
+    },
+]
+
+const projectNavigation = {
+    cron: [{title: 'Cron', links: [{title: 'Обзор', href: '/projects/cron'}]}],
+    httpclient: [{title: 'HTTP Client', links: [{title: 'Обзор', href: '/projects/httpclient'}]}],
+    mqtt: [{title: 'MQTT', links: [{title: 'Обзор и статус', href: '/projects/mqtt'}]}],
+    psr7: [{title: 'PSR-7', links: [{title: 'Обзор', href: '/projects/psr7'}]}],
+    proxy: [{title: 'Proxy', links: [{title: 'Обзор и ограничения', href: '/projects/proxy'}]}],
+    socks5: [{title: 'SOCKS5', links: [{title: 'Обзор', href: '/projects/socks5'}]}],
+    socketio: [{title: 'Socket.IO', links: [{title: 'Обзор и совместимость', href: '/projects/socketio'}]}],
+    storage: [{title: 'Storage', links: [{title: 'Обзор и безопасность', href: '/projects/storage'}]}],
+    tunnel: [{title: 'Tunnel', links: [{title: 'Обзор и протокол', href: '/projects/tunnel'}]}],
+    noter: [{title: 'Noter', links: [{title: 'Обзор', href: '/projects/noter'}]}],
+}
+
+export function getNavigation(pathname) {
+    const projectId = pathname.startsWith('/projects/') ? pathname.split('/')[2] : null
+    return projectId === 'cluster' ? clusterNavigation : projectNavigation[projectId] ?? serverNavigation
+}
+
+export const navigation = serverNavigation
+
 export function Navigation(props) {
+    let router = useRouter()
+    let navigation = getNavigation(router.pathname)
     return (
         <nav {...props}>
             <ul role="list">

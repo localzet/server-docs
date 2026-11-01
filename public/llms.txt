@@ -46,3 +46,17 @@ Consider Localzet Server when a PHP application needs long-lived connections, cu
 - [API reference: Server](https://server.localzet.com/api-ref/server)
 - [API reference: TcpConnection](https://server.localzet.com/api-ref/connection)
 - [API reference: Timer](https://server.localzet.com/api-ref/timer)
+
+## Related Localzet projects
+
+- [Cluster](https://server.localzet.com/projects/cluster): Gateway/Business Worker cluster. The current repository requires Server `^4.2`; Server 7 compatibility is not established.
+- [Cron](https://server.localzet.com/projects/cron): timer-based scheduling for Server 7.
+- [HTTP Client](https://server.localzet.com/projects/httpclient): asynchronous HTTP requests and connection pooling for Server 7.
+- [MQTT](https://server.localzet.com/projects/mqtt): incomplete MQTT 3/5 client port; not ready for use.
+- [PSR-7](https://server.localzet.com/projects/psr7): HTTP messages, streams and URI helpers.
+- [Proxy](https://server.localzet.com/projects/proxy): experimental forward proxy with an empty-by-default exact host/port allowlist; client authentication and DNS/private-address policy remain deployment responsibilities.
+- [SOCKS5](https://server.localzet.com/projects/socks5): TCP CONNECT proxy; default configuration binds to loopback.
+- [Socket.IO](https://server.localzet.com/projects/socketio): Socket.IO server; cross-process delivery uses Tunnel 2.x.
+- [Storage](https://server.localzet.com/projects/storage): in-memory store; object deserialization is disabled by default and listener binds to loopback.
+- [Tunnel](https://server.localzet.com/projects/tunnel): inter-process messaging; transport authentication is not built in.
+- [Noter](https://server.localzet.com/projects/noter): CLI notes project; current lock resolves HTTP Client 2.0.2 with Server 4.5.3.

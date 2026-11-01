@@ -1,0 +1,12 @@
+export const pageTitle = 'Localzet HTTP Client'
+export const description = 'Асинхронный HTTP-клиент для Localzet Server 7 с повторным использованием соединений.'
+
+# Localzet HTTP Client
+
+HttpClient выполняет HTTP-запросы из event loop Localzet Server и предоставляет connection pooling. В текущей версии зависимость Server ограничена `^7.0`, а библиотека PSR-7 устанавливается в совместимой версии из Composer lock.
+
+```sh
+composer require localzet/http
+```
+
+Пакет требует PHP 8.0+, расширения cURL и JSON. Его README не задаёт проектной команды тестов; перед эксплуатацией проверяйте реальные запросы, TLS, редиректы, таймауты, ошибки и закрытие соединений в целевом приложении.

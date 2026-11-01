@@ -6,6 +6,22 @@ import {Logo} from '@/components/Logo'
 import {MobileNavigation, useIsInsideMobileNavigation, useMobileNavigationStore,} from '@/components/MobileNavigation'
 import {ModeToggle} from '@/components/ModeToggle'
 import {MobileSearch, Search} from '@/components/Search'
+import {useRouter} from 'next/router'
+
+const projects = [
+    {id: 'server', title: 'Server', href: '/'},
+    {id: 'cluster', title: 'Cluster', href: '/projects/cluster'},
+    {id: 'cron', title: 'Cron', href: '/projects/cron'},
+    {id: 'httpclient', title: 'HTTP Client', href: '/projects/httpclient'},
+    {id: 'mqtt', title: 'MQTT', href: '/projects/mqtt'},
+    {id: 'psr7', title: 'PSR-7', href: '/projects/psr7'},
+    {id: 'proxy', title: 'Proxy', href: '/projects/proxy'},
+    {id: 'socks5', title: 'SOCKS5', href: '/projects/socks5'},
+    {id: 'socketio', title: 'Socket.IO', href: '/projects/socketio'},
+    {id: 'storage', title: 'Storage', href: '/projects/storage'},
+    {id: 'tunnel', title: 'Tunnel', href: '/projects/tunnel'},
+    {id: 'noter', title: 'Noter', href: '/projects/noter'},
+]
 
 function TopLevelNavItem({href, children}) {
     return (
@@ -21,6 +37,8 @@ function TopLevelNavItem({href, children}) {
 }
 
 export const Header = forwardRef(function Header({className}, ref) {
+    let router = useRouter()
+    let currentProject = router.pathname.startsWith('/projects/') ? router.pathname.split('/')[2] : 'server'
     let {isOpen: mobileNavIsOpen} = useMobileNavigationStore()
     let isInsideMobileNavigation = useIsInsideMobileNavigation()
 
@@ -61,13 +79,35 @@ export const Header = forwardRef(function Header({className}, ref) {
             </div>
             <div className="flex items-center gap-5">
                 <nav className="hidden md:block">
-                    <ul role="list" className="flex items-center gap-8">
-                        <TopLevelNavItem href="https://cluster.localzet.com/">Cluster</TopLevelNavItem>
-                        <TopLevelNavItem href="https://triangle.localzet.com/">Triangle</TopLevelNavItem>
+                    <ul role="list" className="flex max-w-[min(70vw,52rem)] items-center gap-1 overflow-x-auto">
+                        {projects.map((project) => (
+                            <li key={project.id}>
+                                <Link
+                                    href={project.href}
+                                    aria-current={currentProject === project.id ? 'page' : undefined}
+                                    className={clsx(
+                                            'whitespace-nowrap rounded-md px-2 py-1.5 text-sm transition',
+                                        currentProject === project.id
+                                            ? 'bg-slate-900/5 text-slate-900 dark:bg-white/10 dark:text-white'
+                                            : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                                    )}
+                                >
+                                    {project.title}
+                                </Link>
+                            </li>
+                        ))}
                     </ul>
                 </nav>
                 <div className="hidden md:block md:h-5 md:w-px md:bg-slate-900/10 md:dark:bg-white/15"/>
                 <div className="flex gap-4">
+                    <select
+                        aria-label="Выбрать проект"
+                        className="max-w-28 rounded-md border border-slate-900/10 bg-transparent px-2 text-xs text-slate-700 dark:border-white/10 dark:text-slate-300 md:hidden"
+                        value={currentProject}
+                        onChange={(event) => router.push(projects.find((project) => project.id === event.target.value)?.href ?? '/')}
+                    >
+                        {projects.map((project) => <option key={project.id} value={project.id}>{project.title}</option>)}
+                    </select>
                     <MobileSearch/>
                     <ModeToggle/>
                 </div>

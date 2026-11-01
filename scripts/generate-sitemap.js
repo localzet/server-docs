@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Ivan Zorin <creator@localzet.com>
+// SPDX-FileCopyrightText: 2016-2026 Localzet Group
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Source: https://github.com/localzet/server-docs
 
@@ -12,7 +12,7 @@ const OUTPUT_FILE = path.join(__dirname, '../public/sitemap.xml');
 // Исключаем специальные файлы Next.js
 const EXCLUDE_FILES = ['_app.jsx', '_document.jsx', '_error.jsx'];
 const EXCLUDE_PATTERNS = ['_app', '_document', '_error', '404', '500'];
-const CURRENT_PAGE_PREFIXES = ['current/', 'api-ref/'];
+const CURRENT_PAGE_PREFIXES = ['current/', 'api-ref/', 'projects/'];
 const CURRENT_RESEARCH_PAGES = new Set(['research/benchmarks.mdx', 'research/comparison.mdx']);
 
 /**

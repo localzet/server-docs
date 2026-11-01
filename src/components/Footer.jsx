@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Ivan Zorin <creator@localzet.com>
+// SPDX-FileCopyrightText: 2016-2026 Localzet Group
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Source: https://github.com/localzet/server-docs
 
@@ -8,7 +8,7 @@ import {useRouter} from 'next/router'
 import {Transition} from '@headlessui/react'
 
 import {Button} from '@/components/Button'
-import {navigation} from '@/components/Navigation'
+import {getNavigation} from '@/components/Navigation'
 
 function CheckIcon(props) {
     return (
@@ -132,6 +132,7 @@ function PageLink({label, page, previous = false}) {
 
 function PageNavigation() {
     let router = useRouter()
+    let navigation = getNavigation(router.pathname)
     let allPages = navigation.flatMap((group) => group.links)
     let currentPageIndex = allPages.findIndex(
         (page) => page.href === router.pathname
@@ -209,7 +210,7 @@ function SmallPrint() {
         <div
             className="flex flex-col items-center justify-between gap-5 border-t border-slate-900/5 pt-8 dark:border-white/5 sm:flex-row">
             <p className="text-xs text-slate-600 dark:text-slate-400">
-                Copyright &copy; {new Date().getFullYear()} <a className="hover:text-sky-600 dark:hover:text-sky-400" href="https://www.localzet.com">Localzet Group</a>.
+                Copyright © 2016-2026 <a className="hover:text-sky-600 dark:hover:text-sky-400" href="https://www.localzet.com/">Localzet Group</a>. All rights reserved.
             </p>
             <div className="flex gap-4">
                 <SocialLink href="https://x.com/localzet" icon={TwitterIcon}>

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Ivan Zorin <creator@localzet.com>
+// SPDX-FileCopyrightText: 2016-2026 Localzet Group
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Source: https://github.com/localzet/server-docs
 
@@ -7,7 +7,7 @@ import {useRouter} from 'next/router'
 import {createAutocomplete} from '@algolia/autocomplete-core'
 import {Dialog, Transition} from '@headlessui/react'
 import clsx from 'clsx'
-import {navigation} from '@/components/Navigation'
+import {getNavigation} from '@/components/Navigation'
 import Highlighter from 'react-highlight-words'
 
 function subscribeToPlatform() {
@@ -134,6 +134,8 @@ function SearchResult({
                           query,
                       }) {
     let id = useId()
+    let router = useRouter()
+    let navigation = getNavigation(router.pathname)
 
     let sectionTitle = navigation.find((section) =>
         section.links.find((link) => link.href === result.url.split('#')[0])

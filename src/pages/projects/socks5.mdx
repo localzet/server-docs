@@ -1,0 +1,10 @@
+export const pageTitle = 'Localzet SOCKS5'
+export const description = 'SOCKS5 TCP CONNECT proxy для Localzet Server 7 с loopback binding по умолчанию.'
+
+# Localzet SOCKS5
+
+SOCKS5 TCP CONNECT proxy поддерживает IPv4 назначения и DNS имена. Поставка по умолчанию слушает loopback, требует логин и пароль, а явный anonymous режим разрешён только на loopback. UDP ASSOCIATE отключён; BIND и IPv6 назначения не реализованы.
+
+Credentials передаются по протоколу открытым текстом. Используйте доверенную сеть или внешний защищённый туннель. DNS lookup блокирует worker, поэтому задержки resolver влияют на event loop. Одновременные подключения ограничиваются глобально и на IP, а частота попыток на IP — скользящим окном.
+
+Python integration tests запускают локальный сервер и проверяют TCP relay, аутентификацию, отключённый UDP, глобальный и per-IP пределы одновременных подключений и лимит попыток. Они не проверяют UDP, IPv6, DNS latency или production нагрузку.

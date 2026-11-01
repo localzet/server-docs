@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Ivan Zorin <creator@localzet.com>
+// SPDX-FileCopyrightText: 2016-2026 Localzet Group
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Source: https://github.com/localzet/server-docs
 
@@ -63,14 +63,14 @@ export default function withSearch(nextConfig = {}) {
                         let files = glob.sync('**/*.mdx', {cwd: pagesDir})
                         files = files.filter((file) =>
                             file === 'index.mdx' ||
+                            file.startsWith('projects/') ||
                             file.startsWith('current/') ||
                             file.startsWith('api-ref/') ||
                             file === 'research/benchmarks.mdx' ||
                             file === 'research/comparison.mdx'
                         )
                         let data = files.map((file) => {
-                            let url =
-                                file === 'index.mdx' ? '/' : `/${file.replace(/\.mdx$/, '')}`
+                            let url = file === 'index.mdx' ? '/' : `/${file.replace(/\.mdx$/, '')}`
                             let mdx = fs.readFileSync(path.join(pagesDir, file), 'utf8')
 
                             let sections = []

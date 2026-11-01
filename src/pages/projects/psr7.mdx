@@ -1,0 +1,12 @@
+export const pageTitle = 'Localzet PSR-7'
+export const description = 'PSR-7 HTTP messages, streams, URI и request helpers для Localzet Server 7.'
+
+# Localzet PSR-7
+
+Пакет предоставляет HTTP message и stream реализации, URI helpers и адаптер server request. Текущий манифест требует PHP 8.2+, `psr/http-message:^2.0` и `localzet/server:^7.0`.
+
+```sh
+composer require localzet/psr7
+```
+
+Установка и автозагрузка сами по себе не подтверждают PSR-7 conformance. Для полноценной проверки нужны тесты immutability, потоков, URI encoding, multipart uploads и interop с другими реализациями.

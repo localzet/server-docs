@@ -19,9 +19,9 @@ Open http://localhost:3000 during development. Build output is `out/`; the postb
 
 ## Documentation scope
 
-The current handbook describes the Server 7.x development version and is written primarily in Russian. It covers installation, runtime lifecycle, event loops, protocols, HTTP, sessions, gateway behavior, security, operations and testing. The compatibility page compares a previous release source tag with the current `main` branch. The API reference is based on the source tree linked above; it is not a promise that every class has a generated reference page.
+The Server handbook describes the 7.x development version. The project switcher also provides separate documentation areas for Cluster, Cron, HTTP Client, MQTT, PSR-7, Proxy, SOCKS5, Socket.IO, Storage, Tunnel and Noter. Each area has its own sidebar, search results, project metadata and compatibility notes.
 
-Pages outside the current handbook and API reference are retained as an archive. They carry an archive notice, are excluded from the current search index and sitemap, and may contain obsolete examples. The site is not fully bilingual.
+Older pages remain in the archive, carry an archive notice, and are excluded from the search index and sitemap. The site is primarily Russian and is not fully bilingual. Related-project pages reflect the checked out source and Composer lock state; they do not imply production readiness or unverified runtime behavior.
 
 ## Source layout
 
@@ -35,4 +35,4 @@ CI builds and lints the site on pushes and pull requests. GitHub Pages deploymen
 
 ## Author and license
 
-Ivan Zorin (`localzet`), <creator@localzet.com>, https://www.localzet.com. Copyright © 2026 Localzet Group for its contributions. GNU AGPL v3 or later, see [LICENSE](LICENSE). Original attribution and third-party licenses remain applicable; [.github/AUTHORS.md](.github/AUTHORS.md).
+Copyright © 2016-2026 [Localzet Group](https://www.localzet.com/). All rights reserved. GNU AGPL v3 or later, see [LICENSE](LICENSE). Original attribution and third-party licenses remain applicable; [.github/AUTHORS.md](.github/AUTHORS.md).
