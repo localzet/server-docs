@@ -44,7 +44,7 @@ const RELATED_PROJECTS = {
     psr7: ['Localzet PSR-7', 'PSR-7 HTTP message objects, streams and URI utilities for Server 7.', 'https://github.com/localzet/PSR-7'],
     proxy: ['Localzet Proxy', 'Experimental HTTP forward proxy with an empty-by-default exact host and port allowlist. Client authentication and DNS/private-address policy remain deployment responsibilities.', 'https://github.com/localzet/Proxy'],
     socks5: ['Localzet SOCKS5', 'SOCKS5 TCP CONNECT proxy for Localzet Server with loopback-first configuration.', 'https://github.com/localzet/SOCKS5'],
-    socketio: ['Localzet Socket.IO', 'Socket.IO server implementation with Server 7 protocol adapter and Tunnel-based cross-process delivery.', 'https://github.com/localzet/SocketIO'],
+    socketio: ['Localzet Socket.IO', 'Socket.IO server implementation with a Server 7 protocol adapter. Cross-process Tunnel delivery requires an unpublished Server 7-compatible Tunnel release.', 'https://github.com/localzet/SocketIO'],
     storage: ['Localzet Storage', 'Client/server shared in-memory store for Localzet Server. Object deserialization is disabled by default.', 'https://github.com/localzet/Storage'],
     tunnel: ['Localzet Tunnel', 'Client/server messaging channel for Localzet Server processes.', 'https://github.com/localzet/Tunnel'],
     noter: ['Noter', 'Command-line utility for creating and managing notes; it uses Localzet HTTP Client transitively.', 'https://github.com/localzet/Noter'],
