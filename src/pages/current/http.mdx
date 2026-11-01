@@ -1,0 +1,58 @@
+export const pageTitle = 'HTTP, запросы и ответы'
+
+# HTTP, запросы и ответы
+
+HTTP listener (`http://` или `https://`) реализует HTTP/1.x. `onMessage` получает `TcpConnection` и объект `Request`. TCP pipelining и keep-alive обрабатывает транспортный слой; ошибки framing не передаются приложению как обычный запрос.
+
+## Пример обработчика
+
+```php
+use localzet\Server;
+use localzet\Server\Connection\TcpConnection;
+use localzet\Server\Protocols\Http\Request;
+use localzet\Server\Protocols\Http\Response;
+
+$server = new Server('http://127.0.0.1:8080');
+$server->onMessage = static function (TcpConnection $connection, Request $request): void {
+    $name = (string) $request->get('name', 'world');
+    $connection->send(new Response(200, [
+        'Content-Type' => 'text/plain; charset=utf-8',
+    ], 'Hello, ' . $name));
+};
+```
+
+`Request` предоставляет `method()`, `path()`, `uri()`, `queryString()`, `header()`, `cookie()`, `get()`, `post()`, `json()`, `file()` и `rawBody()`. Внешний ввод остаётся недоверенным: валидируйте и авторизуйте его в приложении.
+
+## Ответы и файлы
+
+`Response` принимает status, headers и body. Для условных запросов и одиночного byte range используйте `withFileForRequest($request, $path)`: метод учитывает HEAD, ETag и cache validators. Файл передаётся потоком с backpressure. Multipart byte ranges в этой линии не реализованы.
+
+Компрессия по заголовку запроса задаётся явно через `withCompressionForRequest($request)`. Не включайте её без учёта размера и типа ответа.
+
+```php
+$response = (new Response(200, ['Content-Type' => 'application/json']))
+    ->withBody(json_encode(['ok' => true], JSON_THROW_ON_ERROR));
+
+$connection->send($response);
+```
+
+Заголовки ответа очищаются и проверяются сериализатором. Для HTTP/1.1 запросов обязателен один корректный `Host`. Parser отклоняет дубли `Content-Length`, сочетание `Transfer-Encoding` и `Content-Length`, неподдерживаемые transfer codings и некорректное framing.
+
+## Server-Sent Events
+
+`ServerSentEvents` сериализует одно событие; он не управляет авторизацией, reconnect policy или долговременным состоянием клиента. Для долгоживущего соединения настройте таймауты и лимиты приложения и обрабатывайте закрытие клиента.
+
+```php
+use localzet\Server\Protocols\Http\Response;
+use localzet\Server\Protocols\Http\ServerSentEvents;
+
+$event = new ServerSentEvents(data: ['status' => 'ready'], event: 'state', id: '42');
+$connection->send(new Response(200, [
+    'Content-Type' => 'text/event-stream; charset=utf-8',
+    'Cache-Control' => 'no-cache',
+], (string) $event));
+```
+
+Для больших upload задайте `Http::uploadTmpDir()` на существующий writable каталог с подходящими правами. Настройки `maxHeaderLength()` и `maxHeaderCount()` задают общие пределы HTTP parser-а; сверяйте их с лимитами `TcpConnection` и максимальным размером сообщения.
+
+Сессии описаны отдельно в [руководстве по HTTP sessions](/current/sessions).

@@ -1,0 +1,68 @@
+export const pageTitle = 'TCP proxy и HTTP gateway'
+
+# TCP proxy и HTTP gateway
+
+В `src/Proxy` и `src/Gateway` есть два отдельных компонента. Оба подключаются к raw TCP `Server` без application protocol; gateway сам обрабатывает только HTTP/1.x framing.
+
+## Общий пул upstream
+
+`UpstreamPool` поддерживает weighted round-robin, least-connections и random selection, пассивное quarantine после ошибок и восстановление после успешной проверки соединения.
+
+```php
+use localzet\Server\Gateway\HttpReverseProxy;
+use localzet\Server\Gateway\HttpRoute;
+use localzet\Server\Proxy\UpstreamPool;
+
+$pool = new UpstreamPool(
+    ['tcp://10.0.0.10:8080', 'tcp://10.0.0.11:8080'],
+    UpstreamPool::ROUND_ROBIN,
+    failureThreshold: 2,
+    quarantineSeconds: 5.0,
+);
+```
+
+`UpstreamPool` принимает TCP URI, например `tcp://host:port`; URI и адреса upstream задаются конфигурацией приложения.
+
+## HTTP/1.x reverse proxy
+
+```php
+use localzet\Server;
+use localzet\Server\Gateway\HttpReverseProxy;
+use localzet\Server\Gateway\HttpRoute;
+
+$gateway = (new HttpReverseProxy())
+    ->setConnectTimeout(2.0)
+    ->setMaxHeaderSize(32 * 1024)
+    ->route(new HttpRoute(
+        pool: $pool,
+        host: 'api.example.test',
+        pathPrefix: '/api/',
+        rewritePrefix: '/v1/',
+    ));
+
+$server = new Server('tcp://0.0.0.0:8080');
+$gateway->attach($server);
+Server::runAll();
+```
+
+Маршрут сопоставляет Host и prefix пути. Поддерживаются streaming request/response body, Content-Length, chunked transfer, keep-alive и WebSocket Upgrade tunneling. Gateway обрабатывает один in-flight запрос на клиентское соединение: pipelined bytes буферизуются, следующий запрос отправляется после ответа.
+
+Повторное подключение к другому upstream допускается до установления соединения. После connect автоматического повторного воспроизведения запроса нет: upstream мог уже обработать часть данных. В `status()` доступны runtime counters текущего worker-а; это не централизованный metrics exporter.
+
+## Raw TCP proxy
+
+```php
+use localzet\Server;
+use localzet\Server\Proxy\TcpProxy;
+
+$proxy = new TcpProxy($pool, connectTimeout: 2.0);
+$server = new Server('tcp://0.0.0.0:9000');
+$proxy->attach($server);
+Server::runAll();
+```
+
+TCP proxy передаёт bytes как есть и использует backpressure. Listener должен оставаться raw TCP, без другого `Server::$protocol`.
+
+## Границы и безопасность
+
+Здесь нет HTTP/2/3, TLS termination management, cache, service discovery, circuit-breaker API, rate limiter или access-control policy. Используйте фиксированный allowlist upstream-ов; не строите upstream URI из пользовательского запроса. Ограничьте доступ к listener-у сетевыми правилами и настройте timeout/лимит соединений на приложении и edge proxy.

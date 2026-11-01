@@ -187,63 +187,26 @@ function NavigationGroup({group, className}) {
 
 export const navigation = [
     {
-        title: 'Введение',
+        title: 'Линия 7.x · актуальная',
         links: [
-            {title: 'Обзор', href: '/'},
-            {title: 'Преимущества', href: '/features'},
-            {title: 'Принцип работы', href: '/principle'},
-            {title: 'Примеры использования', href: '/example'},
-        ],
-    },
-    {
-        title: 'Установка',
-        links: [
-            {title: 'Предупреждения', href: '/must-read'},
-            {title: 'Системные требования', href: '/install/requirement'},
-            {title: 'Установка и настройка', href: '/install/install'},
-            {title: 'Запуск и управление', href: '/install/start-and-stop'},
-        ],
-    },
-    {
-        title: 'Разработка',
-        links: [
-            // { title: 'Перед началом', href: '/development/before' },
-            {title: 'Структура', href: '/development/structure'},
-            {title: 'Основной процесс', href: '/development/process'},
-            // { title: 'Рекомендации', href: '/development/standard' },
-        ],
-    },
-    {
-        title: 'Протоколы',
-        links: [
-            {title: 'Что за протоколы?', href: '/protocols'},
-            {title: 'Классы протоколов', href: '/protocols/custom'},
-        ],
-    },
-    {
-        title: 'HTTP',
-        links: [
-            {title: 'Запрос', href: '/http/request'},
-            {title: 'Ответ', href: '/http/response'},
-            {title: 'Сессия', href: '/http/session'},
-            {title: 'Управление сессией', href: '/http/session-control'},
-            {title: 'SSE', href: '/http/SSE'},
+            {title: 'Обзор и версия', href: '/'},
+            {title: 'Установка и первый сервер', href: '/current/start'},
+            {title: 'Совместимость', href: '/current/compatibility'},
+            {title: 'Процессы и команды', href: '/current/runtime'},
+            {title: 'Event loop и таймеры', href: '/current/event-loops'},
+            {title: 'Протоколы и framing', href: '/current/protocols'},
+            {title: 'HTTP', href: '/current/http'},
+            {title: 'Сессии', href: '/current/sessions'},
+            {title: 'Gateway и TCP proxy', href: '/current/gateway'},
+            {title: 'Безопасность', href: '/current/security'},
+            {title: 'Эксплуатация', href: '/current/operations'},
+            {title: 'Тесты и benchmark', href: '/current/testing'},
+            {title: 'Сравнение реализаций', href: '/research/comparison'},
+            {title: 'Границы benchmark', href: '/research/benchmarks'},
         ],
     },
     {
         title: 'Архитектура',
-        links: [
-            {title: 'Обзор архитектуры', href: '/architecture/overview'},
-            {title: 'Модель процессов', href: '/architecture/process-model'},
-            {title: 'Событийные циклы', href: '/architecture/event-loops'},
-            {title: 'Обработка соединений', href: '/architecture/connections'},
-            {title: 'Протоколы', href: '/architecture/protocols'},
-            {title: 'Производительность', href: '/architecture/performance'},
-            {title: 'Безопасность', href: '/architecture/security'},
-        ],
-    },
-    {
-        title: 'API Reference',
         links: [
             {title: 'Server', href: '/api-ref/server'},
             {title: 'Connection', href: '/api-ref/connection'},
@@ -251,21 +214,12 @@ export const navigation = [
         ],
     },
     {
-        title: 'Продвинутые темы',
+        title: 'Архив · справочник 4.x',
         links: [
-            {title: 'Масштабирование', href: '/advanced/scaling'},
-            {title: 'Развертывание', href: '/advanced/deployment'},
-            {title: 'Решение проблем', href: '/advanced/troubleshooting'},
-            {title: 'Лучшие практики', href: '/advanced/best-practices'},
-        ],
-    },
-    {
-        title: 'Исследования',
-        links: [
-            {title: 'Обзор исследований', href: '/research'},
-            {title: 'Научные концепции', href: '/research/concepts'},
-            {title: 'Бенчмарки', href: '/research/benchmarks'},
-            {title: 'Сравнение', href: '/research/comparison'},
+            {title: 'Установка и запуск', href: '/install/start-and-stop'},
+            {title: 'HTTP API', href: '/http/request'},
+            {title: 'Процесс и архитектура', href: '/architecture/overview'},
+            {title: 'Deployment', href: '/advanced/deployment'},
         ],
     },
 ]

@@ -1,0 +1,33 @@
+export const pageTitle = 'Проверки, benchmark и границы доказательств'
+
+# Проверки и измерения
+
+У репозитория есть PHP script-based suite. Команды и их область:
+
+| Команда | Что запускает |
+|---|---|
+| `composer run lint` | PHP syntax check файлов проекта, исключая `vendor` |
+| `composer run test` | Основные protocol/connection smoke checks |
+| `composer run analyze` | PHPStan level 0 для ядра; Swow и Mongo handler исключены из анализа |
+| `composer run test:revolt` | Revolt adapter integration |
+| `composer run test:gateway` | Gateway smoke, Host regression и локальные network integration |
+| `composer run test:fuzz` | Детерминированные malformed-input checks для HTTP/WebSocket |
+| `composer run test:memory` | Ограниченная memory regression проверка |
+| `composer run test:integration` | HTTP/HTTPS, WebSocket, lifecycle, reload, upgrade и shutdown через локальные listeners |
+| `composer run test:all` | Перечисленные runtime suite и integration tests |
+| `composer run release:audit` | Release smoke и integration script; не включает PHPStan |
+
+`test:gateway` и `test:integration` открывают локальные порты, создают процессы и временные файлы; запускайте их в разрешённой тестовой среде. Windows не входит в Linux CI интеграционное покрытие. CI matrix проверяет PHP 8.1–8.5; отдельная weekly/manual job проверяет последние допустимые dev-зависимости.
+
+## Parser benchmark
+
+`composer benchmark` запускает `tests/benchmark.php`. Он прогревает и повторно разбирает простой HTTP request через `Request`, затем выводит JSON с PHP/ОС, числом операций, временем, ops/sec и peak memory.
+
+```sh
+composer benchmark -- --smoke
+LOCALZET_BENCH_WARMUP=5000 LOCALZET_BENCH_ITERATIONS=100000 composer benchmark
+```
+
+Smoke (`100` операций) проверяет harness; это не performance result. Parser microbenchmark не измеряет socket throughput, p50/p99 latency, конкурентность, TLS, event loop load или capacity workers. Для сравнения приложений используйте отдельный нагрузочный сценарий, фиксируйте железо, ОС, PHP build/extensions, конфигурацию, прогрев и распределение запросов. В этом репозитории нет подтверждённых production QPS/connection limits или сравнительного benchmark-а с другими серверами.
+
+Benchmark result — наблюдение на одном окружении, а не гарантия для пользовательского приложения.

@@ -8,7 +8,7 @@ import {Navigation} from '@/components/Navigation'
 import {Prose} from '@/components/Prose'
 import {SectionProvider} from '@/components/SectionProvider'
 
-export function Layout({children, sections = []}) {
+export function Layout({children, sections = [], legacy = false}) {
     return (
         <SectionProvider sections={sections}>
             <div className="lg:ml-72 xl:ml-80">
@@ -29,6 +29,11 @@ export function Layout({children, sections = []}) {
                 </motion.header>
                 <div className="relative px-4 pt-14 sm:px-6 lg:px-8">
                     <main className="py-16">
+                        {legacy && (
+                            <aside className="mb-8 rounded-2xl border border-amber-500/30 bg-amber-50 p-4 text-sm leading-6 text-amber-950 dark:bg-amber-500/10 dark:text-amber-100" role="note">
+                                <strong>Архивный материал для API 4.x.</strong> Эта страница не сверялась с веткой 7.x и может содержать устаревшие сигнатуры и команды. Откройте <Link href="/">актуальную документацию 7.x</Link>.
+                            </aside>
+                        )}
                         <Prose as="article">{children}</Prose>
                     </main>
                     <Footer/>

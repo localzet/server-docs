@@ -1,0 +1,59 @@
+export const pageTitle = 'Протоколы и границы сообщений'
+
+# Протоколы и границы сообщений
+
+TCP переносит поток байтов и сам по себе не сохраняет границы вызовов `send()`. Протокол сервера определяет, когда накопленных данных достаточно для одного сообщения, а затем передаёт сообщение в `onMessage`.
+
+| Listener URI | Протокол |
+|---|---|
+| `tcp://host:port` | Raw TCP; приложению или gateway нужно задать framing |
+| `udp://host:port` | Datagram-сообщения |
+| `http://host:port` | HTTP/1.x |
+| `https://host:port` | HTTP/1.x поверх TLS stream context |
+| `websocket://host:port` | WebSocket поверх HTTP Upgrade |
+
+Ветка реализует HTTP/1.x, не HTTP/2 или HTTP/3. TLS требует корректных сертификата и ключа в stream context или завершения TLS на доверенном reverse proxy.
+
+## Пользовательский TCP-протокол
+
+Реализуйте `ProtocolInterface` и задайте его классу свойство `Server::$protocol`. Протокол должен уметь определить полную длину первого сообщения в буфере и декодировать его. Верните `0`/отсутствие полной длины, пока пакет не собран; не предполагайте, что один `read` равен одному сообщению.
+
+```php
+use localzet\Server;
+use localzet\Server\Connection\ConnectionInterface;
+use localzet\Server\Protocols\ProtocolInterface;
+
+final class LineProtocol implements ProtocolInterface
+{
+    public static function input(string $buffer, ConnectionInterface $connection): int
+    {
+        $end = strpos($buffer, "\n");
+        return $end === false ? 0 : $end + 1;
+    }
+
+    public static function decode(string $buffer, ConnectionInterface $connection): mixed
+    {
+        return rtrim($buffer, "\r\n");
+    }
+
+    public static function encode(mixed $message, ConnectionInterface $connection): string
+    {
+        return (string) $message . "\n";
+    }
+}
+
+$server = new Server('tcp://127.0.0.1:9000');
+$server->protocol = LineProtocol::class;
+$server->onMessage = static function (ConnectionInterface $connection, mixed $message): void {
+    $connection->send($message);
+};
+Server::runAll();
+```
+
+`input()` возвращает число байтов первого полного пакета либо `0`, если его пока недостаточно. `decode()` получает ровно этот пакет, а `encode()` формирует wire bytes. Для пользовательского протокола обязательно тестируйте частичные чтения, несколько сообщений в одном буфере, oversized frame, malformed input и разрыв соединения.
+
+## WebSocket
+
+WebSocket listener обрабатывает HTTP Upgrade, маскированные клиентские frames, fragmentation и close handshake. При graceful остановке сервер отправляет close code 1001 открытым соединениям. Прикладные callback-и доступны через `onWebSocketConnect`, `onWebSocketConnected`, `onWebSocketPing`, `onWebSocketPong` и `onWebSocketClose`.
+
+См. [HTTP и обработчики сообщений](/current/http) и [архивный справочник пользовательских протоколов](/protocols/custom) только для API 4.x.

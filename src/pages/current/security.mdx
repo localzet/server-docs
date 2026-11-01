@@ -1,0 +1,44 @@
+export const pageTitle = 'Модель безопасности и границы доверия'
+
+# Модель безопасности
+
+Localzet Server предоставляет транспорт и protocol parser. Аутентификация, авторизация бизнес-операций, CSRF policy и rate limiting остаются ответственностью приложения и внешнего edge.
+
+## Что проверяет HTTP parser
+
+В текущей реализации HTTP parser:
+
+- требует один корректный `Host` для HTTP/1.1 и отклоняет дубли;
+- отклоняет конфликтующий/повторный `Content-Length`, сочетание с `Transfer-Encoding` и неподдерживаемые transfer codings;
+- проверяет request line и принимает extension methods как HTTP token;
+- ограничивает размер/число заголовков;
+- проверяет `Expect: 100-continue` и обрабатывает chunked framing;
+- игнорирует forwarded client IP, если удалённый peer не входит в `Request::$trustedProxies`.
+
+Эти проверки защищают границы парсера, но не валидируют параметры, права пользователя или содержимое приложения.
+
+## Доверенные proxy
+
+Не добавляйте `*` в `Request::$trustedProxies`, если перед сервисом могут подключаться недоверенные клиенты. Укажите точные IP/CIDR балансировщиков, ограничьте listener сетевым уровнем и только тогда используйте forwarded headers.
+
+```php
+use localzet\Server\Protocols\Http\Request;
+
+Request::$trustedProxies = ['10.20.0.0/16', '127.0.0.1'];
+```
+
+Проверяйте, что edge перезаписывает входящие `Forwarded`/`X-Forwarded-*`, а не доверяет произвольным значениям клиента.
+
+## Worker и привилегии
+
+На Unix задайте непривилегированного пользователя/группу после выбора listener-ов. Дайте процессу только нужные права на сертификаты, конфигурацию, логи и session storage. Не запускайте управляющий entry file от внешнего HTTP handler-а.
+
+В worker-ах PHP-память не разделяется автоматически. Для совместного состояния используйте специально настроенное внешнее хранилище с аутентификацией и сетевыми ACL.
+
+## TLS, сессии и gateway
+
+TLS можно завершать на доверенном edge либо на listener-е с PHP stream context; проверьте сертификат, ключ, протоколы и hostname на целевом runtime. По умолчанию session cookie не гарантирует production-политику: задайте `secure`, `httpOnly`, `sameSite`, lifetime и domain по модели приложения.
+
+Gateway допускает маршрутизацию к upstream-ам из конфигурации. Держите этот список статическим или административно контролируемым, чтобы не создать SSRF-путь. Сам gateway не заменяет auth, ACL или DDoS protection.
+
+Для приватного сообщения об уязвимости используйте [security policy репозитория](https://github.com/localzet/Server/blob/main/.github/SECURITY.md).

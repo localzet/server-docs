@@ -12,9 +12,11 @@ const OUTPUT_FILE = path.join(__dirname, '../public/sitemap.xml');
 // Исключаем специальные файлы Next.js
 const EXCLUDE_FILES = ['_app.jsx', '_document.jsx', '_error.jsx'];
 const EXCLUDE_PATTERNS = ['_app', '_document', '_error', '404', '500'];
+const CURRENT_PAGE_PREFIXES = ['current/', 'api-ref/'];
+const CURRENT_RESEARCH_PAGES = new Set(['research/benchmarks.mdx', 'research/comparison.mdx']);
 
 /**
- * Рекурсивно собирает все MDX и JSX файлы из директории pages
+ * Собирает только опубликованные актуальные страницы документации
  */
 function collectPages(dir, basePath = '') {
     const pages = [];
@@ -35,6 +37,13 @@ function collectPages(dir, basePath = '') {
 
             // Обрабатываем только MDX файлы
             if (item.endsWith('.mdx')) {
+                const relativeFile = basePath ? `${basePath}/${item}` : item;
+                if (
+                    relativeFile !== 'index.mdx' &&
+                    !CURRENT_PAGE_PREFIXES.some((prefix) => relativeFile.startsWith(prefix)) &&
+                    !CURRENT_RESEARCH_PAGES.has(relativeFile)
+                ) continue;
+
                 const name = item.replace('.mdx', '');
                 
                 // index.mdx -> просто путь директории
@@ -65,8 +74,6 @@ function collectPages(dir, basePath = '') {
  * Генерирует XML sitemap
  */
 function generateSitemap(pages) {
-    const now = new Date().toISOString();
-    
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n';
     xml += '        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n';
@@ -76,7 +83,6 @@ function generateSitemap(pages) {
     for (const page of pages) {
         xml += '  <url>\n';
         xml += `    <loc>${BASE_URL}${page.url}</loc>\n`;
-        xml += `    <lastmod>${now}</lastmod>\n`;
         xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
         xml += `    <priority>${page.priority}</priority>\n`;
         xml += '  </url>\n';

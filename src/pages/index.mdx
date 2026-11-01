@@ -1,72 +1,49 @@
-import {Guides} from '@/components/Guides'
 import {HeroPattern} from '@/components/HeroPattern'
 
-export const sections = [
-    {title: 'Гайды', id: 'guides'}
-]
+export const pageTitle = 'Localzet Server — документация линии 7.x'
+export const description = 'Актуальное руководство по Localzet Server 7.x: запуск, процессы, event loop, HTTP, TCP, UDP, WebSocket, сессии и gateway.'
+export const keywords = 'Localzet Server 7.x, PHP server, PHP event loop, HTTP/1.1, WebSocket, TCP, UDP, reverse proxy'
 
-export const pageTitle = 'Localzet Server - Высокопроизводительный асинхронный PHP сервер'
-export const description = 'Localzet Server — высокопроизводительный асинхронный event-driven сервер для PHP с открытым исходным кодом. Поддержка WebSocket, HTTP, TCP/UDP протоколов. Master-Worker архитектура, многопроцессорность, долгосрочные соединения. Полная документация по установке, архитектуре и разработке приложений.'
-export const keywords = 'localzet server, localzet, асинхронный php сервер, php event-driven server, php websocket server, php async server, высокопроизводительный php, php многопроцессорность, php master-worker, php event loop, php socket server, php tcp server, php udp server, php реальное время, php чат сервер, php game server, php iot server, веб-сокеты php, асинхронное программирование php, non-blocking php, php concurrent connections, php performance, php scalability, php high performance, php event loop, php server framework'
+<HeroPattern />
 
-<HeroPattern/>
+# Localzet Server
 
-# Что такое Localzet Server?
+Документация к текущей ветке разработки **7.x**. Localzet Server — библиотека PHP для серверных приложений с долгоживущими соединениями, несколькими сетевыми протоколами и управлением worker-процессами.
 
-**Localzet Server** — это высокопроизводительный асинхронный event-driven сервер для PHP с открытым исходным кодом. В отличие от традиционных MVC фреймворков, Localzet Server представляет собой низкоуровневую и универсальную платформу, позволяющую расширить возможности PHP за пределы стандартной веб-разработки.
+Сначала важное о версиях: опубликованные пакеты **4.x** и текущая ветка **7.x** — разные линии совместимости. `composer require localzet/server` выбирает стабильный опубликованный релиз; примеры этой документации относятся к исходникам 7.x. Перед использованием сверяйте версию из `composer show localzet/server` и [таблицу совместимости](/current/compatibility).
 
-**Основные характеристики:**
-- **Асинхронная архитектура**: Event-driven модель с неблокирующим I/O
-- **Master-Worker архитектура**: Многопроцессорная обработка для максимальной производительности
-- **Множественные протоколы**: Поддержка WebSocket, HTTP/HTTPS, TCP, UDP и пользовательских протоколов
-- **Высокая производительность**: Обработка десятков тысяч одновременных соединений
-- **Масштабируемость**: Горизонтальное и вертикальное масштабирование
-- **Долгосрочные соединения**: Поддержка real-time приложений (чаты, игры, IoT)
-
-<div className="mb-16 mt-6 flex gap-3">
-    <Button href="/example" arrow="right" children="Простые примеры"/>
-    <Button href="/must-read" variant="outline" children="Ключевые особенности"/>
-    <Button href="/architecture/overview" variant="outline" children="Архитектура"/>
+<div className="not-prose my-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"><strong>HTTP/1.x и TLS</strong><p className="mb-0 mt-2 text-sm text-slate-600 dark:text-slate-300">HTTP-запросы, ответы, потоковая отдача файлов и SSE.</p></div>
+    <div className="rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"><strong>TCP, UDP, WebSocket</strong><p className="mb-0 mt-2 text-sm text-slate-600 dark:text-slate-300">Встроенные протоколы и интерфейс для пользовательского framing.</p></div>
+    <div className="rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"><strong>Event loop</strong><p className="mb-0 mt-2 text-sm text-slate-600 dark:text-slate-300">Select, Revolt, ext-event, ext-ev и явно выбранные Swoole/Swow.</p></div>
+    <div className="rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"><strong>Worker lifecycle</strong><p className="mb-0 mt-2 text-sm text-slate-600 dark:text-slate-300">Статус, graceful stop, rolling reload и Unix hot upgrade.</p></div>
 </div>
 
-## Возможности и применение Localzet Server {{ anchor: false }}
+## Как читать документацию
 
-Localzet Server выходит за рамки традиционных фреймворков, предоставляя разработчикам мощный инструментарий для создания широкого спектра высоконагруженных приложений:
+<figure className="not-prose my-8 rounded-2xl border border-slate-900/10 bg-slate-50 p-5 dark:border-white/10 dark:bg-white/5" aria-label="Путь от запуска к обработке соединения">
+  <div className="grid gap-3 text-center sm:grid-cols-4">
+    <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900"><strong>1. Запуск</strong><div className="mt-1 text-sm">Server и listener</div></div>
+    <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900"><strong>2. Приём</strong><div className="mt-1 text-sm">event loop и worker</div></div>
+    <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900"><strong>3. Framing</strong><div className="mt-1 text-sm">TCP bytes → message</div></div>
+    <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900"><strong>4. Ответ</strong><div className="mt-1 text-sm">callback и backpressure</div></div>
+  </div>
+  <figcaption className="mt-4 text-sm text-slate-600 dark:text-slate-300">Обработчик получает сообщение только после того, как выбранный протокол определил его границы.</figcaption>
+</figure>
 
-### Области применения
+## Быстрый путь
 
-- **Real-time приложения**: Мессенджеры, чаты, системы уведомлений в реальном времени
-- **IoT и устройства**: Управление и мониторинг интернет-вещей устройств
-- **Игровые серверы**: Многопользовательские игры с низкой латентностью
-- **Микросервисы**: Высокопроизводительные сервисы и API
-- **WebSocket приложения**: Интерактивные веб-приложения с двусторонней связью
-- **Управление инфраструктурой**: Мониторинг и управление серверами и сервисами
-- **Потоковая обработка данных**: Real-time обработка и трансляция данных
+- [Установка и первый сервер](/current/start)
+- [Совместимость, версии PHP и расширения](/current/compatibility)
+- [Процессы и команды управления](/current/runtime)
+- [Протоколы и framing](/current/protocols)
+- [HTTP, запросы, ответы и SSE](/current/http)
+- [Reverse proxy и TCP gateway](/current/gateway)
+- [Безопасность и production](/current/security)
+- [Тестирование и измерение производительности](/current/testing)
 
-### Технические преимущества
+## Границы реализации
 
-**Архитектура и производительность:**
-- Event Loop на базе libuv, libev, libevent или встроенного PHP event loop
-- Многопроцессорная обработка с автоматической балансировкой нагрузки
-- Неблокирующий I/O для максимальной эффективности
-- Пул соединений и переиспользование ресурсов
+Сервер реализует HTTP/1.x, TLS поверх PHP streams, WebSocket, TCP и UDP. Gateway включает raw TCP proxy и потоковый HTTP/1.x reverse proxy с WebSocket Upgrade. Он не является HTTP/2/3 ingress, API management платформой или системой service discovery. В проекте нет встроенной аутентификации приложения, rate limiter или гарантии производительности для произвольной нагрузки.
 
-**Протоколы и соединения:**
-- Поддержка HTTP/1.1, WebSocket, TCP, UDP протоколов
-- SSL/TLS шифрование для безопасной передачи данных
-- Пользовательские протоколы для специфичных задач
-- Долгосрочные соединения с механизмом heartbeat
-
-**Масштабирование и надежность:**
-- Горизонтальное масштабирование (несколько процессов)
-- Вертикальное масштабирование (тысячи соединений на процесс)
-- Автоматическое восстановление после сбоев
-- Плавный перезапуск без простоя сервиса
-
-### Для разработчиков
-
-Мы призываем разработчиков не только осваивать Localzet Server, но и активно участвовать в open-source экосистеме, создавая собственные проекты на его основе. Такой подход способствует развитию профессиональных навыков, освоению передовых практик асинхронного программирования и оптимизации производительности. Кроме того, это отличная возможность внести свой вклад в развитие PHP-сообщества и расширить горизонты применения языка в сфере высоконагруженных и распределенных систем.
-
-Множество проектов уже созданы на базе Localzet Server, включая фреймворки для разработки приложений с длительными соединениями, системы управления и мониторинга, чат-приложения и другие высоконагруженные решения.
-
-{/* <Guides/> */}
+Остальные страницы старого справочника описывают прежние версии API и помечены как архивные. Для актуального кода начинайте с раздела **Линия 7.x** в меню.

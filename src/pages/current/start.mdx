@@ -1,0 +1,67 @@
+export const pageTitle = 'Установка и первый сервер 7.x'
+
+# Установка и первый сервер
+
+Ветка 7.x — текущая линия разработки репозитория. Публичный стабильный пакет может относиться к 4.x; проверьте [различия версий](/current/compatibility), прежде чем переносить примеры.
+
+## Требования
+
+- PHP CLI 8.1 или новее;
+- `ext-json` — обязательное расширение;
+- Composer — для установки библиотеки и dev-зависимостей;
+- Unix `pcntl` и `posix` — для supervisor и нескольких worker-процессов.
+
+На Windows доступен однопроцессный режим. Дополнительные event-loop и session backends подключаются отдельно. Подробности — в [матрице совместимости](/current/compatibility).
+
+## Получить исходники ветки 7.x
+
+Чтобы запустить примеры этой документации, клонируйте репозиторий и установите зависимости:
+
+```sh
+git clone https://github.com/localzet/Server.git
+cd Server
+composer install
+```
+
+Для потребительского приложения `composer require localzet/server` выбирает стабильную опубликованную версию. Не предполагайте, что это 7.x: проверяйте установленную версию командой `composer show localzet/server`.
+
+## Минимальный HTTP-сервер
+
+Создайте `server.php`:
+
+```php
+<?php
+
+use localzet\Server;
+use localzet\Server\Connection\TcpConnection;
+use localzet\Server\Protocols\Http\Request;
+use localzet\Server\Protocols\Http\Response;
+
+require __DIR__ . '/vendor/autoload.php';
+
+$server = new Server('http://127.0.0.1:8080');
+$server->name = 'example';
+$server->onMessage = static function (TcpConnection $connection, Request $request): void {
+    $connection->send(new Response(200, [
+        'Content-Type' => 'application/json; charset=utf-8',
+    ], json_encode(['path' => $request->path()], JSON_THROW_ON_ERROR)));
+};
+
+Server::runAll();
+```
+
+Запустите и проверьте:
+
+```sh
+php server.php start
+curl -i http://127.0.0.1:8080/hello
+```
+
+Команда управления использует тот же entry file приложения. Не запускайте `start` из другого PHP-файла: в нём должны быть созданы нужные экземпляры `Server` до вызова `Server::runAll()`.
+
+## Следующие шаги
+
+- Для локального просмотра команд: `php server.php help`.
+- Для оценки возможностей event loop: `php server.php capabilities --json`.
+- Для graceful завершения отправьте `SIGTERM` процессу master либо выполните `php server.php stop -g`.
+- Для сетевого сервиса настройте bind-адрес, лимиты соединений, таймауты, пользователя процесса и TLS согласно [операционному руководству](/current/operations).

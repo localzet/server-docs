@@ -61,6 +61,13 @@ export default function withSearch(nextConfig = {}) {
                         this.addContextDependency(pagesDir)
 
                         let files = glob.sync('**/*.mdx', {cwd: pagesDir})
+                        files = files.filter((file) =>
+                            file === 'index.mdx' ||
+                            file.startsWith('current/') ||
+                            file.startsWith('api-ref/') ||
+                            file === 'research/benchmarks.mdx' ||
+                            file === 'research/comparison.mdx'
+                        )
                         let data = files.map((file) => {
                             let url =
                                 file === 'index.mdx' ? '/' : `/${file.replace(/\.mdx$/, '')}`

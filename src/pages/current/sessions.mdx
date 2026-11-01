@@ -1,0 +1,31 @@
+export const pageTitle = 'HTTP-сессии'
+
+# HTTP-сессии
+
+Сессии Localzet — отдельный runtime API; они не включают и не используют PHP global `session_start()`. Каждый HTTP `Request` предоставляет `session()` и `sessionId()`. По умолчанию используется `FileSessionHandler`.
+
+```php
+$session = $request->session();
+$visits = (int) $session->get('visits', 0) + 1;
+$session->set('visits', $visits);
+
+$connection->send(new Response(200, ['Content-Type' => 'text/plain'], "Visit {$visits}"));
+```
+
+Изменённые данные сохраняются обработчиком при завершении жизненного цикла запроса. Не храните состояние отдельного запроса в глобальных переменных worker-а.
+
+## Cookie settings
+
+Cookie-параметры настраиваются через `Session::setCookieParams()` или свойства `Session`: имя, lifetime, path, domain, `secure`, `httpOnly`, `sameSite`. Для HTTPS production включайте `secure`; задавайте подходящие `sameSite`, path и lifetime с учётом приложения.
+
+Идентификатор можно регенерировать через `$request->sessionRegenerateId()`, например после аутентификации. Саму проверку пользователя, права доступа и CSRF-защиту выполняет приложение.
+
+## Storage handlers
+
+- `FileSessionHandler` — встроенный handler для одного узла и локального файлового storage.
+- `RedisSessionHandler` и `RedisClusterSessionHandler` — опциональны и требуют соответствующего Redis клиента/runtime.
+- `MongoSessionHandler` — опционален и требует пакета `mongodb/mongodb`.
+
+Пользовательский handler задаётся через `Session::setHandler()` или `Session::handlerClass()` и реализует `SessionHandlerInterface`. Перед переключением storage проверьте атомарность записей, доступность данных из всех workers/узлов, очистку просроченных записей и права на файлы.
+
+Данные сессии сериализуются для хранения. Не помещайте туда объекты с небезопасной десериализацией, большие payload-ы или секреты без анализа их жизненного цикла и защиты storage. Чтение запрещает создание PHP-объектов при `unserialize`, но это не заменяет контроль доступа к session ID и защиту cookie.

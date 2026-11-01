@@ -1,0 +1,56 @@
+export const pageTitle = 'Процессы и управление сервером'
+
+# Процессы и управление сервером
+
+`Server::runAll()` регистрирует listener-ы и запускает runtime. В Unix многопроцессном режиме master управляет worker-ами; workers принимают и обрабатывают соединения. При `count = 1` сервер работает одним worker-ом. Не переносите сюда поведение из руководств 4.x: текущая CLI и процедуры обновления описаны ниже.
+
+<figure className="not-prose my-8 rounded-2xl border border-slate-900/10 bg-slate-50 p-5 dark:border-white/10 dark:bg-white/5" aria-label="Master управляет workers, workers обрабатывают клиентские соединения">
+  <div className="mx-auto max-w-xl rounded-xl border border-sky-500/30 bg-sky-50 p-4 text-center dark:bg-sky-500/10"><strong>Master</strong><div className="mt-1 text-sm">PID · команды · контроль жизненного цикла</div></div>
+  <div className="mx-auto my-3 text-center text-slate-400" aria-hidden="true">↓ создаёт и контролирует</div>
+  <div className="grid gap-3 sm:grid-cols-2">
+    <div className="rounded-xl border border-slate-900/10 bg-white p-4 text-center dark:border-white/10 dark:bg-slate-900"><strong>Worker A</strong><div className="mt-1 text-sm">listener → event loop → callbacks</div></div>
+    <div className="rounded-xl border border-slate-900/10 bg-white p-4 text-center dark:border-white/10 dark:bg-slate-900"><strong>Worker B … N</strong><div className="mt-1 text-sm">отдельная память и собственные таймеры</div></div>
+  </div>
+  <figcaption className="mt-4 text-sm text-slate-600 dark:text-slate-300">В приложении не разделяйте изменяемое состояние между workers без внешнего хранилища или IPC.</figcaption>
+</figure>
+
+## Настройка workers
+
+```php
+$server = new Server('http://0.0.0.0:8080');
+$server->name = 'api';
+$server->count = 4;
+$server->maxRequests = 10_000;
+$server->maxLifetime = 3600;
+$server->maxMemory = 256 * 1024 * 1024;
+$server->maxConnections = 10_000;
+$server->idleTimeout = 60;
+$server->frameTimeout = 15;
+$server->tlsHandshakeTimeout = 10;
+```
+
+Эти защитные лимиты настраиваются приложением. Подбирайте их под размер сообщения и ожидаемую работу; нулевые или default значения не следует считать универсальной production-политикой.
+
+## Команды
+
+Управляйте сервером из того же entry file:
+
+```sh
+php server.php start
+php server.php start -d
+php server.php status --json
+php server.php connections --json
+php server.php capabilities --json
+php server.php reload
+php server.php reload -g
+php server.php upgrade
+php server.php restart -g
+php server.php stop -g
+```
+
+- `reload` последовательно заменяет workers, но workers наследуют код уже загруженного master-а. Он не перечитывает bootstrap приложения.
+- `upgrade` на поддерживаемых Unix runtime повторно выполняет entry file через `pcntl_exec()`, восстанавливает listener descriptors и rolling-replaces workers. Сохраняются PID master-а и listener topology.
+- Если меняется набор listeners или их параметры, используйте `restart -g`.
+- `SIGTERM` — graceful drain; `SIGINT` — быстрая остановка.
+
+Перед автоматизацией проверьте фактическую среду командами `status --json` и `capabilities --json`. Для supervisor сигналов убедитесь, что посылаете их master-процессу.

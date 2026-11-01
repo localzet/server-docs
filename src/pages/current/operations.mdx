@@ -1,0 +1,32 @@
+export const pageTitle = 'Эксплуатация и обновление'
+
+# Эксплуатация и обновление
+
+## Перед запуском
+
+1. Проверьте PHP CLI, `ext-json`, права и нужные optional extensions.
+2. Для Unix multiprocess убедитесь в наличии `pcntl` и `posix`.
+3. Выполните `php server.php capabilities --json` и зафиксируйте фактически выбранный backend.
+4. Назначьте bind address, число workers и лимиты соединений, размеров пакетов, idle/frame/TLS handshake timeout.
+5. Настройте каталог логов и session storage с правами только нужного пользователя процесса.
+6. Ограничьте доступ к listener-у firewall/edge proxy; не выставляйте raw TCP listener в публичную сеть без модели доступа.
+
+## Shutdown и supervisor
+
+В Docker, systemd и Kubernetes отправляйте `SIGTERM` master-процессу и выделите достаточное время на graceful drain. `SIGINT` — быстрый stop. Проверьте фактический entry file, PID и stop timeout в целевом окружении; не считайте успешный запуск контейнера доказательством того, что приложение корректно дренирует соединения.
+
+Базовый systemd unit должен запускать конкретный PHP CLI entry file от отдельного пользователя и передавать сигналы master-у. Права на исходники и секреты разделяйте: workers не должны иметь возможность менять код приложения.
+
+## Обновление кода
+
+- `reload` заменяет worker-ы из загруженного master image; изменённый bootstrap может остаться старым.
+- `upgrade` перечитывает bootstrap через Unix `pcntl_exec()` при поддерживаемой передаче listener descriptors и сохраняет master PID.
+- Изменение listener topology выполняйте через `restart -g`.
+
+После операции проверьте `status --json`, generation, worker PID-ы и фактический HTTP/TCP ответ. Интеграционные сценарии репозитория показывают конкретно протестированные transitions, но не заменяют acceptance check приложения.
+
+## Наблюдаемость
+
+Используйте `status --json` и `connections --json` для текущего состояния процесса. Встроенная статистика worker-а не является распределённой метрикой: при нескольких процессах и узлах агрегируйте её отдельно. Собирайте логи, restart/crash события, число активных соединений, ошибки и задержки на уровне приложения или edge.
+
+Порядок сетевых портов, firewall, log rotation, file descriptor limits, health checks и deployment rollout зависит от окружения. Сначала измеряйте ограничения целевого хоста; универсальных production-цифр проект не публикует.

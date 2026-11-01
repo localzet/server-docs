@@ -17,11 +17,11 @@ npm run build
 
 Open http://localhost:3000 during development. Build output is `out/`; the postbuild command generates the sitemap and copies it into the static export. `npm run build` does not publish the site.
 
-## Scope
+## Documentation scope
 
-The existing site pages are in Russian. An English primary handbook with a Russian duplicate remains a separate documentation task. Do not claim that the current site is fully bilingual.
+The current handbook describes the Server 7.x development line and is written primarily in Russian. It covers installation, runtime lifecycle, event loops, protocols, HTTP, sessions, gateway behavior, security, operations and testing. The API reference is based on the source tree linked above; it is not a promise that every class has a generated reference page.
 
-Existing handbook pages describe the legacy 4.x API. The Server development branch targets 7.x: examples must be reviewed before use with that branch.
+Pages outside the current handbook and API reference are retained as a 4.x archive. They carry an archive notice, are excluded from the current search index and sitemap, and may contain obsolete examples. The site is not fully bilingual.
 
 ## Source layout
 
@@ -31,7 +31,7 @@ Existing handbook pages describe the legacy 4.x API. The Server development bran
 - `public`: static assets.
 - `scripts/generate-sitemap.js`: sitemap generation.
 
-CI builds and lints the site on pushes and pull requests. Pages deployment is manual through workflow dispatch. Dependency audit findings and a successful static build are separate checks.
+CI builds and lints the site on pushes and pull requests. GitHub Pages deployment is performed only by manually dispatching `.github/workflows/deploy.yml` from the intended branch. A successful static build does not verify runtime behavior of the Server library; dependency audit findings are a separate check.
 
 ## Author and license
 

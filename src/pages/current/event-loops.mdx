@@ -1,0 +1,41 @@
+export const pageTitle = 'Событийный цикл и таймеры'
+
+# Событийный цикл и таймеры
+
+Каждый worker обслуживает сокеты и таймеры через реализацию `EventInterface`. Выбор backend-а выполняет `EventLoopFactory`; имена и требования перечислены в [матрице совместимости](/current/compatibility).
+
+На Unix автоматический выбор: `event`, затем `ev`, затем Revolt, иначе встроенный `Select`. На Windows используется `Windows`. `Swoole` и `Swow` выбираются только явно, чтобы автоматический режим не менял глобальную семантику I/O приложения. Посмотреть доступность можно так:
+
+```sh
+php server.php capabilities --json
+```
+
+```php
+use localzet\Server\Events\EventLoopFactory;
+
+$loop = EventLoopFactory::create('revolt'); // бросает RuntimeException, если backend недоступен
+```
+
+## Таймеры
+
+`localzet\Timer` — фасад таймеров текущего процесса. `repeat()` повторяет callback, `delay()` вызывает его один раз, `del()` отменяет таймер.
+
+```php
+use localzet\Timer;
+
+$timerId = Timer::repeat(5.0, static function (): void {
+    // Короткая неблокирующая работа.
+});
+
+Timer::delay(30.0, static function (): void {
+    // Одноразовый callback.
+});
+
+Timer::del($timerId);
+```
+
+Интервалы задаются в секундах. Не рассчитывайте на realtime-гарантию срока: callback выполняется в event loop и может задержаться, пока worker занят синхронной операцией.
+
+`Timer::sleep()` не всегда асинхронный: он приостанавливает текущую Fiber/coroutine только для backend-а с `SuspensionCapableInterface` (например, Revolt). На обычном backend-е он использует блокирующий `usleep()`. Не вызывайте его без понимания выбранного backend-а внутри обработчика соединения.
+
+Очищайте периодические таймеры при завершении принадлежащей им задачи. Таймеры и PHP-память не общие между worker-процессами.
