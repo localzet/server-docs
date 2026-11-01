@@ -31,7 +31,7 @@ export function Layout({children, sections = [], legacy = false}) {
                     <main className="py-16">
                         {legacy && (
                             <aside className="mb-8 rounded-2xl border border-amber-500/30 bg-amber-50 p-4 text-sm leading-6 text-amber-950 dark:bg-amber-500/10 dark:text-amber-100" role="note">
-                                <strong>Архивный материал для API 4.x.</strong> Эта страница не сверялась с веткой 7.x и может содержать устаревшие сигнатуры и команды. Откройте <Link href="/">актуальную документацию 7.x</Link>.
+                                <strong>Архивная страница.</strong> Примеры и сигнатуры могут отличаться от текущей версии. Сверьте изменения на странице <Link href="/current/compatibility">сравнения версий</Link> или откройте <Link href="/">текущую документацию</Link>.
                             </aside>
                         )}
                         <Prose as="article">{children}</Prose>

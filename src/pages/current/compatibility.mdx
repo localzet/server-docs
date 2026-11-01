@@ -1,38 +1,39 @@
-export const pageTitle = 'Совместимость и поддерживаемые возможности'
+export const pageTitle = 'Совместимость и сравнение версий'
+export const description = 'Сравнение исходников Localzet Server v4.5.3 и текущей версии 7.x: требования PHP, обязательные расширения, event loop, gateway и миграция.'
 
-# Совместимость и поддерживаемые возможности
+# Совместимость и сравнение версий
 
-Эта документация описывает исходники ветки 7.x. Она не является справочником для стабильного пакета 4.x.
+Текущая документация описывает `main` с Composer branch alias `7.0.x-dev`. В таблице ниже сравниваются исходники этого репозитория с тегом `v4.5.3`. Это сравнение исходного кода и манифестов, а не гарантия совместимости конкретного приложения.
 
-## Версии
-
-| Линия | Где используется | Как выбирать |
+| Область | `v4.5.3` | Текущий `main` (`7.0.x-dev`) |
 |---|---|---|
-| 7.x | Текущий исходный код репозитория и эта документация | Установить исходники ветки `main` для разработки и проверки |
-| 4.x | Опубликованный compatibility release, используемый существующими пакетами Localzet | Проверить вывод `composer show localzet/server` и документацию конкретного релиза |
+| PHP и обязательные зависимости | PHP `^8.1 \|\| ^8.2`; обязательны `ext-sockets`, `ext-pcntl`, `ext-posix`, `localzet/events` | PHP `>=8.1`; обязательна только `ext-json`; остальные интеграции объявлены как optional |
+| Event loop | Собственный набор Linux drivers, включая `StreamSelect`, `ext-uv`, `ext-event` и `ext-ev` | `EventLoopFactory`: `event` → `ev` → Revolt → встроенный `Select`; Windows имеет отдельную реализацию, Swoole/Swow выбираются явно |
+| Gateway и proxy | В исходниках тега нет компонентов `Gateway/HttpReverseProxy` и `Proxy/TcpProxy` | Добавлены HTTP/1.x reverse proxy, raw TCP proxy и общий `UpstreamPool` |
+| Hot upgrade | В исходниках тега нет `Runtime/HotUpgradeBroker` | Добавлен Unix hot upgrade с `pcntl_exec()` и передачей listener descriptors на поддерживаемой среде |
+| Публичный API | Сигнатуры и реализация отражают контракт тега 4.5.3 | API и runtime изменялись; используйте справочник текущей версии и проверяйте приложение тестами |
 
-Публичные namespace и сигнатуры могли измениться между линиями. Не обновляйте production-приложение с 4.x до 7.x только заменой constraint: прогоните приложение и его протокольные тесты на целевой версии.
+Ссылки на исходники: [`v4.5.3` composer.json](https://github.com/localzet/Server/blob/v4.5.3/composer.json), [текущий `composer.json`](https://github.com/localzet/Server/blob/main/composer.json), [сравнение тегов и main](https://github.com/localzet/Server/compare/v4.5.3...main).
 
-## PHP и операционные системы
+## Перед обновлением приложения
 
-- Runtime constraint исходников: PHP `>=8.1`; `ext-json` обязателен.
-- Основная CI-матрица проекта выполняется на Linux с PHP 8.1–8.5.
-- Windows использует отдельный backend и предназначен для однопроцессного режима; эта платформа не входит в указанную Linux CI-матрицу.
-- На Unix supervisor и несколько workers требуют `pcntl` и `posix`. Возможность hot upgrade зависит также от Unix descriptor passing и проверяется runtime-командой `capabilities`.
+1. Зафиксируйте фактически установленную версию через `composer show localzet/server` и `composer.lock`.
+2. Сверьте используемые классы, callbacks и конфигурацию с [API-справочником](/api-ref/server).
+3. Проверьте обязательные и optional PHP extensions целевой среды.
+4. Прогоните собственные unit, protocol и integration tests на текущей версии исходников.
+5. Проверьте graceful shutdown, reload/upgrade, framing и работу сессий в staging до переключения production.
 
-## Event loop backends
+Нельзя переходить между этими версиями одной заменой Composer constraint: набор обязательных расширений, внутренний event loop, lifecycle и возможности proxy изменились. Контракт вашего приложения нужно проверять отдельно.
 
-| Backend | Требование | Автоматический выбор |
-|---|---|---|
-| `select` | Встроенный PHP stream select | Fallback |
-| `event` | Расширение `event` и `EventBase` | Unix, если доступно |
-| `ev` | Расширение `ev` и `Ev` | Unix, если `event` недоступен |
-| `revolt` / `fiber` | Пакет `revolt/event-loop` | Unix, если предыдущие backend-ы недоступны |
-| `swoole`, `swow` | Соответствующее расширение/runtime | Только явный выбор |
-| `windows` | Windows runtime | Выбирается автоматически в Windows |
+## PHP и платформы
 
-Автоматический выбор на Unix имеет порядок `event` → `ev` → Revolt → Select. Явный выбор недоступного backend-а завершается ошибкой, а не незаметным fallback. Проверяйте `php server.php capabilities --json` на целевом окружении.
+- Минимальное требование текущего кода: PHP `>=8.1`; `ext-json` обязателен.
+- Основная CI-матрица выполняется на Linux с PHP 8.1–8.5.
+- Windows использует отдельный backend и предназначен для однопроцессного режима; платформа не входит в указанную Linux CI-матрицу.
+- На Unix supervisor и несколько workers требуют `pcntl` и `posix`. Hot upgrade также зависит от поддержки передачи listening descriptors; проверяйте runtime-команду `capabilities`.
 
-## Необязательные интеграции
+## Optional интеграции и event loop
 
-Redis и MongoDB нужны только при выборе соответствующих session handlers. `ext-sockets` применяется отдельными возможностями, включая передачу listening descriptors при поддерживаемом hot upgrade. Не устанавливайте эти зависимости, если приложение не использует их функции.
+Redis и MongoDB нужны только для соответствующих session handlers. `ext-sockets` применяется отдельными возможностями, включая передачу listening descriptors при поддерживаемом hot upgrade.
+
+На Unix автоматический выбор event loop имеет порядок `event` → `ev` → Revolt → Select. Явный выбор недоступного backend-а завершается ошибкой, а не скрытым fallback. Проверяйте окружение командой `php server.php capabilities --json`.

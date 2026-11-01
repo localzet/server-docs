@@ -1,4 +1,5 @@
 export const pageTitle = 'API: TcpConnection 7.x'
+export const description = 'Справочник TcpConnection и ConnectionInterface Localzet Server: отправка данных, callbacks, buffering и управление соединением.'
 
 # API: `TcpConnection`
 
@@ -27,7 +28,7 @@ export const pageTitle = 'API: TcpConnection 7.x'
 
 ## Callback-и соединения
 
-На instance можно задать `onMessage`, `onClose`, `onError`, `onBufferFull` и `onBufferDrain`. WebSocket connection дополнительно имеет callbacks handshake, ping/pong и close. Проверяйте типы и сигнатуры в исходном `TcpConnection.php`/`ConnectionInterface.php`; эти классы — актуальный контракт ветки 7.x.
+На instance можно задать `onMessage`, `onClose`, `onError`, `onBufferFull` и `onBufferDrain`. WebSocket connection дополнительно имеет callbacks handshake, ping/pong и close. Проверяйте типы и сигнатуры в исходном `TcpConnection.php`/`ConnectionInterface.php`; эти классы — актуальный контракт текущей версии 7.x.
 
 ## Асинхронный клиент
 

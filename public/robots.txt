@@ -1,41 +1,23 @@
-# robots.txt for Localzet Server Documentation
-# https://server.localzet.com
-
+# Public documentation is available to search and AI crawlers.
 User-agent: *
 Allow: /
 
-# Allow all search engines
-User-agent: Googlebot
+User-agent: GPTBot
 Allow: /
 
-User-agent: Bingbot
+User-agent: OAI-SearchBot
 Allow: /
 
-User-agent: Slurp
+User-agent: ChatGPT-User
 Allow: /
 
-User-agent: DuckDuckBot
+User-agent: ClaudeBot
 Allow: /
 
-User-agent: Baiduspider
+User-agent: PerplexityBot
 Allow: /
 
-User-agent: YandexBot
+User-agent: Google-Extended
 Allow: /
 
-User-agent: facebookexternalhit
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-# Disallow admin or private areas if any
-# Disallow: /admin/
-# Disallow: /private/
-
-# Sitemap location
 Sitemap: https://server.localzet.com/sitemap.xml
-
-# Crawl-delay (optional, helps with server load)
-Crawl-delay: 1
-

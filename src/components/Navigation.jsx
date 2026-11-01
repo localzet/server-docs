@@ -187,7 +187,7 @@ function NavigationGroup({group, className}) {
 
 export const navigation = [
     {
-        title: 'Линия 7.x · актуальная',
+        title: 'Текущая версия · 7.x',
         links: [
             {title: 'Обзор и версия', href: '/'},
             {title: 'Установка и первый сервер', href: '/current/start'},
@@ -214,7 +214,7 @@ export const navigation = [
         ],
     },
     {
-        title: 'Архив · справочник 4.x',
+        title: 'Архив документации',
         links: [
             {title: 'Установка и запуск', href: '/install/start-and-stop'},
             {title: 'HTTP API', href: '/http/request'},

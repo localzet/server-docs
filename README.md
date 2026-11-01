@@ -19,9 +19,9 @@ Open http://localhost:3000 during development. Build output is `out/`; the postb
 
 ## Documentation scope
 
-The current handbook describes the Server 7.x development line and is written primarily in Russian. It covers installation, runtime lifecycle, event loops, protocols, HTTP, sessions, gateway behavior, security, operations and testing. The API reference is based on the source tree linked above; it is not a promise that every class has a generated reference page.
+The current handbook describes the Server 7.x development version and is written primarily in Russian. It covers installation, runtime lifecycle, event loops, protocols, HTTP, sessions, gateway behavior, security, operations and testing. The compatibility page compares a previous release source tag with the current `main` branch. The API reference is based on the source tree linked above; it is not a promise that every class has a generated reference page.
 
-Pages outside the current handbook and API reference are retained as a 4.x archive. They carry an archive notice, are excluded from the current search index and sitemap, and may contain obsolete examples. The site is not fully bilingual.
+Pages outside the current handbook and API reference are retained as an archive. They carry an archive notice, are excluded from the current search index and sitemap, and may contain obsolete examples. The site is not fully bilingual.
 
 ## Source layout
 

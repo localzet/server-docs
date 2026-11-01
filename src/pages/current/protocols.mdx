@@ -1,4 +1,5 @@
 export const pageTitle = 'Протоколы и границы сообщений'
+export const description = 'TCP framing и встроенные HTTP, WebSocket, UDP протоколы Localzet Server; пример пользовательского ProtocolInterface.'
 
 # Протоколы и границы сообщений
 
@@ -56,4 +57,4 @@ Server::runAll();
 
 WebSocket listener обрабатывает HTTP Upgrade, маскированные клиентские frames, fragmentation и close handshake. При graceful остановке сервер отправляет close code 1001 открытым соединениям. Прикладные callback-и доступны через `onWebSocketConnect`, `onWebSocketConnected`, `onWebSocketPing`, `onWebSocketPong` и `onWebSocketClose`.
 
-См. [HTTP и обработчики сообщений](/current/http) и [архивный справочник пользовательских протоколов](/protocols/custom) только для API 4.x.
+См. [HTTP и обработчики сообщений](/current/http). Пример из [архивного справочника пользовательских протоколов](/protocols/custom) может требовать адаптации к текущей версии.

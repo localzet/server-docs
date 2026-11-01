@@ -1,10 +1,11 @@
 export const pageTitle = 'Процессы и управление сервером'
+export const description = 'Модель master-worker Localzet Server, параметры worker-ов, CLI команды, сигналы, reload, restart и hot upgrade.'
 
 # Процессы и управление сервером
 
-`Server::runAll()` регистрирует listener-ы и запускает runtime. В Unix многопроцессном режиме master управляет worker-ами; workers принимают и обрабатывают соединения. При `count = 1` сервер работает одним worker-ом. Не переносите сюда поведение из руководств 4.x: текущая CLI и процедуры обновления описаны ниже.
+`Server::runAll()` регистрирует listener-ы и запускает runtime. В Unix многопроцессном режиме master управляет worker-ами; workers принимают и обрабатывают соединения. При `count = 1` сервер работает одним worker-ом. Команды и процедуры обновления для текущей версии описаны ниже.
 
-<figure className="not-prose my-8 rounded-2xl border border-slate-900/10 bg-slate-50 p-5 dark:border-white/10 dark:bg-white/5" aria-label="Master управляет workers, workers обрабатывают клиентские соединения">
+<figure className="not-prose mx-auto my-8 w-full max-w-3xl rounded-2xl border border-slate-900/10 bg-slate-50 p-5 dark:border-white/10 dark:bg-white/5" aria-label="Master управляет workers, workers обрабатывают клиентские соединения">
   <div className="mx-auto max-w-xl rounded-xl border border-sky-500/30 bg-sky-50 p-4 text-center dark:bg-sky-500/10"><strong>Master</strong><div className="mt-1 text-sm">PID · команды · контроль жизненного цикла</div></div>
   <div className="mx-auto my-3 text-center text-slate-400" aria-hidden="true">↓ создаёт и контролирует</div>
   <div className="grid gap-3 sm:grid-cols-2">

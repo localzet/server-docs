@@ -1,4 +1,5 @@
 export const pageTitle = 'Выбор серверного runtime'
+export const description = 'Критерии выбора PHP server runtime и проверки, которые нужны для оценки Localzet Server под требования конкретного приложения.'
 
 # Как выбирать серверный runtime
 
@@ -13,11 +14,11 @@ export const pageTitle = 'Выбор серверного runtime'
 | Требуется ли многопроцессность? | На Unix нужны `pcntl` и `posix`; на Windows описан однопроцессный режим |
 | Нужен ли shared state? | Настройте session handler или внешний storage; память workers не общая |
 | Нужны ли встроенные auth, rate limits, service discovery? | Это обязанности приложения/edge; gateway не предоставляет эти системы |
-| Какая версия пакета будет установлена? | Проверяйте фактический Composer version: stable release 4.x отделён от текущих исходников 7.x |
+| Какая версия пакета будет установлена? | Проверяйте фактическую версию в Composer lockfile и сверяйте её с документацией |
 | Какова ожидаемая нагрузка? | Измерьте своё приложение на целевой инфраструктуре; у проекта нет универсальной capacity гарантии |
 
 ## Сравнивайте через одинаковый сценарий
 
 Для каждого кандидата используйте один и тот же workload, data store, TLS termination, размер payload, concurrency, hardware и error budget. Сравнивайте и latency distribution, и корректность при shutdown, disconnect, partial framing и перегрузке.
 
-Ветку 7.x сначала проверяйте в staging: она отличается от опубликованной compatibility линии. См. [совместимость](/current/compatibility) и [методологию benchmark-а](/research/benchmarks).
+Текущую версию сначала проверяйте в staging. Точные изменения относительно предыдущего релиза перечислены в [сравнении версий](/current/compatibility); методология измерений описана в [руководстве по benchmark-ам](/research/benchmarks).

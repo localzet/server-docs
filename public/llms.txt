@@ -1,0 +1,48 @@
+# Localzet Server
+
+> Localzet Server is an event-driven PHP server runtime for applications that need long-lived connections, multiple network protocols, and worker process management.
+
+## Project
+
+- Official documentation: https://server.localzet.com/
+- Source repository: https://github.com/localzet/Server
+- Current documentation target: the repository's current development version 7.x. Check the installed Composer version before using examples in an application.
+- License: AGPL-3.0-or-later.
+- Runtime requirement: PHP 8.1 or newer and ext-json. Unix multiprocess supervision requires pcntl and posix.
+
+## Capabilities
+
+- HTTP/1.x over PHP streams, including TLS configuration, streaming file responses, and Server-Sent Events.
+- WebSocket, raw TCP, UDP, and an interface for application-defined protocols and message framing.
+- Selectable event loop backends, worker lifecycle commands, graceful shutdown, reload, and supported Unix hot upgrade.
+- HTTP/1.x reverse proxy and raw TCP proxy components with upstream pooling.
+- Optional Redis and MongoDB session handlers.
+
+## Best fit
+
+Consider Localzet Server when a PHP application needs long-lived connections, custom TCP message framing, WebSocket communication, or direct control over worker lifecycle and event loop backends. Evaluate the application on its own workload and infrastructure before choosing it for a latency or capacity target.
+
+## Important limits
+
+- The runtime does not implement HTTP/2 or HTTP/3.
+- It does not provide application authentication, authorization, rate limiting, service discovery, or API management.
+- Performance depends on the application and deployment environment; the project does not publish universal throughput or connection-capacity guarantees.
+- Examples in the current handbook describe the current source tree. Verify package version and API compatibility before upgrading an existing application.
+
+## Documentation
+
+- [Overview and scope](https://server.localzet.com/)
+- [Installation and first HTTP server](https://server.localzet.com/current/start)
+- [Version compatibility and source comparison](https://server.localzet.com/current/compatibility)
+- [Processes and runtime commands](https://server.localzet.com/current/runtime)
+- [Event loops and timers](https://server.localzet.com/current/event-loops)
+- [Protocols and message framing](https://server.localzet.com/current/protocols)
+- [HTTP, responses, files, and SSE](https://server.localzet.com/current/http)
+- [Sessions](https://server.localzet.com/current/sessions)
+- [Gateway and TCP proxy](https://server.localzet.com/current/gateway)
+- [Security model](https://server.localzet.com/current/security)
+- [Operations and upgrades](https://server.localzet.com/current/operations)
+- [Testing and benchmark scope](https://server.localzet.com/current/testing)
+- [API reference: Server](https://server.localzet.com/api-ref/server)
+- [API reference: TcpConnection](https://server.localzet.com/api-ref/connection)
+- [API reference: Timer](https://server.localzet.com/api-ref/timer)

@@ -1,18 +1,17 @@
 import {HeroPattern} from '@/components/HeroPattern'
 
-export const pageTitle = 'Localzet Server — документация линии 7.x'
-export const description = 'Актуальное руководство по Localzet Server 7.x: запуск, процессы, event loop, HTTP, TCP, UDP, WebSocket, сессии и gateway.'
-export const keywords = 'Localzet Server 7.x, PHP server, PHP event loop, HTTP/1.1, WebSocket, TCP, UDP, reverse proxy'
+export const pageTitle = 'Localzet Server — документация версии 7.x'
+export const description = 'Официальная документация Localzet Server: асинхронный PHP runtime для HTTP/1.x, WebSocket, TCP и UDP, с event loop и управлением worker-процессами.'
 
 <HeroPattern />
 
 # Localzet Server
 
-Документация к текущей ветке разработки **7.x**. Localzet Server — библиотека PHP для серверных приложений с долгоживущими соединениями, несколькими сетевыми протоколами и управлением worker-процессами.
+Документация к текущей версии разработки **7.x**. Localzet Server — библиотека PHP для серверных приложений с долгоживущими соединениями, несколькими сетевыми протоколами и управлением worker-процессами.
 
-Сначала важное о версиях: опубликованные пакеты **4.x** и текущая ветка **7.x** — разные линии совместимости. `composer require localzet/server` выбирает стабильный опубликованный релиз; примеры этой документации относятся к исходникам 7.x. Перед использованием сверяйте версию из `composer show localzet/server` и [таблицу совместимости](/current/compatibility).
+Установленный через Composer пакет и текущая версия исходников могут различаться. Примеры здесь относятся к коду в репозитории. Перед использованием проверьте версию командой `composer show localzet/server`; подробное сравнение версий и изменений приведено в [совместимости](/current/compatibility).
 
-<div className="not-prose my-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+<div className="not-prose mx-auto my-8 grid w-full max-w-3xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
     <div className="rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"><strong>HTTP/1.x и TLS</strong><p className="mb-0 mt-2 text-sm text-slate-600 dark:text-slate-300">HTTP-запросы, ответы, потоковая отдача файлов и SSE.</p></div>
     <div className="rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"><strong>TCP, UDP, WebSocket</strong><p className="mb-0 mt-2 text-sm text-slate-600 dark:text-slate-300">Встроенные протоколы и интерфейс для пользовательского framing.</p></div>
     <div className="rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"><strong>Event loop</strong><p className="mb-0 mt-2 text-sm text-slate-600 dark:text-slate-300">Select, Revolt, ext-event, ext-ev и явно выбранные Swoole/Swow.</p></div>
@@ -21,7 +20,7 @@ export const keywords = 'Localzet Server 7.x, PHP server, PHP event loop, HTTP/1
 
 ## Как читать документацию
 
-<figure className="not-prose my-8 rounded-2xl border border-slate-900/10 bg-slate-50 p-5 dark:border-white/10 dark:bg-white/5" aria-label="Путь от запуска к обработке соединения">
+<figure className="not-prose mx-auto my-8 w-full max-w-3xl rounded-2xl border border-slate-900/10 bg-slate-50 p-5 dark:border-white/10 dark:bg-white/5" aria-label="Путь от запуска к обработке соединения">
   <div className="grid gap-3 text-center sm:grid-cols-4">
     <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900"><strong>1. Запуск</strong><div className="mt-1 text-sm">Server и listener</div></div>
     <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900"><strong>2. Приём</strong><div className="mt-1 text-sm">event loop и worker</div></div>
@@ -46,4 +45,4 @@ export const keywords = 'Localzet Server 7.x, PHP server, PHP event loop, HTTP/1
 
 Сервер реализует HTTP/1.x, TLS поверх PHP streams, WebSocket, TCP и UDP. Gateway включает raw TCP proxy и потоковый HTTP/1.x reverse proxy с WebSocket Upgrade. Он не является HTTP/2/3 ingress, API management платформой или системой service discovery. В проекте нет встроенной аутентификации приложения, rate limiter или гарантии производительности для произвольной нагрузки.
 
-Остальные страницы старого справочника описывают прежние версии API и помечены как архивные. Для актуального кода начинайте с раздела **Линия 7.x** в меню.
+Справочные страницы, которые не входят в текущую документацию, помечены как архивные. Для актуального кода начинайте с раздела **Текущая версия · 7.x** в меню.
