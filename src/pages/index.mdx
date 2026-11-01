@@ -11,7 +11,7 @@ export const description = 'Официальная документация Loca
 
 Установленный через Composer пакет и текущая версия исходников могут различаться. Примеры здесь относятся к коду в репозитории. Перед использованием проверьте версию командой `composer show localzet/server`; подробное сравнение версий и изменений приведено в [совместимости](/current/compatibility).
 
-<div className="not-prose mx-auto my-8 grid w-full max-w-3xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
+<div className="not-prose mx-auto my-8 grid w-full max-w-3xl gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:mx-[calc(50%_-_min(50%,33rem))]">
     <div className="rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"><strong>HTTP/1.x и TLS</strong><p className="mb-0 mt-2 text-sm text-slate-600 dark:text-slate-300">HTTP-запросы, ответы, потоковая отдача файлов и SSE.</p></div>
     <div className="rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"><strong>TCP, UDP, WebSocket</strong><p className="mb-0 mt-2 text-sm text-slate-600 dark:text-slate-300">Встроенные протоколы и интерфейс для пользовательского framing.</p></div>
     <div className="rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"><strong>Event loop</strong><p className="mb-0 mt-2 text-sm text-slate-600 dark:text-slate-300">Select, Revolt, ext-event, ext-ev и явно выбранные Swoole/Swow.</p></div>
@@ -20,7 +20,7 @@ export const description = 'Официальная документация Loca
 
 ## Как читать документацию
 
-<figure className="not-prose mx-auto my-8 w-full max-w-3xl rounded-2xl border border-slate-900/10 bg-slate-50 p-5 dark:border-white/10 dark:bg-white/5" aria-label="Путь от запуска к обработке соединения">
+<figure className="not-prose mx-auto my-8 w-full max-w-3xl rounded-2xl border border-slate-900/10 bg-slate-50 p-5 dark:border-white/10 dark:bg-white/5 lg:mx-[calc(50%_-_min(50%,33rem))]" aria-label="Путь от запуска к обработке соединения">
   <div className="grid gap-3 text-center sm:grid-cols-4">
     <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900"><strong>1. Запуск</strong><div className="mt-1 text-sm">Server и listener</div></div>
     <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900"><strong>2. Приём</strong><div className="mt-1 text-sm">event loop и worker</div></div>
