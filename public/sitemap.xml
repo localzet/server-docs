@@ -124,6 +124,21 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://server.localzet.com/projects/console</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/console/reference</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/console/start</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://server.localzet.com/projects/cron</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

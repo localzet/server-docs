@@ -3,7 +3,7 @@ export const description = 'Формат HTTP запроса, конфигура
 
 # Noter: API и эксплуатация
 
-Noter — CLI отправитель заметок, а не приложение-хранилище. Требуются PHP 8.2+ и `ext-curl`. Команда `noter <text>` берёт текст из аргумента; при отсутствии аргумента читает stdin.
+Noter — CLI отправитель заметок, а не приложение-хранилище. В версии `v0.1.6` требуются PHP 8.4.1+ и `ext-curl`. Команда `noter <text>` берёт текст из аргумента; при отсутствии аргумента читает stdin.
 
 ## Контракт приёмника
 
@@ -25,4 +25,4 @@ CLI выполняет HTTP POST на `NOTER_URL` и отправляет:
 
 ## Зависимости и release
 
-Текущий lock фиксирует `localzet/http 2.0.2` и `localzet/server 4.5.3`. Опубликованный HttpClient tag рассчитан на Server 4; этот проект пока не мигрирован на Server 7. Сначала требуется совместимый стабильный HTTP client, затем отдельная проверка API и обновление Noter. CI проверяет Composer manifest/lock, lint, PHAR и loopback HTTP сценарии; release BIN дополнительно скачивает bundled PHP runtime с внешнего CDN, поэтому локальная CI сборка не подтверждает доступность CDN.
+Lockfile версии `v0.1.6` фиксирует `localzet/http 3.0.0`, `localzet/psr7 4.0.0`, `localzet/console 2.0.1` и `localzet/server 7.0.0`. CI проверяет Composer manifest/lock, lint, PHAR и loopback HTTP сценарии. GitHub Release прикладывает собранный исполняемый файл `noter`; перед распространением проверьте его платформенную совместимость и источник загрузки.

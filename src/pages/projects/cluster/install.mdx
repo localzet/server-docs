@@ -1,11 +1,12 @@
 # Установка Cluster
 
-Установите совместимый выпуск пакета:
+Cluster пока не зарегистрирован в Packagist. После публикации тега `v1.0.0` подключите Git-репозиторий и установите Cluster:
 
 ```sh
-composer require localzet/cluster
+composer config repositories.localzet-cluster vcs https://github.com/localzet/Cluster
+composer require localzet/cluster:^1.0
 ```
 
-Перед развёртыванием проверьте ограничение `localzet/server` в установленном lock-файле. Текущая ветка Cluster использует Server `^4.2`; Server 7 не входит в это требование.
+Cluster 1.x поддерживает Localzet Server `^7.0`. Проверьте итоговую версию в `composer.lock` перед развёртыванием.
 
 Создайте сильный случайный общий секрет и передайте его всем узлам через защищённую конфигурацию. Не помещайте секрет в репозиторий, командную историю, образ контейнера или публичные логи.

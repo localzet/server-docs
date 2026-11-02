@@ -227,6 +227,7 @@ const clusterNavigation = [
 ]
 
 const projectNavigation = {
+    console: [{title: 'Console', links: [{title: 'Обзор', href: '/projects/console'}, {title: 'Установка и команды', href: '/projects/console/start'}, {title: 'Laravel bridge и TUI', href: '/projects/console/reference'}]}],
     cron: [{title: 'Cron', links: [{title: 'Обзор', href: '/projects/cron'}, {title: 'Установка и расписания', href: '/projects/cron/start'}, {title: 'API и эксплуатация', href: '/projects/cron/reference'}]}],
     httpclient: [{title: 'HTTP Client', links: [{title: 'Обзор', href: '/projects/httpclient'}, {title: 'Первый запрос', href: '/projects/httpclient/start'}, {title: 'Запросы и обработка ответов', href: '/projects/httpclient/reference'}]}],
     mqtt: [{title: 'MQTT', links: [{title: 'Обзор и статус', href: '/projects/mqtt'}, {title: 'Подключение и обмен сообщениями', href: '/projects/mqtt/start'}, {title: 'Параметры и надёжность', href: '/projects/mqtt/reference'}]}],

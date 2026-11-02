@@ -1,0 +1,32 @@
+# Laravel bridge и TUI API
+
+## Команды Illuminate
+
+Интеграция подключается явно. Передайте уже загруженный контейнер приложения Laravel, затем регистрируйте команды Illuminate:
+
+```php
+$console->useIlluminate($laravelApplication);
+$console->addIlluminateCommand(new App\Console\Commands\ExampleCommand());
+```
+
+Команды Laravel используют контейнер, prompts и lifecycle Illuminate. Сам Localzet Console не загружает Laravel-приложение и не заменяет его bootstrap.
+
+## UTF-8 и ANSI
+
+`localzet\Console\Tui\Utf8` предоставляет `width()`, `clipAnsi()`, `pad()` и `clean()`. `clean()` удаляет ANSI и управляющие последовательности из непроверенного текста. `width()` считает видимые ячейки; это важно для кириллицы и широких Unicode-глифов.
+
+## Интерактивный вывод
+
+`localzet\Console\Tui\Terminal` управляет альтернативным экраном и временными настройками `/dev/tty` на Unix. Всегда вызывайте `close()` в `finally`:
+
+```php
+$terminal = new localzet\Console\Tui\Terminal();
+$terminal->open();
+try {
+    $terminal->draw(['Статус приложения']);
+} finally {
+    $terminal->close();
+}
+```
+
+Этот API рассчитан на интерактивный терминал. Для CI, redirected output и Windows используйте стандартный Symfony Console output.
