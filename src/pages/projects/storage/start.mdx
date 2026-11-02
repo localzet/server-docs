@@ -1,0 +1,27 @@
+export const pageTitle = 'Storage: начало работы'
+export const description = 'Практическая инструкция по установке и первому запуску Storage.'
+
+# Storage: начало работы
+
+## Установка
+
+```sh
+composer require localzet/storage
+```
+
+## Первый сценарий
+
+```php
+use localzet\Server;
+use localzet\Storage\Server as StorageServer;
+use localzet\Storage\Client;
+
+new StorageServer('127.0.0.1', 8008);
+Server::runAll();
+
+$cache = new Client('127.0.0.1:8008');
+$cache->set('greeting', 'hello');
+$value = $cache->get('greeting');
+```
+
+Сверьте совместимость и ограничения в разделе API и эксплуатации до включения в приложение.

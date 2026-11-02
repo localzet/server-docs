@@ -1,0 +1,27 @@
+export const pageTitle = 'Cron: начало работы'
+export const description = 'Практическая инструкция по установке и первому запуску Cron.'
+
+# Cron: начало работы
+
+## Установка
+
+```sh
+composer require localzet/cron
+```
+
+## Первый сценарий
+
+```php
+use localzet\Cron;
+use localzet\Server;
+
+$server = new Server();
+$server->onServerStart = static function () {
+    new Cron('* * * * * *', static function (): void {
+        echo date('Y-m-d H:i:s') . PHP_EOL;
+    }, 'heartbeat');
+};
+Server::runAll();
+```
+
+Сверьте совместимость и ограничения в разделе API и эксплуатации до включения в приложение.

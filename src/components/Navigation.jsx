@@ -17,19 +17,6 @@ function useInitialValue(value, condition = true) {
     return condition ? initialValue : value
 }
 
-function TopLevelNavItem({href, children}) {
-    return (
-        <li className="md:hidden">
-            <Link
-                href={href}
-                className="block py-1 text-sm text-slate-600 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-            >
-                {children}
-            </Link>
-        </li>
-    )
-}
-
 function NavLink({href, tag, active, isAnchorLink = false, children}) {
     return (
         <Link
@@ -240,16 +227,16 @@ const clusterNavigation = [
 ]
 
 const projectNavigation = {
-    cron: [{title: 'Cron', links: [{title: 'Обзор', href: '/projects/cron'}]}],
-    httpclient: [{title: 'HTTP Client', links: [{title: 'Обзор', href: '/projects/httpclient'}]}],
-    mqtt: [{title: 'MQTT', links: [{title: 'Обзор и статус', href: '/projects/mqtt'}]}],
-    psr7: [{title: 'PSR-7', links: [{title: 'Обзор', href: '/projects/psr7'}]}],
-    proxy: [{title: 'Proxy', links: [{title: 'Обзор и ограничения', href: '/projects/proxy'}]}],
-    socks5: [{title: 'SOCKS5', links: [{title: 'Обзор', href: '/projects/socks5'}]}],
-    socketio: [{title: 'Socket.IO', links: [{title: 'Обзор и совместимость', href: '/projects/socketio'}]}],
-    storage: [{title: 'Storage', links: [{title: 'Обзор и безопасность', href: '/projects/storage'}]}],
-    tunnel: [{title: 'Tunnel', links: [{title: 'Обзор и протокол', href: '/projects/tunnel'}]}],
-    noter: [{title: 'Noter', links: [{title: 'Обзор', href: '/projects/noter'}]}],
+    cron: [{title: 'Cron', links: [{title: 'Обзор', href: '/projects/cron'}, {title: 'Установка и расписания', href: '/projects/cron/start'}, {title: 'API и эксплуатация', href: '/projects/cron/reference'}]}],
+    httpclient: [{title: 'HTTP Client', links: [{title: 'Обзор', href: '/projects/httpclient'}, {title: 'Первый запрос', href: '/projects/httpclient/start'}, {title: 'Запросы и обработка ответов', href: '/projects/httpclient/reference'}]}],
+    mqtt: [{title: 'MQTT', links: [{title: 'Обзор и статус', href: '/projects/mqtt'}, {title: 'Подключение и обмен сообщениями', href: '/projects/mqtt/start'}, {title: 'Параметры и надёжность', href: '/projects/mqtt/reference'}]}],
+    psr7: [{title: 'PSR-7', links: [{title: 'Обзор', href: '/projects/psr7'}, {title: 'Сообщения и потоки', href: '/projects/psr7/start'}, {title: 'Типы и правила работы', href: '/projects/psr7/reference'}]}],
+    proxy: [{title: 'Proxy', links: [{title: 'Обзор и ограничения', href: '/projects/proxy'}, {title: 'Запуск и настройка доступа', href: '/projects/proxy/start'}, {title: 'Маршрутизация и эксплуатация', href: '/projects/proxy/reference'}]}],
+    socks5: [{title: 'SOCKS5', links: [{title: 'Обзор', href: '/projects/socks5'}, {title: 'Установка и запуск', href: '/projects/socks5/start'}, {title: 'Настройки и ограничения', href: '/projects/socks5/reference'}]}],
+    socketio: [{title: 'Socket.IO', links: [{title: 'Обзор и совместимость', href: '/projects/socketio'}, {title: 'Подключение к серверу', href: '/projects/socketio/start'}, {title: 'Namespaces, комнаты и доставка', href: '/projects/socketio/reference'}]}],
+    storage: [{title: 'Storage', links: [{title: 'Обзор и безопасность', href: '/projects/storage'}, {title: 'Сервер и клиент', href: '/projects/storage/start'}, {title: 'Операции и ограничения', href: '/projects/storage/reference'}]}],
+    tunnel: [{title: 'Tunnel', links: [{title: 'Обзор и протокол', href: '/projects/tunnel'}, {title: 'События и очереди', href: '/projects/tunnel/start'}, {title: 'Клиент, форматы и доставка', href: '/projects/tunnel/reference'}]}],
+    noter: [{title: 'Noter', links: [{title: 'Обзор', href: '/projects/noter'}, {title: 'Установка и отправка заметки', href: '/projects/noter/start'}, {title: 'Настройка сервера-приёмника', href: '/projects/noter/reference'}]}],
 }
 
 export function getNavigation(pathname) {

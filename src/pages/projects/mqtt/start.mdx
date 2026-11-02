@@ -1,0 +1,32 @@
+export const pageTitle = 'MQTT: начало работы'
+export const description = 'Практическая инструкция по установке и первому запуску MQTT.'
+
+# MQTT: начало работы
+
+## Установка
+
+```sh
+composer require localzet/mqtt
+```
+
+## Первый сценарий
+
+```php
+use localzet\MQTT\Client;
+
+$mqtt = new Client('mqtt://127.0.0.1:1883', [
+    'client_id' => sprintf('example-worker-%d', getmypid()),
+    'protocol_level' => 4,
+    'username' => getenv('MQTT_USERNAME') ?: '',
+    'password' => getenv('MQTT_PASSWORD') ?: '',
+    'connect_timeout' => 10,
+    'resubscribe' => true,
+]);
+$mqtt->onMessage = static function ($topic, $message): void {
+    echo "$topic: $message" . PHP_EOL;
+};
+$mqtt->connect();
+$mqtt->subscribe('demo/status', ['qos' => 1]);
+```
+
+Сверьте совместимость и ограничения в разделе API и эксплуатации до включения в приложение.

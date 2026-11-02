@@ -1,0 +1,8 @@
+export const pageTitle = 'SOCKS5: API и эксплуатация'
+export const description = 'API, совместимость, ограничения и эксплуатационные рекомендации SOCKS5.'
+
+# SOCKS5: API и эксплуатация
+
+По умолчанию слушатель привязан к `127.0.0.1:1080`. Настройки: `SOCKS5_BIND`, `SOCKS5_PORT`, `SOCKS5_USERNAME`, `SOCKS5_PASSWORD`, `SOCKS5_ALLOW_NO_AUTH`, лимиты подключений и попыток, `SOCKS5_PID_FILE`, `SOCKS5_LOG_FILE`. Без учётных данных сервис не запустится; anonymous режим разрешён только по явному флагу на loopback.
+
+Реализован TCP CONNECT к IPv4 и DNS-именам. UDP ASSOCIATE выключен, BIND и IPv6 не поддерживаются. DNS поиск блокирует worker; лимиты действуют на процесс. Логин и пароль передаются без шифрования — используйте доверенную сеть либо защищённый туннель. Интеграционная проверка: `python3 tests/integration.py`.

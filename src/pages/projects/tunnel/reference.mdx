@@ -1,0 +1,8 @@
+export const pageTitle = 'Tunnel: API и эксплуатация'
+export const description = 'API, совместимость, ограничения и эксплуатационные рекомендации Tunnel.'
+
+# Tunnel: API и эксплуатация
+
+Нужны PHP 8.1+ и Localzet Server `^7.0`. Статический API клиента: `connect`, `on`, `subscribe`, `unsubscribe`, `publish`, `watch`, `unwatch`, `enqueue`, `reserve`. Регистрируйте обработчики до публикации. При `watch(..., autoReserve: true)` следующий элемент запрашивается в `finally` callback. Очереди хранятся в памяти и не переживают остановку.
+
+Поддерживаются JSON и PHP serialization; десериализация объектов выключена по умолчанию. Включайте её на сервере и клиенте только в доверенной изолированной сети. У Tunnel нет аутентификации peer и собственного шифрования: ограничьте доступ сетевыми ACL. Делайте обработчики идемпотентными и проверяйте reconnect и shutdown. Перед интеграцией проверьте совместимость Tunnel и Server в Composer lock.

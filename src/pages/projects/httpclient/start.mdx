@@ -1,0 +1,33 @@
+export const pageTitle = 'HTTP Client: начало работы'
+export const description = 'Практическая инструкция по установке и первому запуску HTTP Client.'
+
+# HTTP Client: начало работы
+
+## Установка
+
+```sh
+composer require localzet/http
+```
+
+## Первый сценарий
+
+```php
+use localzet\HTTP\Client;
+
+$http = new Client([
+    'max_conn_per_addr' => 32,
+    'keepalive_timeout' => 15,
+    'connect_timeout' => 10,
+    'timeout' => 20,
+]);
+$http->get('https://example.com/status',
+    success: static function ($response): void {
+        echo $response->getStatusCode();
+    },
+    error: static function ($exception): void {
+        error_log((string) $exception);
+    }
+);
+```
+
+Сверьте совместимость и ограничения в разделе API и эксплуатации до включения в приложение.

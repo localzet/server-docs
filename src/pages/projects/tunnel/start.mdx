@@ -1,0 +1,29 @@
+export const pageTitle = 'Tunnel: начало работы'
+export const description = 'Практическая инструкция по установке и первому запуску Tunnel.'
+
+# Tunnel: начало работы
+
+## Установка
+
+```sh
+composer require localzet/tunnel
+```
+
+## Первый сценарий
+
+```php
+use localzet\Server;
+use localzet\Tunnel\Server as TunnelServer;
+use localzet\Tunnel\Client;
+
+new TunnelServer('frame://127.0.0.1:2206');
+Server::runAll();
+
+Client::connect('frame://127.0.0.1:2206');
+Client::on('cache.updated', static function ($data): void {
+    // Handle the event in this worker.
+});
+Client::publish('cache.updated', ['key' => 'item-1']);
+```
+
+Сверьте совместимость и ограничения в разделе API и эксплуатации до включения в приложение.

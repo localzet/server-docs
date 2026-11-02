@@ -1,0 +1,31 @@
+export const pageTitle = 'Socket.IO: начало работы'
+export const description = 'Практическая инструкция по установке и первому запуску Socket.IO.'
+
+# Socket.IO: начало работы
+
+## Установка
+
+```sh
+composer require localzet/socketio
+```
+
+## Первый сценарий
+
+```php
+use localzet\Server;
+use localzet\SocketIO\SocketIO;
+
+$server = new Server('socketio://127.0.0.1:2020');
+$io = new SocketIO();
+$io->attach($server);
+$io->on('connection', static function ($socket): void {
+    $socket->on('ping', static function ($data) use ($socket): void {
+        $socket->emit('pong', $data);
+    });
+});
+Server::runAll();
+```
+
+Здесь listener привязан к loopback. Если сервер должен принимать внешние подключения, задайте адрес осознанно и ограничьте доступ сетевыми правилами.
+
+Сверьте совместимость и ограничения в разделе API и эксплуатации до включения в приложение.

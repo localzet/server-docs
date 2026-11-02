@@ -1,0 +1,28 @@
+export const pageTitle = 'PSR-7: начало работы'
+export const description = 'Практическая инструкция по установке и первому запуску PSR-7.'
+
+# PSR-7: начало работы
+
+## Установка
+
+```sh
+composer require localzet/psr7
+```
+
+## Первый сценарий
+
+```php
+use localzet\PSR7\Request;
+use localzet\PSR7\Response;
+use localzet\PSR7\Stream;
+
+$body = fopen('php://temp', 'r+');
+fwrite($body, '{"name":"item"}');
+rewind($body);
+$request = (new Request('POST', 'https://api.example.test/items'))
+    ->withHeader('Content-Type', 'application/json')
+    ->withBody(new Stream($body));
+$response = new Response(201, ['Content-Type' => 'application/json']);
+```
+
+Сверьте совместимость и ограничения в разделе API и эксплуатации до включения в приложение.

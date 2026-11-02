@@ -23,19 +23,6 @@ const projects = [
     {id: 'noter', title: 'Noter', href: '/projects/noter'},
 ]
 
-function TopLevelNavItem({href, children}) {
-    return (
-        <li>
-            <Link
-                href={href}
-                className="text-sm leading-5 text-slate-600 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-            >
-                {children}
-            </Link>
-        </li>
-    )
-}
-
 export const Header = forwardRef(function Header({className}, ref) {
     let router = useRouter()
     let currentProject = router.pathname.startsWith('/projects/') ? router.pathname.split('/')[2] : 'server'
@@ -51,7 +38,7 @@ export const Header = forwardRef(function Header({className}, ref) {
             ref={ref}
             className={clsx(
                 className,
-                'fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-12 px-4 transition sm:px-6 lg:left-72 lg:z-30 lg:px-8 xl:left-80',
+                'fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-4 px-4 transition sm:px-6 lg:left-72 lg:z-30 lg:px-8 xl:left-80',
                 !isInsideMobileNavigation &&
                 'backdrop-blur-sm dark:backdrop-blur lg:left-72 xl:left-80',
                 isInsideMobileNavigation
@@ -77,37 +64,18 @@ export const Header = forwardRef(function Header({className}, ref) {
                     <Logo />
                 </Link>
             </div>
-            <div className="flex items-center gap-5">
-                <nav className="hidden md:block">
-                    <ul role="list" className="flex max-w-[min(70vw,52rem)] items-center gap-1 overflow-x-auto">
-                        {projects.map((project) => (
-                            <li key={project.id}>
-                                <Link
-                                    href={project.href}
-                                    aria-current={currentProject === project.id ? 'page' : undefined}
-                                    className={clsx(
-                                            'whitespace-nowrap rounded-md px-2 py-1.5 text-sm transition',
-                                        currentProject === project.id
-                                            ? 'bg-slate-900/5 text-slate-900 dark:bg-white/10 dark:text-white'
-                                            : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                                    )}
-                                >
-                                    {project.title}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </nav>
-                <div className="hidden md:block md:h-5 md:w-px md:bg-slate-900/10 md:dark:bg-white/15"/>
-                <div className="flex gap-4">
-                    <select
-                        aria-label="Выбрать проект"
-                        className="max-w-28 rounded-md border border-slate-900/10 bg-transparent px-2 text-xs text-slate-700 dark:border-white/10 dark:text-slate-300 md:hidden"
-                        value={currentProject}
-                        onChange={(event) => router.push(projects.find((project) => project.id === event.target.value)?.href ?? '/')}
-                    >
-                        {projects.map((project) => <option key={project.id} value={project.id}>{project.title}</option>)}
-                    </select>
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                <label className="sr-only" htmlFor="project-switcher">Выбрать проект</label>
+                <select
+                    id="project-switcher"
+                    aria-label="Выбрать проект"
+                    className="w-28 min-w-0 rounded-md border border-slate-900/10 bg-white/70 px-2 py-1.5 text-xs text-slate-700 dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 sm:w-36 sm:text-sm"
+                    value={currentProject}
+                    onChange={(event) => router.push(projects.find((project) => project.id === event.target.value)?.href ?? '/')}
+                >
+                    {projects.map((project) => <option key={project.id} value={project.id}>{project.title}</option>)}
+                </select>
+                <div className="flex shrink-0 items-center gap-3 sm:gap-4">
                     <MobileSearch/>
                     <ModeToggle/>
                 </div>

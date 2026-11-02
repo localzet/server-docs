@@ -1,0 +1,8 @@
+export const pageTitle = 'PSR-7: API и эксплуатация'
+export const description = 'API, совместимость, ограничения и эксплуатационные рекомендации PSR-7.'
+
+# PSR-7: API и эксплуатация
+
+Нужны PHP 8.2+, Localzet Server `^7.0` и `psr/http-message:^2.0`. Основные типы `localzet\PSR7`: `Request`, `Response`, `ServerRequest`, `Uri`, `UploadedFile`, `Stream`. Для URI доступны `UriResolver` и `UriNormalizer`; для потоков — Buffer, Caching, Limit, Multipart, Append, NoSeek, Inflate, LazyOpen, Dropping, Pump и Fn декораторы.
+
+Сообщения неизменяемы: сохраняйте результат каждого вызова `with*()`. Закрывайте потоки после использования. Наличие пакета в Composer не подтверждает соответствие PSR: проверяйте неизменяемость, кодирование URI, чтение/перемотку/закрытие потоков, multipart и совместимость с потребителем.

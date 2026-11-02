@@ -129,7 +129,27 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://server.localzet.com/projects/cron/reference</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/cron/start</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://server.localzet.com/projects/httpclient</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/httpclient/reference</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/httpclient/start</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -139,7 +159,27 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://server.localzet.com/projects/mqtt/reference</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/mqtt/start</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://server.localzet.com/projects/noter</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/noter/reference</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/noter/start</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -149,7 +189,27 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://server.localzet.com/projects/proxy/reference</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/proxy/start</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://server.localzet.com/projects/psr7</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/psr7/reference</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/psr7/start</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -159,7 +219,27 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://server.localzet.com/projects/socketio/reference</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/socketio/start</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://server.localzet.com/projects/socks5</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/socks5/reference</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/socks5/start</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -169,7 +249,27 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://server.localzet.com/projects/storage/reference</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/storage/start</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://server.localzet.com/projects/tunnel</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/tunnel/reference</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://server.localzet.com/projects/tunnel/start</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

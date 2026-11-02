@@ -1,0 +1,23 @@
+export const pageTitle = 'SOCKS5: начало работы'
+export const description = 'Практическая инструкция по установке и первому запуску SOCKS5.'
+
+# SOCKS5: начало работы
+
+## Установка и запуск
+
+```sh
+composer install --no-dev
+# Provide credentials through a secret manager before starting the service.
+php start.php start
+php start.php stop
+```
+
+## Первый сценарий
+
+```sh
+export SOCKS5_USERNAME='proxy-user'
+export SOCKS5_PASSWORD='<secret>'
+php start.php start
+```
+
+Сверьте совместимость и ограничения в разделе API и эксплуатации до включения в приложение.
