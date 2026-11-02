@@ -1,29 +1,47 @@
 export const pageTitle = 'Tunnel: начало работы'
-export const description = 'Практическая инструкция по установке и первому запуску Tunnel.'
+export const description = 'Запуск локального сервера Tunnel, подписка на событие и отправка сообщения.'
 
 # Tunnel: начало работы
 
-## Установка
+Tunnel передаёт события между процессами Localzet Server. Стабильная линия `2.x` рассчитана на Server 4; текущие исходники для Server 7 пока устанавливаются из `dev-main`:
 
 ```sh
-composer require localzet/tunnel
+composer require localzet/tunnel:dev-main
 ```
 
-## Первый сценарий
+## Поднимите сервер каналов
+
+Создайте `tunnel.php`:
 
 ```php
+<?php
+
 use localzet\Server;
 use localzet\Tunnel\Server as TunnelServer;
-use localzet\Tunnel\Client;
+
+require __DIR__ . '/vendor/autoload.php';
 
 new TunnelServer('frame://127.0.0.1:2206');
 Server::runAll();
+```
+
+Запустите его штатной CLI-командой Server (`php tunnel.php start`). Сокет привязан к loopback: для межузлового соединения задайте закрытый адрес и firewall ACL.
+
+## Подпишитесь и опубликуйте
+
+В процессе приложения зарегистрируйте callback и подключите клиента:
+
+```php
+use localzet\Tunnel\Client;
 
 Client::connect('frame://127.0.0.1:2206');
-Client::on('cache.updated', static function ($data): void {
-    // Handle the event in this worker.
+Client::on('cache.updated', static function (mixed $data): void {
+    // Update local process state from the event payload.
 });
+
 Client::publish('cache.updated', ['key' => 'item-1']);
 ```
 
-Сверьте совместимость и ограничения в разделе API и эксплуатации до включения в приложение.
+Сначала вызовите `connect()`, затем зарегистрируйте событие: `on()` сразу отправляет серверу подписку. Вызывайте это один раз при старте процесса внутри event loop Server, а не на каждый запрос. По умолчанию wire format использует PHP serialization, но object deserialization на принимающей стороне выключена; передавайте скаляры и массивы. Оба процесса должны использовать один и тот же формат.
+
+Публикация — доставка активным подписчикам, а не долговременная гарантия: состояние соединений и очереди находятся в памяти. Проверяйте reconnect, повторную доставку и shutdown. Дополнительные методы очереди и настройки сериализации описаны в [API и эксплуатации](/projects/tunnel/reference).

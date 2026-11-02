@@ -1,32 +1,49 @@
 export const pageTitle = 'MQTT: начало работы'
-export const description = 'Практическая инструкция по установке и первому запуску MQTT.'
+export const description = 'Подключение PHP-клиента к брокеру MQTT 3.1.1 или MQTT 5 и приём сообщений.'
 
 # MQTT: начало работы
 
-## Установка
+Установите пакет в приложение на Localzet Server 7. Публичный API клиента работает внутри event loop.
 
 ```sh
-composer require localzet/mqtt
+composer config repositories.localzet-mqtt vcs https://github.com/localzet/MQTT
+composer require localzet/mqtt:dev-main
 ```
 
-## Первый сценарий
+Пример использует локальный брокер без TLS. В production передавайте credentials из secret manager и подключайтесь по `mqtts://` с проверкой сертификата.
 
 ```php
-use localzet\MQTT\Client;
+<?php
 
-$mqtt = new Client('mqtt://127.0.0.1:1883', [
-    'client_id' => sprintf('example-worker-%d', getmypid()),
-    'protocol_level' => 4,
-    'username' => getenv('MQTT_USERNAME') ?: '',
-    'password' => getenv('MQTT_PASSWORD') ?: '',
-    'connect_timeout' => 10,
-    'resubscribe' => true,
-]);
-$mqtt->onMessage = static function ($topic, $message): void {
-    echo "$topic: $message" . PHP_EOL;
+use localzet\MQTT\Client;
+use localzet\Server;
+
+require __DIR__ . '/vendor/autoload.php';
+
+$server = new Server('http://127.0.0.1:8080');
+$server->count = 1;
+$server->onWorkerStart = static function (): void {
+    $client = new Client('mqtt://127.0.0.1:1883', [
+        'client_id' => 'status-listener-' . getmypid(),
+        'protocol_level' => 4,
+        'username' => getenv('MQTT_USERNAME') ?: '',
+        'password' => getenv('MQTT_PASSWORD') ?: '',
+        'connect_timeout' => 10,
+        'resubscribe' => true,
+    ]);
+
+    $client->onMessage = static function (string $topic, string $message): void {
+        echo $topic . ': ' . $message . PHP_EOL;
+    };
+    $client->onConnect = static function (Client $client): void {
+        $client->subscribe('demo/status', ['qos' => 1]);
+    };
+    $client->connect();
 };
-$mqtt->connect();
-$mqtt->subscribe('demo/status', ['qos' => 1]);
+
+Server::runAll();
 ```
 
-Сверьте совместимость и ограничения в разделе API и эксплуатации до включения в приложение.
+Используйте уникальный `client_id` для каждого активного клиента. Выберите `protocol_level: 4` для MQTT 3.1.1 или `5` для MQTT 5. Подписывайтесь после успешного подключения; при reconnect клиент может восстановить подписки, но приложение всё равно должно учитывать повторную доставку и делать обработчики идемпотентными.
+
+Проверка протокола выполняется `composer run test`. Интеграционный сценарий `composer run test:broker` требует Docker и запускает временный Mosquitto. Он проверяет TCP/TLS handshake и QoS 1, но тестовый TLS сертификат самоподписанный; production trust chain проверяйте отдельно. См. [API и эксплуатацию](/projects/mqtt/reference).

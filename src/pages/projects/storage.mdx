@@ -4,6 +4,13 @@ export const description = 'Общее in-memory хранилище Localzet Ser
 # Localzet Storage
 [Начало работы](/projects/storage/start) · [API и эксплуатация](/projects/storage/reference)
 
+Пакет пока не опубликован в Packagist. Подключите Git VCS repository и устанавливайте текущую ветку `dev-main`.
+
+```sh
+composer config repositories.localzet-storage vcs https://github.com/localzet/Storage
+composer require localzet/storage:dev-main
+```
+
 
 Storage предоставляет клиент-серверное общее in-memory хранилище. Пакет требует PHP 8.2+ и Localzet Server 7. По умолчанию listener привязан к `127.0.0.1:8008`; встроенной аутентификации нет.
 

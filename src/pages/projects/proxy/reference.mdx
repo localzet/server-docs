@@ -1,8 +1,21 @@
 export const pageTitle = 'Proxy: API и эксплуатация'
-export const description = 'API, совместимость, ограничения и эксплуатационные рекомендации Proxy.'
+export const description = 'Настройки HTTP forward proxy, allowlist назначения, CONNECT relay и известные сетевые ограничения.'
 
 # Proxy: API и эксплуатация
 
-Нужны PHP 8.1+ и Localzet Server `^7.0`. `allowedHosts` задаёт точные разрешённые имена (без учёта регистра), `allowedPorts` — порты. Обработчик принимает абсолютные URL `http://` и CONNECT для туннеля; некорректные и запрещённые запросы отклоняются.
+Требуются PHP 8.1+ и Localzet Server `^7.0`. Класс `localzet\Proxy` наследуется от Server и принимает `new Proxy($socketName, $socketContext = [])`. Listener и число worker настраиваются через свойства Server.
 
-Аутентификации клиентов нет. Привязывайте listener к loopback или закрытой сети за ingress ACL. Список имён не фиксирует DNS-ответ и не блокирует частные или link-local адреса, если разрешённое имя указывает на них. Настройте исходящий firewall; отдельно проверьте смену DNS, CONNECT и закрытие ресурсов.
+## Политика исходящих подключений
+
+```php
+$proxy->allowedHosts = ['api.example.org'];
+$proxy->allowedPorts = [443];
+```
+
+Пустой список `allowedHosts` запрещает все назначения. Сопоставление hostname точное, без учёта регистра; порт сравнивается по точному номеру. Реализуются HTTP absolute-form запросы и `CONNECT`. В исходящий поток передаётся полученный HTTP buffer, CONNECT после успешного соединения начинает двунаправленный TCP pipe.
+
+Прокси не имеет встроенной клиентской аутентификации. Разрешённое DNS имя может резолвиться в loopback, private, link-local или иной запрещённый адрес; код не закрепляет и не фильтрует DNS ответы. Сетевой egress firewall обязателен, если доступ к чувствительным сетям должен быть закрыт. Не слушайте публичный интерфейс без внешних ACL и доверенного auth ingress.
+
+## Границы реализации и проверки
+
+Пакет не является reverse proxy, HTTP/2 proxy или production gateway с полной политикой маршрутизации. Протокол HTTP-запроса обрабатывается имеющимся callback; перед реальным трафиком проверьте framing и поведение больших/частичных запросов на целевом Server. Тесты: `composer test`, `composer test:integration`, `composer lint`. Интеграция проверяет loopback HTTP, CONNECT и отказ upstream, но не DNS rebinding, защиту private ranges, аутентификацию клиента или нагрузочную устойчивость.

@@ -4,6 +4,13 @@ export const description = 'Socket.IO server для Localzet Server 7 с in-memo
 # Localzet Socket.IO
 [Начало работы](/projects/socketio/start) · [API и эксплуатация](/projects/socketio/reference)
 
+Пакет пока не опубликован в Packagist. Подключите Git VCS repository и устанавливайте текущую ветку `dev-main`.
+
+```sh
+composer config repositories.localzet-socketio vcs https://github.com/localzet/SocketIO
+composer require localzet/socketio:dev-main
+```
+
 
 SocketIO подключает Engine.IO/Socket.IO обработчики к Localzet Server и содержит собственные WebSocket framing/parser реализации. Для Server 7 добавлен `ProtocolInterface` adapter и схема `socketio://`.
 

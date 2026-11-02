@@ -1,8 +1,29 @@
-export const pageTitle = 'Mqtt: API и эксплуатация'
-export const description = 'API, совместимость, ограничения и эксплуатационные рекомендации Mqtt.'
+export const pageTitle = 'MQTT: API и эксплуатация'
+export const description = 'Настройка MQTT 3.1.1 и MQTT 5 клиента, callbacks, подтверждений, TLS и reconnect.'
 
-# Mqtt: API и эксплуатация
+# MQTT: API и эксплуатация
 
-Пакет требует Localzet Server `^7.0`. `mqtt://host[:port]` использует порт 1883 по умолчанию, `mqtts://` — 8883. `protocol_level: 4` выбирает MQTT 3.1.1, `5` — MQTT 5. Параметры TLS передаются через `ssl`; оставляйте проверку сертификата включённой. Основные методы: `connect`, `subscribe`, `unsubscribe`, `publish`, `disconnect`, `reconnect`.
+Пакет `localzet/mqtt` требует Localzet Server `^7.0`. `Client` принимает адрес `mqtt://host[:port]` (по умолчанию 1883), `mqtts://host[:port]` (8883) или TCP address. `protocol_level: 4` включает MQTT 3.1.1, `5` — MQTT 5.
 
-`resubscribe` восстанавливает подписки, но не гарантирует однократную обработку сообщения. Делайте handlers идемпотентными и учитывайте QoS и состояние сессии. В репозитории есть тесты протокола и сценарий с Mosquitto. Самоподписанный сертификат в тесте не проверяет production цепочку доверия.
+## Настройки и callbacks
+
+Часто используемые параметры:
+
+| Параметр | Назначение |
+| --- | --- |
+| `client_id` | Идентификатор сессии брокера; используйте уникальное значение на активный процесс |
+| `username`, `password` | Credentials брокера, передавайте из secret store |
+| `connect_timeout` | Предельное ожидание соединения |
+| `resubscribe` | Повторно подписаться на сохранённые topics после reconnect |
+| `ssl` | TLS boolean или stream SSL context |
+| `properties` | MQTT 5 connect properties |
+
+`onConnect`, `onReconnect`, `onMessage`, `onClose` и `onError` — callbacks клиента. Типовой порядок: создать клиента, установить обработчики, вызвать `connect()`, подписаться из `onConnect`, а затем публиковать. Основные методы: `subscribe($topic, $options, $callback, $properties)`, `unsubscribe(...)`, `publish($topic, $content, $options, $callback, $properties)`, `disconnect()` и `reconnect()`.
+
+Для `mqtts://` включается TLS transport. Настройте SSL context с проверкой peer и hostname, доверенным CA и допустимой версией TLS; не отключайте `verify_peer` для удобства. Не публикуйте пароль, payload или чувствительные topics в debug-логах.
+
+## Доставка и восстановление
+
+QoS 1 допускает повторную доставку. Reconnect и автоматическая повторная подписка не превращают callback в exactly-once обработчик. Делайте операции потребителя идемпотентными, учитывайте clean/persistent session настройки брокера и обрабатывайте отказ подключения и закрытие. Пакет не управляет брокером, ACL, хранилищем сообщений или retained-message политикой.
+
+`composer run test` запускает протокольные регрессии. `composer run test:broker` требует Docker и проверяет Mosquitto сценарии TCP/TLS, credentials, QoS 1 и reconnect. В тесте сертификат самоподписанный с отключённой проверкой цепочки; успешный тест подтверждает handshake, но не production certificate validation.

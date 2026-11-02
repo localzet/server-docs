@@ -1,8 +1,20 @@
 export const pageTitle = 'Tunnel: API и эксплуатация'
-export const description = 'API, совместимость, ограничения и эксплуатационные рекомендации Tunnel.'
+export const description = 'События, подписки, очереди, reconnect, wire format и границы доставки Tunnel.'
 
 # Tunnel: API и эксплуатация
 
-Нужны PHP 8.1+ и Localzet Server `^7.0`. Статический API клиента: `connect`, `on`, `subscribe`, `unsubscribe`, `publish`, `watch`, `unwatch`, `enqueue`, `reserve`. Регистрируйте обработчики до публикации. При `watch(..., autoReserve: true)` следующий элемент запрашивается в `finally` callback. Очереди хранятся в памяти и не переживают остановку.
+Требуются PHP 8.1+ и Localzet Server `^7.0`. Сервер создаётся как `new localzet\Tunnel\Server($socketName, $debug = false, $allowObjectSerialization = false)`; при заданном socket name он регистрирует один worker через bootstrap Server. `Client` — статический API и рассчитан на один соединённый Tunnel endpoint в каждом PHP-процессе. Стабильная линия Tunnel `2.x` рассчитана на Server 4; текущие исходники Server 7 пока устанавливаются через `dev-main`.
 
-Поддерживаются JSON и PHP serialization; десериализация объектов выключена по умолчанию. Включайте её на сервере и клиенте только в доверенной изолированной сети. У Tunnel нет аутентификации peer и собственного шифрования: ограничьте доступ сетевыми ACL. Делайте обработчики идемпотентными и проверяйте reconnect и shutdown. Перед интеграцией проверьте совместимость Tunnel и Server в Composer lock.
+## События
+
+Сначала вызовите `Client::connect($socketName)`, затем регистрируйте callbacks через `on($event, $callback)`. `on()` одновременно оформляет подписку; для явного управления используйте `subscribe()` и `unsubscribe()`. `publish($events, $data, $is_loop = false)` отправляет событие подписчикам; `is_loop` выбирает round-robin режим публикации, а не гарантирует однократную обработку. `onConnect`, `onClose` и `onMessage` позволяют наблюдать lifecycle соединения.
+
+## Очереди
+
+`enqueue($channels, $data)` добавляет данные в именованную очередь. `watch($channels, $callback, $autoReserve = true)` начинает получать элементы; при авто-резервировании Tunnel запрашивает следующий элемент после завершения callback. `unwatch()` прекращает наблюдение, `reserve()` запрашивает элемент вручную. Очередь хранится только в RAM сервера, не является durable queue и теряется при рестарте. Для побочных эффектов используйте идемпотентные handlers; собственный механизм retry/dead-letter отсутствует.
+
+## Формат, безопасность и надёжность
+
+Wire protocol по умолчанию сериализует данные PHP. Object deserialization закрыта и на сервере, и на клиенте. Не используйте `new Server(..., allowObjectSerialization: true)` и `Client::allowObjectSerialization()` с недоверенными peer. Передавайте скаляры и массивы; обе стороны должны договориться о формате. Протокол не имеет встроенной аутентификации или TLS, поэтому слушайте loopback либо изолированную сеть и ограничьте доступ внешними ACL.
+
+Reconnect восстанавливает транспорт, но не обеспечивает durable delivery или exactly-once. Тестируйте разрыв соединения, повторную подписку, конкурирующих consumers и shutdown в целевом приложении. Версия Server 7 должна быть совместима с текущей веткой Tunnel; проверяйте Composer constraints установленного checkout перед развёртыванием.

@@ -1,24 +1,43 @@
 export const pageTitle = 'Proxy: начало работы'
-export const description = 'Практическая инструкция по установке и первому запуску Proxy.'
+export const description = 'Установка и закрытый запуск HTTP forward proxy с ограничением адресов и портов назначения.'
 
 # Proxy: начало работы
 
-## Установка
+Localzet Proxy — экспериментальный HTTP forward proxy для доверенной сети. У него нет клиентской аутентификации, поэтому оставьте listener на loopback, а разрешённые назначения перечислите явно.
 
 ```sh
-composer require localzet/proxy
+composer config repositories.localzet-proxy vcs https://github.com/localzet/Proxy
+composer require localzet/proxy:dev-main
 ```
 
-## Первый сценарий
+Создайте `proxy.php`:
 
 ```php
+<?php
+
 use localzet\Proxy;
 
+require __DIR__ . '/vendor/autoload.php';
+
 $proxy = new Proxy('tcp://127.0.0.1:8080');
+$proxy->name = 'restricted-forward-proxy';
 $proxy->count = 1;
 $proxy->allowedHosts = ['api.example.org'];
-$proxy->allowedPorts = [80, 443];
+$proxy->allowedPorts = [443];
+
 Proxy::runAll();
 ```
 
-Сверьте совместимость и ограничения в разделе API и эксплуатации до включения в приложение.
+Запустите локально:
+
+```sh
+php proxy.php start
+```
+
+Проверьте, что неразрешённые host и port отклоняются. Разрешённый CONNECT можно проверить клиентом `curl`:
+
+```sh
+curl --proxy http://127.0.0.1:8080 https://api.example.org/health
+```
+
+Список разрешённых имён проверяется до DNS-разрешения. Он сам по себе не блокирует private, loopback или link-local адреса, на которые может указывать разрешённое имя; закройте исходящий доступ firewall/ACL. Не публикуйте прокси во внешнюю сеть без отдельного слоя аутентификации и сетевого контроля. Команды локальных проверок и ограничения парсинга перечислены в [API и эксплуатации](/projects/proxy/reference).

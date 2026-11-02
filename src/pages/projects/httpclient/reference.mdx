@@ -1,8 +1,30 @@
 export const pageTitle = 'HTTP Client: API и эксплуатация'
-export const description = 'API, совместимость, ограничения и эксплуатационные рекомендации HTTP Client.'
+export const description = 'Методы Client и ParallelClient, параметры пула соединений, ошибки и совместимость выпусков.'
 
 # HTTP Client: API и эксплуатация
 
-Ветка исходников требует PHP 8.0+, расширения `curl` и `json`, Localzet Server `^7.0` и PSR-7 `^3.0`. Методы `get()`, `post()` и `request()` асинхронны: результат доступен в callback успеха, ошибка — в callback ошибки. `request()` принимает HTTP-версию и callbacks в массиве параметров. `ParallelClient` добавляет `push()`, `batch()` и `await()`; формат набора запросов сверяйте с кодом установленной версии. Стабильный тег `v2.0.2` относится к Server 4.2, не к этой ветке.
+Текущая ветка исходников требует PHP 8.2+, `ext-curl`, `ext-json`, Localzet Server `^7.0`, Localzet PSR-7 `^3.0` и `psr/http-message:^2.0`. Опубликованный `v2.0.2` относится к Server 4.2; перед установкой сверяйте [манифест stable tag](https://github.com/localzet/HttpClient/blob/v2.0.2/composer.json) и [текущий манифест](https://github.com/localzet/HttpClient/blob/main/composer.json). Ветка `dev-main` не является стабильным релизом.
 
-Ограничивайте число соединений и задавайте таймауты. Обрабатывайте оба callback, не пишите секретные заголовки в журнал и проверяйте TLS. Redirect, отмена, потоковая передача и закрытие пула требуют интеграционных проверок. В манифесте нет именованных команд тестирования и lint.
+## Методы запроса
+
+- `Client::get($url, $headers = [], $success = null, $error = null)` отправляет GET.
+- `Client::post($url, $data = [], $headers = [], $success = null, $error = null)` отправляет POST form data.
+- `Client::request($url, $method = 'GET', $data = [], $headers = [], $options = [])` задаёт общий вариант запроса.
+- `ParallelClient::push($url, $options)` и `batch($set)` накапливают запросы; `await($errorThrow = false)` ожидает завершения и возвращает результаты.
+
+При переданных callbacks запрос завершается асинхронно: ответ доступен только в callback успеха, ошибки передаются в callback ошибки. На поддерживаемом Unix event loop вызов `request()` без callback может приостановить текущую Fiber и вернуть результат, но для кода приложения предпочтительно явно обрабатывать оба callback. HTTP status code сам по себе не считается транспортной ошибкой.
+
+## Пул и эксплуатация
+
+```php
+$client = new \localzet\HTTP\Client([
+    'max_conn_per_addr' => 32,
+    'keepalive_timeout' => 15,
+    'connect_timeout' => 5,
+    'timeout' => 20,
+]);
+```
+
+Опции пула относятся к каждому адресу; задавайте конечные таймауты и ограничение соединений под свой трафик. Они заменяют соответствующие значения по умолчанию, а вложенные настройки объединяются по ключам. Не блокируйте callback долгой работой, редактируйте credentials перед логированием и не отключайте проверку TLS в production. Закрытие пула, redirect policy, отмена и streaming требуют проверки на точной версии кода и целевой среде.
+
+В репозитории нет сопровождаемого набора сквозных тестов для сетевых edge cases. Перед использованием проверьте TLS trust chain, редиректы, response body, медленный/оборванный upstream и закрытие соединений. Не закрепляйте dev-ветку в production до выпуска совместимого стабильного тега.

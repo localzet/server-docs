@@ -1,31 +1,39 @@
 export const pageTitle = 'Socket.IO: начало работы'
-export const description = 'Практическая инструкция по установке и первому запуску Socket.IO.'
+export const description = 'Подключение Socket.IO к локальному listener Localzet Server и обработка события.'
 
 # Socket.IO: начало работы
 
-## Установка
+Socket.IO добавляет Engine.IO transport и event API поверх Localzet Server 7. Установите пакет:
 
 ```sh
-composer require localzet/socketio
+composer config repositories.localzet-socketio vcs https://github.com/localzet/SocketIO
+composer require localzet/socketio:dev-main
 ```
 
-## Первый сценарий
+Минимальный сервер ниже слушает только loopback, задаёт разрешённый browser origin и возвращает событие `pong`:
 
 ```php
+<?php
+
 use localzet\Server;
 use localzet\SocketIO\SocketIO;
 
+require __DIR__ . '/vendor/autoload.php';
+
 $server = new Server('socketio://127.0.0.1:2020');
 $io = new SocketIO();
+$io->origins('https://app.example.org');
 $io->attach($server);
+
 $io->on('connection', static function ($socket): void {
     $socket->on('ping', static function ($data) use ($socket): void {
         $socket->emit('pong', $data);
     });
 });
+
 Server::runAll();
 ```
 
-Здесь listener привязан к loopback. Если сервер должен принимать внешние подключения, задайте адрес осознанно и ограничьте доступ сетевыми правилами.
+Запустите как Localzet Server entrypoint: `php socketio.php start`. Перед подключением браузера проверьте актуальную совместимость используемого `socket.io-client`: текущие регрессии не подтверждают поддержку всех версий протокола, polling и WebSocket upgrade.
 
-Сверьте совместимость и ограничения в разделе API и эксплуатации до включения в приложение.
+Параметр origin ограничивает часть браузерных источников, но не заменяет аутентификацию и авторизацию: отсутствующий/нулевой Origin не является доказательством доверия. Проверяйте пользователя и права в приложении, задайте список origins явно и ограничьте listener ingress ACL. Межпроцессные комнаты требуют совместимого adapter; см. [API и ограничения](/projects/socketio/reference).

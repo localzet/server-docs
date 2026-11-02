@@ -1,35 +1,50 @@
 export const pageTitle = 'HTTP Client: начало работы'
-export const description = 'Практическая инструкция по установке и первому запуску HTTP Client.'
+export const description = 'Установка HTTP Client для Server 7, асинхронный запрос и обработка ошибок.'
 
 # HTTP Client: начало работы
 
-## Установка
+Текущий исходный код адаптирован к Localzet Server 7 и пока распространяется как `dev-main`. Опубликованный стабильный тег `v2.0.2` требует Server 4.2, поэтому не смешивайте его с этим примером.
 
 ```sh
 composer require localzet/http:dev-main
 ```
 
-Ветка `dev-main` соответствует Server 7. Последний стабильный тег `v2.0.2` требует Server 4.2; версии пакета и исходников нельзя считать взаимозаменяемыми.
-
-## Первый сценарий
+Клиент использует event loop Server: вызывайте его из работающего процесса Server, а не из обычного короткого PHP CLI вызова.
 
 ```php
-use localzet\HTTP\Client;
+<?php
 
-$http = new Client([
-    'max_conn_per_addr' => 32,
+use localzet\HTTP\Client;
+use localzet\Server;
+use localzet\Server\Connection\TcpConnection;
+use localzet\Server\Protocols\Http\Request;
+use localzet\Server\Protocols\Http\Response;
+
+require __DIR__ . '/vendor/autoload.php';
+
+$server = new Server('http://127.0.0.1:8080');
+$client = new Client([
+    'max_conn_per_addr' => 16,
     'keepalive_timeout' => 15,
-    'connect_timeout' => 10,
-    'timeout' => 20,
+    'connect_timeout' => 5,
+    'timeout' => 10,
 ]);
-$http->get('https://example.com/status',
-    success: static function ($response): void {
-        echo $response->getStatusCode();
-    },
-    error: static function ($exception): void {
-        error_log((string) $exception);
-    }
-);
+
+$server->onMessage = static function (TcpConnection $connection, Request $request) use ($client): void {
+    $client->get(
+        'https://example.com/health',
+        success: static function ($response) use ($connection): void {
+            $connection->send(new Response(200, ['Content-Type' => 'text/plain'], (string) $response));
+        },
+        error: static function (Throwable $error) use ($connection): void {
+            $connection->send(new Response(502, [], 'Upstream request failed'));
+        },
+    );
+};
+
+Server::runAll();
 ```
 
-Сверьте совместимость и ограничения в разделе API и эксплуатации до включения в приложение.
+Для проверки передайте локальный upstream URL и выполните запрос к `http://127.0.0.1:8080`. Обработайте оба callback: сетевые ошибки приходят отдельно от HTTP-ответов, поэтому в callback успеха проверяйте также status code. Не возвращайте приватный текст исключения клиенту и не записывайте секретные заголовки в логи.
+
+Перед production-развёртыванием зафиксируйте проверенный commit/branch, проверьте TLS и redirect поведение и выполните интеграционные проверки на используемых версиях Server и PSR-7. Подробности — в [API и ограничениях](/projects/httpclient/reference).

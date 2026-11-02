@@ -1,27 +1,42 @@
 export const pageTitle = 'Storage: начало работы'
-export const description = 'Практическая инструкция по установке и первому запуску Storage.'
+export const description = 'Запуск Localzet Storage на loopback и работа с ключами из приложения PHP.'
 
 # Storage: начало работы
 
-## Установка
+Storage — простое общее in-memory хранилище для процессов приложения. Установите пакет вместе с Localzet Server 7:
 
 ```sh
-composer require localzet/storage
+composer config repositories.localzet-storage vcs https://github.com/localzet/Storage
+composer require localzet/storage:dev-main
 ```
 
-## Первый сценарий
+Создайте серверное приложение. Storage слушает loopback и использует один worker по умолчанию:
 
 ```php
+<?php
+
 use localzet\Server;
 use localzet\Storage\Server as StorageServer;
-use localzet\Storage\Client;
+
+require __DIR__ . '/vendor/autoload.php';
 
 new StorageServer('127.0.0.1', 8008);
 Server::runAll();
+```
+
+Запустите файл командой Localzet Server, например `php storage.php start`. В другом процессе приложения:
+
+```php
+use localzet\Storage\Client;
 
 $cache = new Client('127.0.0.1:8008');
 $cache->set('greeting', 'hello');
-$value = $cache->get('greeting');
+$greeting = $cache->get('greeting');
+
+$cache->add('counter', 0);
+$cache->increment('counter');
 ```
 
-Сверьте совместимость и ограничения в разделе API и эксплуатации до включения в приложение.
+`set`, `get`, `add`, `cas`, `increment` и `delete` работают через клиентский API; прочитайте возвращаемое значение, чтобы обработать отсутствующий ключ или неудачную условную запись. Клиент распределяет ключи между заданными адресами по CRC32, поэтому изменение списка узлов перемещает часть ключей.
+
+Данные теряются при остановке процесса; TTL, персистентности, репликации, аутентификации и шифрования нет. Не открывайте порт наружу. Объектная десериализация выключена; см. [безопасность и wire format](/projects/storage/reference).

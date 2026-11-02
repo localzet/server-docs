@@ -1,27 +1,49 @@
 export const pageTitle = 'Cron: начало работы'
-export const description = 'Практическая инструкция по установке и первому запуску Cron.'
+export const description = 'Установка, запуск периодического задания и проверка расписания в Localzet Server.'
 
 # Cron: начало работы
 
-## Установка
+Cron добавляет расписания в таймеры процесса Localzet Server. Добавьте пакет в приложение и создайте экземпляр задания при старте каждого worker:
 
 ```sh
-composer require localzet/cron
+composer require localzet/cron:dev-main
 ```
 
-## Первый сценарий
+Используйте `dev-main` для исходников под Server 7. Опубликованный stable `v1.0.3` рассчитан на Server 4.5; не используйте его с этим примером.
 
 ```php
+<?php
+
 use localzet\Cron;
 use localzet\Server;
 
-$server = new Server();
-$server->onServerStart = static function () {
-    new Cron('* * * * * *', static function (): void {
-        echo date('Y-m-d H:i:s') . PHP_EOL;
-    }, 'heartbeat');
+require __DIR__ . '/vendor/autoload.php';
+
+$server = new Server('http://127.0.0.1:8080');
+$server->count = 1;
+$server->onWorkerStart = static function (): void {
+    new Cron('*/10 * * * * *', static function (): void {
+        echo date(DATE_ATOM) . " scheduled task\n";
+    }, 'ten-second-heartbeat');
 };
+
 Server::runAll();
 ```
 
-Сверьте совместимость и ограничения в разделе API и эксплуатации до включения в приложение.
+Это расписание с шестью полями срабатывает каждые десять секунд. Для обычного cron используйте пять полей (`минута час день месяц день-недели`); шестое поле задаёт секунды. Сервер намеренно слушает только loopback, а `count = 1` исключает дублирование задания между workers в этом примере.
+
+## Проверьте расписание
+
+```php
+$parser = new \localzet\CronParser();
+
+if (!$parser->isValid('0 */5 * * *')) {
+    throw new InvalidArgumentException('Invalid schedule');
+}
+
+$nextTimes = $parser->parse('0 */5 * * *');
+```
+
+`parse()` возвращает рассчитанные Unix timestamps; задайте нужный timezone приложения до расчёта. Тесты проекта: `composer test` и `composer lint`. Планировщик работает в памяти каждого процесса и не является распределённым scheduler — для глобально единственного запуска используйте один экземпляр или внешнюю блокировку.
+
+См. [API и эксплуатационные ограничения](/projects/cron/reference).

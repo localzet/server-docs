@@ -4,6 +4,13 @@ export const description = 'Экспериментальный HTTP forward prox
 # Localzet Proxy
 [Начало работы](/projects/proxy/start) · [API и эксплуатация](/projects/proxy/reference)
 
+Пакет пока не опубликован в Packagist. Подключите Git VCS repository и устанавливайте текущую ветку `dev-main`.
+
+```sh
+composer config repositories.localzet-proxy vcs https://github.com/localzet/Proxy
+composer require localzet/proxy:dev-main
+```
+
 
 Экспериментальный HTTP forward proxy на Localzet Server 7. Исходящие TCP-подключения разрешены только к именам и портам из `allowedHosts` и `allowedPorts`. Встроенной аутентификации клиентов нет; DNS-резолвинг и блокировка частных IP для разрешённых имён остаются ответственностью сетевой политики.
 

@@ -1,23 +1,30 @@
 export const pageTitle = 'SOCKS5: начало работы'
-export const description = 'Практическая инструкция по установке и первому запуску SOCKS5.'
+export const description = 'Установка самостоятельного SOCKS5 CONNECT-сервиса, настройка credentials и локальная проверка.'
 
 # SOCKS5: начало работы
 
-## Установка и запуск
+SOCKS5 здесь поставляется как самостоятельный сервисный проект, а не пакет для встраивания. Требуются PHP 8.2+, Composer и Linux CLI. Получите исходники, установите зависимости и задайте credentials до запуска:
 
 ```sh
-composer install --no-dev
-# Provide credentials through a secret manager before starting the service.
-php start.php start
+git clone https://github.com/localzet/SOCKS5.git
+cd SOCKS5
+composer install --no-dev --prefer-dist
+
+export SOCKS5_BIND=127.0.0.1
+export SOCKS5_PORT=1080
+export SOCKS5_USERNAME='proxy-user'
+read -rsp 'SOCKS5 password: ' SOCKS5_PASSWORD; export SOCKS5_PASSWORD; echo
+php start.php start -d
+```
+
+Пароль не записывается в исходники. Для службы задайте переменные через защищённый механизм управления секретами; daemon mode выше подходит только для локальной проверки и ручного управления.
+
+Проверьте локальный TCP CONNECT, запустив включённый сценарий интеграции:
+
+```sh
+python3 tests/integration.py
+php start.php status
 php start.php stop
 ```
 
-## Первый сценарий
-
-```sh
-export SOCKS5_USERNAME='proxy-user'
-export SOCKS5_PASSWORD='<secret>'
-php start.php start
-```
-
-Сверьте совместимость и ограничения в разделе API и эксплуатации до включения в приложение.
+Для ручной проверки используйте клиент, который запрашивает пароль интерактивно; не помещайте credentials в URL или аргументы команды. Логин/пароль SOCKS передаются открытым текстом; внешний доступ прокладывайте через доверенную сеть или защищённый туннель. Сервер по умолчанию слушает loopback и требует аутентификацию. Сверьте поддерживаемые команды и ограничения в [API и эксплуатации](/projects/socks5/reference).

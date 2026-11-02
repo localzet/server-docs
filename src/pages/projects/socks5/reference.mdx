@@ -1,8 +1,35 @@
 export const pageTitle = 'SOCKS5: API и эксплуатация'
-export const description = 'API, совместимость, ограничения и эксплуатационные рекомендации SOCKS5.'
+export const description = 'Переменные настройки, поддерживаемые SOCKS5 команды, ограничения и диагностика сервиса.'
 
 # SOCKS5: API и эксплуатация
 
-По умолчанию слушатель привязан к `127.0.0.1:1080`. Настройки: `SOCKS5_BIND`, `SOCKS5_PORT`, `SOCKS5_USERNAME`, `SOCKS5_PASSWORD`, `SOCKS5_ALLOW_NO_AUTH`, лимиты подключений и попыток, `SOCKS5_PID_FILE`, `SOCKS5_LOG_FILE`. Без учётных данных сервис не запустится; anonymous режим разрешён только по явному флагу на loopback.
+Это самостоятельный Linux PHP CLI-сервис, который использует `localzet/server:^7.0`. Запуск и остановка выполняются через `start.php`:
 
-Реализован TCP CONNECT к IPv4 и DNS-именам. UDP ASSOCIATE выключен, BIND и IPv6 не поддерживаются. DNS поиск блокирует worker; лимиты действуют на процесс. Логин и пароль передаются без шифрования — используйте доверенную сеть либо защищённый туннель. Интеграционная проверка: `python3 tests/integration.py`.
+```sh
+php start.php start
+php start.php status
+php start.php stop
+```
+
+## Конфигурация
+
+Все параметры задаются переменными окружения процесса службы:
+
+| Переменная | По умолчанию | Назначение |
+| --- | --- | --- |
+| `SOCKS5_BIND` | `127.0.0.1` | IPv4 адрес прослушивания |
+| `SOCKS5_PORT` | `1080` | TCP порт |
+| `SOCKS5_USERNAME`, `SOCKS5_PASSWORD` | обязательны | SOCKS username/password auth |
+| `SOCKS5_ALLOW_NO_AUTH` | `0` | Включает anonymous только на loopback |
+| `SOCKS5_MAX_CONNECTIONS` | `1024` | Одновременные соединения на worker |
+| `SOCKS5_MAX_CONNECTIONS_PER_IP` | `32` | Одновременные соединения с одного IP |
+| `SOCKS5_MAX_ATTEMPTS_PER_MINUTE` | `120` | Попытки соединения с одного IP за rolling minute |
+| `SOCKS5_PID_FILE`, `SOCKS5_LOG_FILE` | `/tmp/localzet-socks5.*` | Пути pid и log файлов |
+
+Задайте credentials в защищённом окружении, не в unit-файле с открытым доступом или shell history. AUTH username/password передаются без шифрования; ограничьте сетевой доступ и применяйте зашифрованный туннель для удалённых клиентов. Anonymous доступ разрешается только при явной настройке и loopback bind.
+
+## Поддержка протокола
+
+Реализован SOCKS5 TCP `CONNECT` к IPv4 адресам и DNS-именам. DNS lookup синхронный и может блокировать worker. `UDP ASSOCIATE` выключен, `BIND` и IPv6 назначения не поддерживаются. Не считайте сервис универсальным SOCKS5 сервером: тестируйте только нужный вам CONNECT поток и учитывайте ограничения фрагментации/буферов.
+
+Запуск интеграционных проверок: `python3 tests/integration.py` (нужен Python 3). Они создают локальные временные endpoints и проверяют auth, relay и лимиты, но не проверяют внешнее production окружение, разрешение DNS или сетевые ACL.

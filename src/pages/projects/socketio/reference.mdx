@@ -1,8 +1,18 @@
 export const pageTitle = 'Socket.IO: API и эксплуатация'
-export const description = 'API, совместимость, ограничения и эксплуатационные рекомендации Socket.IO.'
+export const description = 'SocketIO, namespace, socket events, rooms, origins и ограничения адаптеров.'
 
 # Socket.IO: API и эксплуатация
 
-Требуются PHP 8.1+ и Localzet Server `^7.0`. `SocketIO` предоставляет `attach`, `of`, `nsp`, `socket`, `adapter` и настройку origins. Namespace и socket поддерживают события, `emit`/`send` и комнаты через `join`, `leave`, `to`, `in`. Проверяйте входные данные в обработчиках приложения.
+Пакет требует PHP 8.1+ и Localzet Server `^7.0`. Создайте `SocketIO`, привяжите к серверу через `attach($server, $options = [])` и регистрируйте обработчики до запуска процессов. `of($namespace)` выбирает namespace; `origins($rule)` задаёт разрешённые browser origins.
 
-Адаптер по умолчанию хранит комнаты в одном процессе; workers не разделяют состояние. `ChannelAdapter` требует совместимый Tunnel — сверяйте ограничения обеих версий в Composer lock. По умолчанию origins разрешены через `*:*`; задайте допустимые источники явно перед подключением недоверенных клиентов. Регрессионные тесты не подтверждают полную работу современных Socket.IO клиентов, long polling, reconnect и межпроцессную доставку. Проверьте handshake, upgrade, origins, комнаты и остановку на фактических версиях.
+## События и комнаты
+
+У socket доступны `on($event, $callback)`, `emit($event, ...$data)`, `send()`, `join($room)`, `leave($room)` и `disconnect()`. Namespace/adapter предоставляет рассылку в `to($room)->emit(...)` и `in($room)->emit(...)`. Валидируйте payload, аутентифицируйте handshake в приложении и проверяйте доступ пользователя к каждому room/event.
+
+По умолчанию используется `DefaultAdapter`, который хранит подключения и rooms в памяти worker. Изменение комнаты в одном процессе не синхронизируется автоматически с другими. `ChannelAdapter` опирается на Tunnel; текущие опубликованные версии Tunnel 2.x совместимы с Server 4, а Server 7 адаптер ещё не имеет совместимого стабильного выпуска. Проверяйте lock-файл и не подключайте этот адаптер к Server 7 без совместимого кода.
+
+## Совместимость протокола и безопасность
+
+Реализация включает собственные Engine.IO/Socket.IO parsers и WebSocket framing. Текущие регрессии покрывают выбор Server listener и часть RFC6455 framing, но не подтверждают полную совместимость с современными Socket.IO клиентами, long polling, upgrade, binary payload или reconnect. Перед выпуском выполните реальный browser/client handshake, transport upgrade, комнаты, acknowledgements, disconnect и cross-worker сценарий на закреплённой версии клиента.
+
+Origins по умолчанию установлены в `*:*`. Задавайте конкретные origins, но помните: CORS/origin policy не является аутентификацией; проверки кода разрешают запросы без Origin. Привязывайте публичный listener за TLS ingress, проверяйте авторизацию приложения и ограничивайте размер/частоту событий. Не включайте межпроцессную доставку до подтверждения совместимости адаптера.

@@ -1,11 +1,17 @@
 export const pageTitle = 'Localzet Tunnel'
-export const description = 'Канал событий, публикации и очередей между процессами Localzet Server.'
+export const description = 'Канал событий и очередей между процессами Localzet Server 7; совместимость зависит от линии выпуска.'
 
 # Localzet Tunnel
 [Начало работы](/projects/tunnel/start) · [API и эксплуатация](/projects/tunnel/reference)
 
 
-Tunnel переносит события по именованным каналам и поддерживает очереди сообщений. Текущий выпуск требует Localzet Server 7. Клиент может использовать JSON или совместимый сериализованный wire format.
+Исходники текущей ветки Tunnel переносят события по именованным каналам и поддерживают очереди сообщений для Localzet Server 7. Опубликованные стабильные выпуски линии `2.x` рассчитаны на Server 4; обычная команда Composer не устанавливает текущие исходники.
+
+```sh
+composer require localzet/tunnel:dev-main
+```
+
+Используйте `dev-main` только для проверки текущих исходников; до совместимого стабильного тега не закрепляйте эту версию в production.
 
 Десериализация объектов на входе отключена по умолчанию. Статический opt-in `Client::allowObjectSerialization()` и аргумент конструктора Server предназначены только для доверенных peer в изолированной сети.
 
