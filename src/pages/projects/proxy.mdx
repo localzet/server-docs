@@ -4,7 +4,7 @@ export const description = 'HTTP forward proxy для Localzet Server 7 с Basic
 # Localzet Proxy
 [Начало работы](/projects/proxy/start) · [API и эксплуатация](/projects/proxy/reference)
 
-Proxy `1.0.0` — выпуск для Localzet Server 7 с обязательной Basic-аутентификацией и allowlist адресов назначения. Пакет ещё не зарегистрирован в Packagist; подключите Git VCS source и установите стабильный tag:
+Proxy `1.0.1` — выпуск для Localzet Server 7 с обязательной Basic-аутентификацией и allowlist адресов назначения. В HTTP-запросе прокси не пересылает upstream заголовки `Proxy-Authorization` и `Proxy-Connection`. Пакет ещё не зарегистрирован в Packagist; подключите Git VCS source и установите стабильный tag:
 
 ```sh
 composer config repositories.localzet-proxy vcs https://github.com/localzet/Proxy

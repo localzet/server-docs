@@ -3,7 +3,7 @@ export const description = 'Установка и закрытый запуск 
 
 # Proxy: начало работы
 
-Localzet Proxy — HTTP forward proxy с обязательной Basic-аутентификацией. Установите стабильную версию:
+Localzet Proxy `1.0.1` — HTTP forward proxy для Server 7 с обязательной Basic-аутентификацией. Установите стабильную версию:
 
 ```sh
 composer config repositories.localzet-proxy vcs https://github.com/localzet/Proxy
@@ -48,4 +48,4 @@ curl --proxy http://127.0.0.1:8080 --proxy-user "$PROXY_USERNAME" http://203.0.1
 
 When no password is included in `--proxy-user`, curl prompts for it instead of putting the password in shell history or process arguments. Replace the documentation-only IP with a reachable, approved literal address; the proxy rejects hostnames.
 
-Basic credentials передаются открытым текстом внутри HTTP. Размещайте listener в доверенной зашифрованной сети или за TLS terminator. В `allowedHosts` задавайте буквальные IPv4/IPv6 адреса, не доменные имена. Сохраните исходящий firewall/ACL и учитывайте, что прокси обрабатывает один запрос на клиентское соединение. Остальные ограничения перечислены в [API и эксплуатации](/projects/proxy/reference).
+Basic credentials передаются открытым текстом внутри HTTP. Размещайте listener в доверенной зашифрованной сети или за TLS terminator. Прокси удаляет `Proxy-Authorization` и `Proxy-Connection` из HTTP-запроса перед отправкой целевому серверу. В `allowedHosts` задавайте буквальные IPv4/IPv6 адреса, не доменные имена. Сохраните исходящий firewall/ACL и учитывайте, что прокси обрабатывает один запрос на клиентское соединение. Остальные ограничения перечислены в [API и эксплуатации](/projects/proxy/reference).
