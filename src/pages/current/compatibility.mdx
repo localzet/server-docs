@@ -3,11 +3,11 @@ export const description = 'Сравнение исходников Localzet Ser
 
 # Совместимость и сравнение версий
 
-Текущая документация описывает `main` с Composer branch alias `7.0.x-dev`. В таблице ниже сравниваются исходники этого репозитория с тегом `v4.5.3`. Это сравнение исходного кода и манифестов, а не гарантия совместимости конкретного приложения.
+Последний опубликованный пакет — `v7.0.2`; он совпадает с текущим `main` и включает исправление очереди данных `AsyncTcpConnection` до завершения соединения. Для библиотеки исходники доступны также как `7.0.x-dev`. В таблице ниже сравниваются исходники текущей версии с тегом `v4.5.3`. Это сравнение исходного кода и манифестов, а не гарантия совместимости конкретного приложения.
 
 | Область | `v4.5.3` | Текущий `main` (`7.0.x-dev`) |
 |---|---|---|
-| PHP и обязательные зависимости | PHP `^8.1 \|\| ^8.2`; обязательны `ext-sockets`, `ext-pcntl`, `ext-posix`, `localzet/events` | PHP `>=8.1`; обязательна только `ext-json`; остальные интеграции объявлены как optional |
+| PHP и обязательные зависимости | PHP `^8.1 \|\| ^8.2`; обязательны `ext-sockets`, `ext-pcntl`, `ext-posix`, `localzet/events` | PHP `>=8.1`; обязательны `ext-json` и `ext-ctype`; остальные интеграции объявлены как optional |
 | Event loop | Собственный набор Linux drivers, включая `StreamSelect`, `ext-uv`, `ext-event` и `ext-ev` | `EventLoopFactory`: `event` → `ev` → Revolt → встроенный `Select`; Windows имеет отдельную реализацию, Swoole/Swow выбираются явно |
 | Gateway и proxy | В исходниках тега нет компонентов `Gateway/HttpReverseProxy` и `Proxy/TcpProxy` | Добавлены HTTP/1.x reverse proxy, raw TCP proxy и общий `UpstreamPool` |
 | Hot upgrade | В исходниках тега нет `Runtime/HotUpgradeBroker` | Добавлен Unix hot upgrade с `pcntl_exec()` и передачей listener descriptors на поддерживаемой среде |
@@ -27,7 +27,7 @@ export const description = 'Сравнение исходников Localzet Ser
 
 ## PHP и платформы
 
-- Минимальное требование текущего кода: PHP `>=8.1`; `ext-json` обязателен.
+- Минимальное требование текущего кода: PHP `>=8.1`; `ext-json` и `ext-ctype` обязательны.
 - Основная CI-матрица выполняется на Linux с PHP 8.1–8.5.
 - Windows использует отдельный backend и предназначен для однопроцессного режима; платформа не входит в указанную Linux CI-матрицу.
 - На Unix supervisor и несколько workers требуют `pcntl` и `posix`. Hot upgrade также зависит от поддержки передачи listening descriptors; проверяйте runtime-команду `capabilities`.

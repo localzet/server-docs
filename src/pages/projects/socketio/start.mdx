@@ -7,7 +7,7 @@ Socket.IO добавляет Engine.IO transport и event API поверх Local
 
 ```sh
 composer config repositories.localzet-socketio vcs https://github.com/localzet/SocketIO
-composer require localzet/socketio:dev-main
+composer require localzet/socketio:^2.0
 ```
 
 Минимальный сервер ниже слушает только loopback, задаёт разрешённый browser origin и возвращает событие `pong`:
@@ -34,6 +34,6 @@ $io->on('connection', static function ($socket): void {
 Server::runAll();
 ```
 
-Запустите как Localzet Server entrypoint: `php socketio.php start`. Перед подключением браузера проверьте актуальную совместимость используемого `socket.io-client`: текущие регрессии не подтверждают поддержку всех версий протокола, polling и WebSocket upgrade.
+Запустите как Localzet Server entrypoint: `php socketio.php start`. Тесты проверяют Engine.IO polling, WebSocket handshake, подключение namespace и echo event. Они не подтверждают совместимость со всеми версиями `socket.io-client`, binary payload и reconnect; закрепите клиентскую версию и проверьте нужные transports в приложении.
 
 Параметр origin ограничивает часть браузерных источников, но не заменяет аутентификацию и авторизацию: отсутствующий/нулевой Origin не является доказательством доверия. Проверяйте пользователя и права в приложении, задайте список origins явно и ограничьте listener ingress ACL. Межпроцессные комнаты требуют совместимого adapter; см. [API и ограничения](/projects/socketio/reference).

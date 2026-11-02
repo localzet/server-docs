@@ -9,10 +9,12 @@ export const description = 'SocketIO, namespace, socket events, rooms, origins �
 
 У socket доступны `on($event, $callback)`, `emit($event, ...$data)`, `send()`, `join($room)`, `leave($room)` и `disconnect()`. Namespace/adapter предоставляет рассылку в `to($room)->emit(...)` и `in($room)->emit(...)`. Валидируйте payload, аутентифицируйте handshake в приложении и проверяйте доступ пользователя к каждому room/event.
 
-По умолчанию используется `DefaultAdapter`, который хранит подключения и rooms в памяти worker. Изменение комнаты в одном процессе не синхронизируется автоматически с другими. `ChannelAdapter` использует Tunnel 3.x, совместимый с Server 7, однако сквозная доставка через адаптер пока не подтверждена. Не включайте его в эксплуатацию до прохождения межпроцессного интеграционного теста.
+По умолчанию используется `DefaultAdapter`, который хранит подключения и rooms в памяти worker. Изменение комнаты в одном процессе не синхронизируется автоматически с другими. `ChannelAdapter` использует Tunnel 3.x. Сквозная проверка подтверждает broadcast между двумя Socket.IO процессами через Tunnel broker. Она не проверяет отказ брокера, повторное подключение, сохранность сообщений, авторизацию rooms или доставку при сетевом разрыве.
+
+Tunnel устанавливается отдельно: `composer require localzet/tunnel:^3.0`. Для межпроцессного режима задайте `ChannelAdapter` и адрес Tunnel broker на каждом worker; ограничьте broker loopback или доверенной сетью.
 
 ## Совместимость протокола и безопасность
 
-Реализация включает собственные Engine.IO/Socket.IO parsers и WebSocket framing. Текущие регрессии покрывают выбор Server listener и часть RFC6455 framing, но не подтверждают полную совместимость с современными Socket.IO клиентами, long polling, upgrade, binary payload или reconnect. Перед выпуском выполните реальный browser/client handshake, transport upgrade, комнаты, acknowledgements, disconnect и cross-worker сценарий на закреплённой версии клиента.
+Реализация включает собственные Engine.IO/Socket.IO parsers и WebSocket framing. Loopback tests покрывают polling и WebSocket handshake, namespace connection, event echo и межпроцессный broadcast. Они не подтверждают полную совместимость со всеми версиями Socket.IO клиента, binary payload, reconnect и broker failover. Проверьте используемую версию клиента и нужные transport сценарии на целевой платформе.
 
-Origins по умолчанию установлены в `*:*`. Задавайте конкретные origins, но помните: CORS/origin policy не является аутентификацией; проверки кода разрешают запросы без Origin. Привязывайте публичный listener за TLS ingress, проверяйте авторизацию приложения и ограничивайте размер/частоту событий. Не включайте межпроцессную доставку до подтверждения совместимости адаптера.
+Origins по умолчанию установлены в `*:*`. Задавайте конкретные origins, но помните: CORS/origin policy не является аутентификацией; проверки кода разрешают запросы без Origin. Привязывайте публичный listener за TLS ingress, проверяйте авторизацию приложения и ограничивайте размер/частоту событий. Перед production проверьте broker permissions, reconnect и сетевые ограничения в целевом окружении.
