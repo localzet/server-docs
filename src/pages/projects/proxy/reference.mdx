@@ -14,7 +14,7 @@ $proxy->allowedHosts = ['203.0.113.10'];
 $proxy->allowedPorts = [443];
 ```
 
-Непустые `username` и `password` обязательны; credentials сверяются в формате HTTP Basic через constant-time comparison. Они передаются открытым текстом в HTTP заголовке, поэтому используйте TLS transport или доверенную сеть. Для обычного HTTP forwarding заголовки `Proxy-Authorization` и `Proxy-Connection` удаляются перед отправкой upstream; при `CONNECT` прокси устанавливает TCP tunnel после успешной проверки. Пустой список `allowedHosts` запрещает все назначения. Разрешайте буквальные IPv4/IPv6 адреса; hostname отклоняются. Порт сравнивается по точному номеру. Реализуются HTTP absolute-form запросы и `CONNECT`.
+Непустые `username` и `password` обязательны; credentials сверяются в формате HTTP Basic через constant-time comparison. Они передаются открытым текстом в HTTP заголовке, поэтому используйте TLS transport или доверенную сеть. Для обычного HTTP forwarding заголовки `Proxy-Authorization` и `Proxy-Connection` удаляются перед отправкой upstream; при `CONNECT` прокси устанавливает TCP tunnel после успешной проверки. Пустой список `allowedHosts` запрещает все назначения. Разрешайте буквальные IPv4/IPv6 адреса; IPv6 в запросах указывается в квадратных скобках, например `[2001:db8::1]`, а в allowlist — в обычной записи `2001:db8::1`. Hostname отклоняются. Порт сравнивается по точному номеру. Реализуются HTTP absolute-form запросы и `CONNECT`.
 
 Basic-аутентификация не шифрует трафик; используйте TLS ingress и сетевой egress firewall. Не слушайте публичный интерфейс без внешних ACL.
 
