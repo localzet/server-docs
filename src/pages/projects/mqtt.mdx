@@ -1,22 +1,21 @@
 export const pageTitle = 'Localzet MQTT — MQTT-клиент для PHP'
-export const description = 'Экспериментальный MQTT 3.1.1 и MQTT 5 клиент для Localzet Server 7: ограничения, установка и проверенное поведение.'
+export const description = 'MQTT 3.1.1 и MQTT 5 клиент для Localzet Server 7 с TCP/TLS, QoS 0/1/2 и переподключением.'
 
 {/* Copyright © 2016-2026 [Localzet Group](https://www.localzet.com/). All rights reserved. Licensed under AGPL-3.0-or-later. */}
 
 # Localzet MQTT
 [Начало работы](/projects/mqtt/start) · [API и эксплуатация](/projects/mqtt/reference)
 
-Пакет пока не опубликован в Packagist. Подключите Git VCS repository и устанавливайте текущую ветку `dev-main`.
+MQTT `1.0.0` — клиент MQTT 3.1.1 и MQTT 5 для Localzet Server 7.
 
 ```sh
-composer config repositories.localzet-mqtt vcs https://github.com/localzet/MQTT
-composer require localzet/mqtt:dev-main
+composer require localzet/mqtt:^1.0
 ```
 
 
-Пакет `localzet/mqtt` предоставляет экспериментальный клиент MQTT 3.1.1 и MQTT 5 для Localzet Server 7. Composer PSR-4, namespaces и runtime API приведены к текущему контракту Server. Адаптеры протокола подключают клиент к `AsyncTcpConnection`; адреса `mqtt://` и `mqtts://` преобразуются в TCP-соединение с нужным транспортом и портом по умолчанию.
+Пакет `localzet/mqtt` предоставляет клиент MQTT 3.1.1 и MQTT 5 для Localzet Server 7. Адаптеры протокола подключают клиент к `AsyncTcpConnection`; адреса `mqtt://` и `mqtts://` выбирают TCP и TLS транспорт.
 
-Регрессионный набор проверяет framing неполных и объединённых пакетов, ping-кодирование и выбор MQTT 3/5 адаптера. Интеграционный набор запускает временный Mosquitto и проверяет логин/пароль, доставку и подтверждение QoS 1 для обоих уровней протокола по TCP и TLS, а также переподключение после перезапуска брокера и восстановление подписки.
+Регрессионный набор проверяет framing неполных и объединённых пакетов, ping-кодирование и выбор MQTT 3/5 адаптера. Интеграционный набор запускает временный Mosquitto и проверяет логин/пароль, QoS 1/2 для обоих уровней протокола по TCP и TLS, а также переподключение после перезапуска брокера и восстановление подписки.
 
 Тестовый TLS-брокер использует самоподписанный сертификат с отключённой проверкой сертификата на клиенте: тест подтверждает TLS handshake, но не валидацию доверенной цепочки сертификатов.
 

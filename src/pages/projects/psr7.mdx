@@ -5,12 +5,12 @@ export const description = 'PSR-7 HTTP messages, streams, URI и request helpers
 [Начало работы](/projects/psr7/start) · [API и эксплуатация](/projects/psr7/reference)
 
 
-Исходники текущей ветки предоставляют HTTP message и stream реализации, URI helpers и адаптер server request; манифест ветки требует PHP 8.2+, `psr/http-message:^2.0` и `localzet/server:^7.0`.
+Релиз `4.0.0` предоставляет HTTP message и stream реализации, URI helpers и адаптер server request; пакет требует PHP 8.2+, `psr/http-message:^2.0` и `localzet/server:^7.0`.
 
 ```sh
-composer require localzet/psr7:dev-main
+composer require localzet/psr7:^4.0
 ```
 
-Внимание к совместимости: опубликованный тег `v3.0.2` требует `localzet/server:^4.1`, а текущая ветка исходников — Server 7. Поэтому `composer require localzet/psr7` выберет пакет для Server 4; используйте явный `dev-main` только при осознанной установке текущих исходников. До публикации совместимого стабильного тега не фиксируйте эту dev-версию в production. Сравнение ограничений есть в [манифесте тега v3.0.2](https://github.com/localzet/PSR-7/blob/v3.0.2/composer.json) и [манифесте текущей ветки](https://github.com/localzet/PSR-7/blob/main/composer.json).
+Линия `4.x` предназначена для Server 7; историческая линия `3.x` рассчитана на Server 4. Установка `^4.0` фиксирует совместимую основную версию; перед обновлением проверьте поведение потоков и URI в приложении.
 
 Установка и автозагрузка сами по себе не подтверждают PSR-7 conformance. Проверяйте неизменяемость сообщений, потоки, URI encoding, multipart uploads и совместимость с потребителем.

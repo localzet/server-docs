@@ -26,4 +26,4 @@ export const description = 'Настройка MQTT 3.1.1 и MQTT 5 клиент
 
 QoS 1 допускает повторную доставку. Reconnect и автоматическая повторная подписка не превращают callback в exactly-once обработчик. Делайте операции потребителя идемпотентными, учитывайте clean/persistent session настройки брокера и обрабатывайте отказ подключения и закрытие. Пакет не управляет брокером, ACL, хранилищем сообщений или retained-message политикой.
 
-`composer run test` запускает протокольные регрессии. `composer run test:broker` требует Docker и проверяет Mosquitto сценарии TCP/TLS, credentials, QoS 1 и reconnect. В тесте сертификат самоподписанный с отключённой проверкой цепочки; успешный тест подтверждает handshake, но не production certificate validation.
+`composer run test` запускает протокольные регрессии. `composer run test:broker` требует Docker и проверяет Mosquitto сценарии MQTT 3.1.1/5, TCP/TLS, credentials, QoS 1/2 и reconnect. В тесте сертификат самоподписанный с отключённой проверкой цепочки; успешный тест подтверждает handshake, но не production certificate validation.

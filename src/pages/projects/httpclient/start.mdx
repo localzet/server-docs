@@ -3,10 +3,10 @@ export const description = 'Установка HTTP Client для Server 7, ас
 
 # HTTP Client: начало работы
 
-Текущий исходный код адаптирован к Localzet Server 7 и пока распространяется как `dev-main`. Опубликованный стабильный тег `v2.0.2` требует Server 4.2, поэтому не смешивайте его с этим примером.
+HTTP Client `3.x` рассчитан на Localzet Server 7. Историческая линия `2.x` предназначена для Server 4.
 
 ```sh
-composer require localzet/http:dev-main
+composer require localzet/http:^3.0
 ```
 
 Клиент использует event loop Server: вызывайте его из работающего процесса Server, а не из обычного короткого PHP CLI вызова.
