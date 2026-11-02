@@ -5,7 +5,7 @@ export const description = 'Консольная утилита для созд�
 [Начало работы](/projects/noter/start) · [API и эксплуатация](/projects/noter/reference)
 
 
-Noter — PHP CLI-проект для создания и управления заметками; в README описана серверная часть и пример интеграции с приложением. Он зависит от `localzet/http:^2.0`; текущий Composer lock разрешает `localzet/http 2.0.2` вместе с `localzet/server 4.5.3`. Не переносите проект на Server 7, пока совместимый выпуск HttpClient не доступен в зависимостях Noter.
+Noter — PHP CLI-проект для отправки заметок на HTTP(S)-приёмник. Требуются PHP 8.2+ и cURL. Пакет зависит от `localzet/http:^2.0`; актуальный lock фиксирует `localzet/http 2.0.2` вместе с `localzet/server 4.5.3`. Это отдельная линия совместимости: не подключайте Noter к Server 7 без обновления HTTP-клиента и проверки его API.
 
 ```sh
 composer install

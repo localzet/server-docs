@@ -5,10 +5,10 @@ export const description = 'Асинхронный HTTP-клиент для Loca
 [Начало работы](/projects/httpclient/start) · [API и эксплуатация](/projects/httpclient/reference)
 
 
-HttpClient выполняет HTTP-запросы из event loop Localzet Server и предоставляет connection pooling. В текущей версии зависимость Server ограничена `^7.0`, а библиотека PSR-7 устанавливается в совместимой версии из Composer lock.
+HttpClient выполняет HTTP-запросы из event loop Localzet Server и предоставляет connection pooling. Текущая ветка исходников требует Server `^7.0`, PHP 8.0+ и расширения cURL/JSON.
 
 ```sh
-composer require localzet/http
+composer require localzet/http:dev-main
 ```
 
-Пакет требует PHP 8.0+, расширения cURL и JSON. Его README не задаёт проектной команды тестов; перед эксплуатацией проверяйте реальные запросы, TLS, редиректы, таймауты, ошибки и закрытие соединений в целевом приложении.
+Проверяйте выбранную версию: опубликованный стабильный тег `v2.0.2` требует `localzet/server:^4.2`, тогда как ветка `dev-main` адаптирована к Server 7. Не фиксируйте dev-версию в production до выпуска совместимого стабильного тега. Ограничения видны в [манифесте v2.0.2](https://github.com/localzet/HttpClient/blob/v2.0.2/composer.json) и [манифесте текущей ветки](https://github.com/localzet/HttpClient/blob/main/composer.json). Перед эксплуатацией проверяйте TLS, редиректы, таймауты, ошибки и закрытие соединений в целевом приложении.
