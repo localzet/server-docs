@@ -1,17 +1,17 @@
-export const pageTitle = 'Localzet Proxy — ограничения доступа'
-export const description = 'Экспериментальный HTTP forward proxy без встроенной аутентификации; исходящие подключения ограничиваются точными именами хостов и портами.'
+export const pageTitle = 'Localzet Proxy — установка и ограничения доступа'
+export const description = 'HTTP forward proxy для Localzet Server 7 с Basic-аутентификацией и allowlist IPv4/IPv6 адресов и портов.'
 
 # Localzet Proxy
 [Начало работы](/projects/proxy/start) · [API и эксплуатация](/projects/proxy/reference)
 
-Пакет пока не опубликован в Packagist. Подключите Git VCS repository и устанавливайте текущую ветку `dev-main`.
+Proxy `1.0.0` — выпуск для Localzet Server 7 с обязательной Basic-аутентификацией и allowlist адресов назначения. Пакет ещё не зарегистрирован в Packagist; подключите Git VCS source и установите стабильный tag:
 
 ```sh
 composer config repositories.localzet-proxy vcs https://github.com/localzet/Proxy
-composer require localzet/proxy:dev-main
+composer require localzet/proxy:^1.0
 ```
 
 
-Экспериментальный HTTP forward proxy на Localzet Server 7. Исходящие TCP-подключения разрешены только к именам и портам из `allowedHosts` и `allowedPorts`. Встроенной аутентификации клиентов нет; DNS-резолвинг и блокировка частных IP для разрешённых имён остаются ответственностью сетевой политики.
+HTTP forward proxy на Localzet Server 7. Каждый запрос требует `Proxy-Authorization: Basic`; исходящие TCP-подключения ограничены `allowedHosts` и `allowedPorts`. Разрешайте только буквальные IPv4/IPv6 адреса: доменные имена отклоняются, чтобы не полагаться на неприкреплённый DNS-результат.
 
-**Не публикуйте listener в Интернет.** Используйте только в доверенной сети за внешними ingress/egress ACL. Локальная интеграционная проверка покрывает loopback HTTP, CONNECT, запрет неразрешённого порта, некорректный запрос и ошибку подключения upstream. Она не проверяет клиентскую аутентификацию, DNS rebinding или частные адреса за разрешённым именем; эти ограничения нужно закрыть сетевой политикой.
+Basic credentials передаются открытым текстом внутри HTTP. Используйте прокси только в доверенной зашифрованной сети или за TLS terminator; сохраните исходящие сетевые ACL как дополнительную границу. Интеграционные проверки покрывают аутентификацию, HTTP, CONNECT, allowlist, некорректный запрос и ошибку upstream. Пакет обрабатывает один запрос на клиентское соединение и не является полнофункциональным HTTP parser.

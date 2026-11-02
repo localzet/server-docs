@@ -1,17 +1,19 @@
 export const pageTitle = 'Localzet Socket.IO'
-export const description = 'Socket.IO server для Localzet Server 7 с in-memory adapter; межпроцессный adapter требует отдельной интеграционной проверки.'
+export const description = 'Socket.IO server для Localzet Server 7 с polling, WebSocket и межпроцессной рассылкой через Tunnel.'
 
 # Localzet Socket.IO
 [Начало работы](/projects/socketio/start) · [API и эксплуатация](/projects/socketio/reference)
 
-Пакет пока не опубликован в Packagist. Подключите Git VCS repository и устанавливайте текущую ветку `dev-main`.
+Socket.IO `2.0.0` — выпуск для Localzet Server 7. Линия `1.x` относится к предыдущему API и не совместима с этим выпуском. Пакет ещё не зарегистрирован в Packagist; подключите Git VCS source и установите стабильный tag:
 
 ```sh
 composer config repositories.localzet-socketio vcs https://github.com/localzet/SocketIO
-composer require localzet/socketio:dev-main
+composer require localzet/socketio:^2.0
 ```
+
+Для межпроцессной рассылки установите совместимый Tunnel отдельно: `composer require localzet/tunnel:^3.0`.
 
 
 SocketIO подключает Engine.IO/Socket.IO обработчики к Localzet Server и содержит собственные WebSocket framing/parser реализации. Для Server 7 добавлен `ProtocolInterface` adapter и схема `socketio://`.
 
-Адаптер по умолчанию хранит состояние в памяти worker и работает без Tunnel. Для межпроцессной доставки предусмотрен Tunnel `3.x`, совместимый с Server 7, однако его интеграция с Socket.IO пока не прошла сквозную проверку. Не используйте межпроцессный адаптер в production до подтверждения доставки между независимыми процессами.
+Адаптер по умолчанию хранит состояние в памяти worker и работает без Tunnel. `ChannelAdapter` использует Tunnel `3.x`. Сквозной тест запускает Tunnel broker и два независимых процесса Socket.IO, затем проверяет доставку broadcast между ними. Тест не покрывает отказ брокера, reconnect, persistence или доставку во время сетевого сбоя.
