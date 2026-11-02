@@ -6,10 +6,10 @@ export const description = 'Установка, запуск периодиче�
 Cron добавляет расписания в таймеры процесса Localzet Server. Добавьте пакет в приложение и создайте экземпляр задания при старте каждого worker:
 
 ```sh
-composer require localzet/cron:dev-main
+composer require localzet/cron:^2.0
 ```
 
-Используйте `dev-main` для исходников под Server 7. Опубликованный stable `v1.0.3` рассчитан на Server 4.5; не используйте его с этим примером.
+Релиз `2.x` предназначен для Server 7. Линия `1.x` рассчитана на Server 4.
 
 ```php
 <?php

@@ -1,5 +1,5 @@
 export const pageTitle = 'Localzet Socket.IO'
-export const description = 'Socket.IO server для Localzet Server 7 с in-memory adapter. Межпроцессная доставка через Tunnel ждёт совместимого выпуска для Server 7.'
+export const description = 'Socket.IO server для Localzet Server 7 с in-memory adapter; межпроцессный adapter требует отдельной интеграционной проверки.'
 
 # Localzet Socket.IO
 [Начало работы](/projects/socketio/start) · [API и эксплуатация](/projects/socketio/reference)
@@ -14,4 +14,4 @@ composer require localzet/socketio:dev-main
 
 SocketIO подключает Engine.IO/Socket.IO обработчики к Localzet Server и содержит собственные WebSocket framing/parser реализации. Для Server 7 добавлен `ProtocolInterface` adapter и схема `socketio://`.
 
-Адаптер по умолчанию хранит состояние в памяти и работает без Tunnel. Для межпроцессной доставки нужен Tunnel ChannelAdapter, но опубликованные версии Tunnel 2.x рассчитаны на Server 4.x; совместимый выпуск для Server 7 пока не опубликован. Текущие регрессионные тесты проверяют listener registration и отдельные RFC6455 masked-frame случаи, но не полную совместимость с современными Socket.IO клиентами, polling и cross-process delivery.
+Адаптер по умолчанию хранит состояние в памяти worker и работает без Tunnel. Для межпроцессной доставки предусмотрен Tunnel `3.x`, совместимый с Server 7, однако его интеграция с Socket.IO пока не прошла сквозную проверку. Не используйте межпроцессный адаптер в production до подтверждения доставки между независимыми процессами.

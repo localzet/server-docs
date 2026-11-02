@@ -3,7 +3,7 @@ export const description = 'Методы Client и ParallelClient, параме�
 
 # HTTP Client: API и эксплуатация
 
-Текущая ветка исходников требует PHP 8.2+, `ext-curl`, `ext-json`, Localzet Server `^7.0`, Localzet PSR-7 `^3.0` и `psr/http-message:^2.0`. Опубликованный `v2.0.2` относится к Server 4.2; перед установкой сверяйте [манифест stable tag](https://github.com/localzet/HttpClient/blob/v2.0.2/composer.json) и [текущий манифест](https://github.com/localzet/HttpClient/blob/main/composer.json). Ветка `dev-main` не является стабильным релизом.
+Релиз `3.0.0` требует PHP 8.2+, `ext-curl`, `ext-json`, Localzet Server `^7.0`, Localzet PSR-7 `^4.0` и `psr/http-message:^2.0`.
 
 ## Методы запроса
 
@@ -27,4 +27,4 @@ $client = new \localzet\HTTP\Client([
 
 Опции пула относятся к каждому адресу; задавайте конечные таймауты и ограничение соединений под свой трафик. Они заменяют соответствующие значения по умолчанию, а вложенные настройки объединяются по ключам. Не блокируйте callback долгой работой, редактируйте credentials перед логированием и не отключайте проверку TLS в production. Закрытие пула, redirect policy, отмена и streaming требуют проверки на точной версии кода и целевой среде.
 
-В репозитории нет сопровождаемого набора сквозных тестов для сетевых edge cases. Перед использованием проверьте TLS trust chain, редиректы, response body, медленный/оборванный upstream и закрытие соединений. Не закрепляйте dev-ветку в production до выпуска совместимого стабильного тега.
+Перед использованием проверьте TLS trust chain, редиректы, response body, медленный/оборванный upstream и закрытие соединений в целевой среде.

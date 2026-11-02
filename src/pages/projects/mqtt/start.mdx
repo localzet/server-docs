@@ -7,7 +7,7 @@ export const description = 'Подключение PHP-клиента к бро�
 
 ```sh
 composer config repositories.localzet-mqtt vcs https://github.com/localzet/MQTT
-composer require localzet/mqtt:dev-main
+composer require localzet/mqtt:^1.0
 ```
 
 Пример использует локальный брокер без TLS. В production передавайте credentials из secret manager и подключайтесь по `mqtts://` с проверкой сертификата.
@@ -46,4 +46,4 @@ Server::runAll();
 
 Используйте уникальный `client_id` для каждого активного клиента. Выберите `protocol_level: 4` для MQTT 3.1.1 или `5` для MQTT 5. Подписывайтесь после успешного подключения; при reconnect клиент может восстановить подписки, но приложение всё равно должно учитывать повторную доставку и делать обработчики идемпотентными.
 
-Проверка протокола выполняется `composer run test`. Интеграционный сценарий `composer run test:broker` требует Docker и запускает временный Mosquitto. Он проверяет TCP/TLS handshake и QoS 1, но тестовый TLS сертификат самоподписанный; production trust chain проверяйте отдельно. См. [API и эксплуатацию](/projects/mqtt/reference).
+Проверка протокола выполняется `composer run test`. Интеграционный сценарий `composer run test:broker` требует Docker и запускает временный Mosquitto. Он проверяет TCP/TLS и QoS 1/2; тестовый TLS сертификат самоподписанный, поэтому production trust chain проверяйте отдельно. См. [API и эксплуатацию](/projects/mqtt/reference).

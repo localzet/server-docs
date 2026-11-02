@@ -3,6 +3,6 @@ export const description = 'API, совместимость, ограничен�
 
 # PSR-7: API и эксплуатация
 
-Нужны PHP 8.2+, Localzet Server `^7.0` и `psr/http-message:^2.0`. Основные типы `localzet\PSR7`: `Request`, `Response`, `ServerRequest`, `Uri`, `UploadedFile`, `Stream`. Для URI доступны `UriResolver` и `UriNormalizer`; для потоков — Buffer, Caching, Limit, Multipart, Append, NoSeek, Inflate, LazyOpen, Dropping, Pump и Fn декораторы.
+Релиз `4.0.0` требует PHP 8.2+, Localzet Server `^7.0` и `psr/http-message:^2.0`. Основные типы `localzet\PSR7`: `Request`, `Response`, `ServerRequest`, `Uri`, `UploadedFile`, `Stream`. Для URI доступны `UriResolver` и `UriNormalizer`; для потоков — Buffer, Caching, Limit, Multipart, Append, NoSeek, Inflate, LazyOpen, Dropping, Pump и Fn декораторы.
 
 Методы `with*()` возвращают новое сообщение; исходный объект сохраняет прежние метод, URI, заголовки, версию протокола, статус и body stream. Сохраняйте возвращённый объект. Сам поток остаётся изменяемым ресурсом: чтение, запись и перемотка через один и тот же `StreamInterface` влияют на всех владельцев этого потока. Закрывайте потоки после использования. Проверяйте URI encoding, операции потоков, multipart и совместимость с потребителем.

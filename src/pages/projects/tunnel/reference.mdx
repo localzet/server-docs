@@ -3,7 +3,7 @@ export const description = 'События, подписки, очереди, re
 
 # Tunnel: API и эксплуатация
 
-Требуются PHP 8.1+ и Localzet Server `^7.0`. Сервер создаётся как `new localzet\Tunnel\Server($socketName, $debug = false, $allowObjectSerialization = false)`; при заданном socket name он регистрирует один worker через bootstrap Server. `Client` — статический API и рассчитан на один соединённый Tunnel endpoint в каждом PHP-процессе. Стабильная линия Tunnel `2.x` рассчитана на Server 4; текущие исходники Server 7 пока устанавливаются через `dev-main`.
+Требуются PHP 8.1+ и Localzet Server `^7.0`. Сервер создаётся как `new localzet\Tunnel\Server($socketName, $debug = false, $allowObjectSerialization = false)`; при заданном socket name он регистрирует один worker через bootstrap Server. `Client` — статический API и рассчитан на один соединённый Tunnel endpoint в каждом PHP-процессе. Релизная линия Tunnel `3.x` рассчитана на Server 7; несовместимая линия `2.x` предназначена для Server 4.
 
 ## События
 
@@ -17,4 +17,4 @@ export const description = 'События, подписки, очереди, re
 
 Wire protocol по умолчанию сериализует данные PHP. Object deserialization закрыта и на сервере, и на клиенте. Не используйте `new Server(..., allowObjectSerialization: true)` и `Client::allowObjectSerialization()` с недоверенными peer. Передавайте скаляры и массивы; обе стороны должны договориться о формате. Протокол не имеет встроенной аутентификации или TLS, поэтому слушайте loopback либо изолированную сеть и ограничьте доступ внешними ACL.
 
-Reconnect восстанавливает транспорт, но не обеспечивает durable delivery или exactly-once. Тестируйте разрыв соединения, повторную подписку, конкурирующих consumers и shutdown в целевом приложении. Версия Server 7 должна быть совместима с текущей веткой Tunnel; проверяйте Composer constraints установленного checkout перед развёртыванием.
+Reconnect восстанавливает транспорт, но не обеспечивает durable delivery или exactly-once. Тестируйте разрыв соединения, повторную подписку, конкурирующих consumers и shutdown в целевом приложении. Для Server 7 используйте `localzet/tunnel:^3.0`.
