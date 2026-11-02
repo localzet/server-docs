@@ -1,0 +1,17 @@
+export const pageTitle = 'Localzet Console'
+export const description = 'Документация Localzet Console: CLI-приложения на Symfony Console, совместимость с Laravel Artisan и терминальные UTF-8/ANSI-инструменты.'
+
+# Localzet Console
+
+Localzet Console — библиотека для создания PHP CLI-приложений. Она основана на Symfony Console, сохраняет обычный API Symfony по умолчанию и позволяет подключать команды Laravel Artisan к существующему приложению.
+
+Текущая версия — `2.0.1`. Она требует PHP 8.4.1+, Symfony Console 8.1 и Illuminate Console 13. Установка через Composer: `composer require localzet/console:^2.0`.
+
+## Возможности
+
+- Приложение командной строки и автопоиск локальных команд.
+- Opt-in регистрация Illuminate-команд с контейнером Laravel.
+- UTF-8 ширина текста в терминальных ячейках, безопасное ANSI-обрезание и очистка control sequences.
+- Полноэкранный `/dev/tty` renderer для интерактивного режима.
+
+Начните со страницы [установки и команд](/projects/console/start), затем изучите [Laravel bridge и TUI API](/projects/console/reference).

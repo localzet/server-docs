@@ -1,0 +1,28 @@
+# Установка и команды Console
+
+## Требования
+
+Localzet Console 2 требует PHP 8.4.1 или новее и Composer 2.
+
+```sh
+composer require localzet/console:^2.0
+```
+
+## Запуск приложения
+
+```php
+<?php
+
+require __DIR__ . '/vendor/autoload.php';
+
+$console = new localzet\Console\Console([
+    'name' => 'Example CLI',
+    'version' => '1.0.0',
+]);
+
+exit($console->run());
+```
+
+Для своей команды расширьте `localzet\Console\Commands\Command` и задайте `$defaultName`. Метод `installCommands($directory, $namespace)` ищет классы команд в указанном каталоге. Приложение должно загрузить эти классы через Composer PSR-4 до их регистрации.
+
+Выпуск `2.0.1` содержит этот API. Сверьте фактически установленную версию командой `composer show localzet/console`.
