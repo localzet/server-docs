@@ -4,14 +4,14 @@ export const description = 'Socket.IO server для Localzet Server 7 с polling
 # Localzet Socket.IO
 [Начало работы](/projects/socketio/start) · [API и эксплуатация](/projects/socketio/reference)
 
-Socket.IO `2.0.0` — выпуск для Localzet Server 7. Линия `1.x` относится к предыдущему API и не совместима с этим выпуском. Пакет ещё не зарегистрирован в Packagist; подключите Git VCS source и установите стабильный tag:
+Socket.IO [`2.0.1`](https://github.com/localzet/SocketIO/releases/tag/v2.0.1) — актуальный выпуск для Localzet Server 7. Линия `1.x` относится к предыдущему API и не совместима с этим выпуском. Пакет ещё не зарегистрирован в Packagist; подключите Git VCS source и установите стабильную линию:
 
 ```sh
 composer config repositories.localzet-socketio vcs https://github.com/localzet/SocketIO
 composer require localzet/socketio:^2.0
 ```
 
-Для межпроцессной рассылки установите совместимый Tunnel отдельно: `composer require localzet/tunnel:^3.0`.
+В выпуске 2.0.1 восстановлена Engine.IO polling-сессия и добавлены проверки polling, WebSocket и межпроцессной рассылки. Для broadcast между workers установите совместимый Tunnel отдельно: `composer require localzet/tunnel:^3.0`.
 
 
 SocketIO подключает Engine.IO/Socket.IO обработчики к Localzet Server и содержит собственные WebSocket framing/parser реализации. Для Server 7 добавлен `ProtocolInterface` adapter и схема `socketio://`.
