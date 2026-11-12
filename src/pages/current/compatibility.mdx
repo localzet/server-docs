@@ -1,11 +1,25 @@
 export const pageTitle = 'Совместимость и сравнение версий'
-export const description = 'Сравнение исходников Localzet Server v4.5.3 и текущей версии 7.x: требования PHP, обязательные расширения, event loop, gateway и миграция.'
+export const description = 'Требования Localzet Server 7.0.4, изменения между выпусками 7.0.2–7.0.4 и сравнение с архивным выпуском 4.5.3.'
 
 # Совместимость и сравнение версий
 
-Последний опубликованный пакет — `v7.0.2`; он совпадает с текущим `main` и включает исправление очереди данных `AsyncTcpConnection` до завершения соединения. Для библиотеки исходники доступны также как `7.0.x-dev`. В таблице ниже сравниваются исходники текущей версии с тегом `v4.5.3`. Это сравнение исходного кода и манифестов, а не гарантия совместимости конкретного приложения.
+Последний опубликованный пакет — `v7.0.4`; его исходники совпадают с текущим `main`. Устанавливайте стабильный выпуск через `composer require localzet/server:^7.0`. Для разработки доступны исходники `7.0.x-dev`.
 
-| Область | `v4.5.3` | Текущий `main` (`7.0.x-dev`) |
+### Изменения в выпусках 7.0.3 и 7.0.4
+
+| Область | Server 7.0.2 | Server 7.0.4 |
+|---|---|---|
+| HTTP reverse proxy | Chunked framing мог накапливать неограниченную строку размера chunk и блок trailers | Ограничены размер chunk-строки и trailers; превышение отклоняется |
+| TCP proxy | После connect ошибка backend могла запустить повтор к другому upstream | После connect клиентское соединение закрывается: часть потока уже могла попасть upstream |
+| RESP2 | Не было лимитов вложенности и числа значений | Введены лимит глубины 64 и максимум 100 000 значений в frame |
+| PID и runtime-файлы | Предсказуемые файлы в общей временной директории | PID читается только из принадлежащего процессу regular file; запись атомарна, status и startup lock используют приватный runtime-каталог |
+| Несколько экземпляров | Разные явно заданные PID-файлы одного entry script могли делить lock | Для разных PID-файлов создаются отдельные runtime-каталоги и lock-файлы |
+
+Выпуск `7.0.4` включает исправления `7.0.3` и дополнительно устраняет конфликт runtime-lock при нескольких экземплярах с разными `Server::$pidFile`.
+
+Ниже сравниваются исходники текущего выпуска с тегом `v4.5.3`. Это сравнение исходного кода и манифестов, а не гарантия совместимости конкретного приложения.
+
+| Область | `v4.5.3` | Текущий выпуск `v7.0.4` |
 |---|---|---|
 | PHP и обязательные зависимости | PHP `^8.1 \|\| ^8.2`; обязательны `ext-sockets`, `ext-pcntl`, `ext-posix`, `localzet/events` | PHP `>=8.1`; обязательны `ext-json` и `ext-ctype`; остальные интеграции объявлены как optional |
 | Event loop | Собственный набор Linux drivers, включая `StreamSelect`, `ext-uv`, `ext-event` и `ext-ev` | `EventLoopFactory`: `event` → `ev` → Revolt → встроенный `Select`; Windows имеет отдельную реализацию, Swoole/Swow выбираются явно |
@@ -13,7 +27,7 @@ export const description = 'Сравнение исходников Localzet Ser
 | Hot upgrade | В исходниках тега нет `Runtime/HotUpgradeBroker` | Добавлен Unix hot upgrade с `pcntl_exec()` и передачей listener descriptors на поддерживаемой среде |
 | Публичный API | Сигнатуры и реализация отражают контракт тега 4.5.3 | API и runtime изменялись; используйте справочник текущей версии и проверяйте приложение тестами |
 
-Ссылки на исходники: [`v4.5.3` composer.json](https://github.com/localzet/Server/blob/v4.5.3/composer.json), [текущий `composer.json`](https://github.com/localzet/Server/blob/main/composer.json), [сравнение тегов и main](https://github.com/localzet/Server/compare/v4.5.3...main).
+Ссылки на исходники: [`v4.5.3` composer.json](https://github.com/localzet/Server/blob/v4.5.3/composer.json), [`v7.0.4` composer.json](https://github.com/localzet/Server/blob/v7.0.4/composer.json), [сравнение тегов](https://github.com/localzet/Server/compare/v4.5.3...v7.0.4).
 
 ## Перед обновлением приложения
 

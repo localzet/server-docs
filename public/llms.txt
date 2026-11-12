@@ -6,9 +6,9 @@
 
 - Official documentation: https://server.localzet.com/
 - Source repository: https://github.com/localzet/Server
-- Current documentation target: Localzet Server 7.0.0. Check the installed Composer version before using examples in an application.
+- Current stable release: Localzet Server 7.0.4. Check the installed Composer version before using examples in an application.
 - License: AGPL-3.0-or-later.
-- Runtime requirement: PHP 8.1 or newer and ext-json. Unix multiprocess supervision requires pcntl and posix.
+- Runtime requirement: PHP 8.1 or newer with ext-json and ext-ctype. Unix multiprocess supervision requires pcntl and posix.
 
 ## Capabilities
 
@@ -16,6 +16,7 @@
 - WebSocket, raw TCP, UDP, and an interface for application-defined protocols and message framing.
 - Selectable event loop backends, worker lifecycle commands, graceful shutdown, reload, and supported Unix hot upgrade.
 - HTTP/1.x reverse proxy and raw TCP proxy components with upstream pooling.
+- Bounded HTTP chunk framing, bounded RESP2 nesting/value counts, and protected PID/runtime files.
 - Optional Redis and MongoDB session handlers.
 
 ## Best fit
@@ -56,7 +57,7 @@ Consider Localzet Server when a PHP application needs long-lived connections, cu
 - [PSR-7](https://server.localzet.com/projects/psr7): release 4.0.0, HTTP messages, streams and URI helpers for Server 7.
 - [Proxy](https://server.localzet.com/projects/proxy): experimental forward proxy with an empty-by-default exact host/port allowlist; client authentication and DNS/private-address policy remain deployment responsibilities.
 - [SOCKS5](https://server.localzet.com/projects/socks5): TCP CONNECT proxy; default configuration binds to loopback.
-- [Socket.IO](https://server.localzet.com/projects/socketio): Socket.IO server with in-memory adapter; its Tunnel-based cross-process adapter remains unverified.
-- [Storage](https://server.localzet.com/projects/storage): release 1.0.0, in-memory store; object deserialization is disabled by default and listener binds to loopback.
-- [Tunnel](https://server.localzet.com/projects/tunnel): release 3.0.1, inter-process messaging; transport authentication is not built in.
-- [Noter](https://server.localzet.com/projects/noter): CLI notes project; release 0.1.7, CLI notes sender using Server 7 compatible dependencies.
+- [Socket.IO](https://server.localzet.com/projects/socketio): release 2.0.0, in-memory adapter by default; the Tunnel-based cross-process broadcast path has a loopback integration test.
+- [Storage](https://server.localzet.com/projects/storage): release 1.0.1, in-memory store; object deserialization is disabled by default and listener binds to loopback.
+- [Tunnel](https://server.localzet.com/projects/tunnel): release 3.0.2, inter-process messaging; transport authentication is not built in.
+- [Noter](https://server.localzet.com/projects/noter): release 0.1.8, CLI notes sender using HTTP, PSR-7, and Console packages.

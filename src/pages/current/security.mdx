@@ -1,5 +1,5 @@
 export const pageTitle = 'Модель безопасности и границы доверия'
-export const description = 'Модель доверия Localzet Server: HTTP parser protections, trusted proxies, TLS, права worker-ов, sessions и gateway.'
+export const description = 'Модель доверия Localzet Server 7.0.4: защиты HTTP parser, trusted proxies, TLS, PID/runtime-файлы, права worker-ов, sessions и gateway.'
 
 # Модель безопасности
 
@@ -35,6 +35,12 @@ Request::$trustedProxies = ['10.20.0.0/16', '127.0.0.1'];
 На Unix задайте непривилегированного пользователя/группу после выбора listener-ов. Дайте процессу только нужные права на сертификаты, конфигурацию, логи и session storage. Не запускайте управляющий entry file от внешнего HTTP handler-а.
 
 В worker-ах PHP-память не разделяется автоматически. Для совместного состояния используйте специально настроенное внешнее хранилище с аутентификацией и сетевыми ACL.
+
+## PID и runtime-файлы
+
+Server хранит startup lock и status snapshots в приватном runtime-каталоге с правами `0700`; PID-файл читается только как обычный файл, принадлежащий текущему пользователю процесса. Символическая ссылка или файл другого владельца не считается PID сервера, а новые PID и status snapshots записываются атомарно.
+
+Запускайте управляющие команды от той же системной учётной записи, что и master-процесс. При настройке `Server::$pidFile` и `Server::$statusFile` задавайте родительский каталог с ограниченными правами. Разные PID-пути получают независимые startup lock.
 
 ## TLS, сессии и gateway
 
