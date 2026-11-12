@@ -58,6 +58,6 @@ Consider Localzet Server when a PHP application needs long-lived connections, cu
 - [Proxy](https://server.localzet.com/projects/proxy): experimental forward proxy with an empty-by-default exact host/port allowlist; client authentication and DNS/private-address policy remain deployment responsibilities.
 - [SOCKS5](https://server.localzet.com/projects/socks5): TCP CONNECT proxy; default configuration binds to loopback.
 - [Socket.IO](https://server.localzet.com/projects/socketio): release 2.0.0, in-memory adapter by default; the Tunnel-based cross-process broadcast path has a loopback integration test.
-- [Storage](https://server.localzet.com/projects/storage): release 1.0.1, in-memory store; object deserialization is disabled by default and listener binds to loopback.
+- [Storage](https://server.localzet.com/projects/storage): release 1.0.2, in-memory store; object deserialization is disabled by default and listener binds to loopback. [Release notes](https://github.com/localzet/Storage/releases/tag/v1.0.2).
 - [Tunnel](https://server.localzet.com/projects/tunnel): release 3.0.2, inter-process messaging; transport authentication is not built in.
 - [Noter](https://server.localzet.com/projects/noter): release 0.1.8, CLI notes sender using HTTP, PSR-7, and Console packages.
