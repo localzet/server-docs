@@ -16,7 +16,7 @@
     "@headlessui/react": "^1.7.13",
     "@mdx-js/loader": "^2.1.5",
     "@mdx-js/react": "^2.1.5",
-    "@next/mdx": "15.5.27",
+    "@next/mdx": "15.5.29",
     "@sindresorhus/slugify": "^2.1.1",
     "@tailwindcss/typography": "^0.5.8",
     "acorn": "^8.8.1",
@@ -28,7 +28,7 @@
     "framer-motion": "7.8.1",
     "mdast-util-to-string": "^3.1.0",
     "mdx-annotations": "^0.1.1",
-    "next": "15.5.27",
+    "next": "15.5.29",
     "postcss-focus-visible": "^6.0.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "eslint": "8.57.1",
-    "eslint-config-next": "15.5.27",
+    "eslint-config-next": "15.5.29",
     "prettier": "^2.8.7",
     "prettier-plugin-tailwindcss": "^0.2.6"
   },
@@ -58,6 +58,8 @@
   },
   "license": "AGPL-3.0-or-later",
   "overrides": {
-    "postcss": "8.5.29"
+    "postcss": "8.5.29",
+    "postcss-selector-parser": "6.1.6",
+    "minimatch": "^3.1.5"
   }
 }
