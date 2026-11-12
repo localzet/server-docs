@@ -2,10 +2,10 @@
 
 ## Требования
 
-Localzet Console 2 требует PHP 8.4.1 или новее и Composer 2.
+Localzet Console 2.2 требует PHP 8.4.1 или новее и Composer 2.
 
 ```sh
-composer require localzet/console:^2.1
+composer require localzet/console:^2.2
 ```
 
 ## Запуск приложения
@@ -25,4 +25,4 @@ exit($console->run());
 
 Для своей команды расширьте `localzet\Console\Commands\Command` и задайте `$defaultName`. Метод `installCommands($directory, $namespace)` ищет классы команд в указанном каталоге. Приложение должно загрузить эти классы через Composer PSR-4 до их регистрации.
 
-Выпуск `2.1.0` содержит этот API и pseudographic Dashboard/Theme widgets. Сверьте фактически установленную версию командой `composer show localzet/console`.
+Выпуск [`2.2.0`](https://github.com/localzet/Console/releases/tag/v2.2.0) включает этот API и pseudographic Dashboard с шириной, ограниченной размером терминала. Сверьте фактически установленную версию командой `composer show localzet/console`.

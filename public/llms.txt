@@ -52,12 +52,13 @@ Consider Localzet Server when a PHP application needs long-lived connections, cu
 
 - [Cluster](https://server.localzet.com/projects/cluster): release 1.0.0, gateway/worker cluster for Server 7. [Release notes](https://github.com/localzet/Cluster/releases/tag/v1.0.0).
 - [Cron](https://server.localzet.com/projects/cron): release 2.0.0, timer-based scheduling for Server 7.
-- [HTTP Client](https://server.localzet.com/projects/httpclient): release 3.0.0, asynchronous HTTP requests and connection pooling for Server 7.
+- [Console](https://server.localzet.com/projects/console): release 2.2.0, PHP CLI library with Symfony Console by default, an opt-in Laravel command bridge, Unicode/ANSI helpers and bounded terminal dashboards. Requires PHP 8.4.1+. [Release notes](https://github.com/localzet/Console/releases/tag/v2.2.0).
+- [HTTP Client](https://server.localzet.com/projects/httpclient): release 3.0.0, asynchronous HTTP requests and connection pooling for Server 7. [Release notes](https://github.com/localzet/HttpClient/releases/tag/v3.0.0).
 - [MQTT](https://server.localzet.com/projects/mqtt): release 1.0.0, MQTT 3.1.1 and MQTT 5 client with TCP/TLS and QoS 0/1/2. [Release notes](https://github.com/localzet/MQTT/releases/tag/v1.0.0).
-- [PSR-7](https://server.localzet.com/projects/psr7): release 4.0.0, HTTP messages, streams and URI helpers for Server 7.
+- [PSR-7](https://server.localzet.com/projects/psr7): release 4.0.0, HTTP messages, streams and URI helpers for Server 7. [Release notes](https://github.com/localzet/PSR-7/releases/tag/v4.0.0).
 - [Proxy](https://server.localzet.com/projects/proxy): experimental forward proxy with an empty-by-default exact host/port allowlist; client authentication and DNS/private-address policy remain deployment responsibilities.
 - [SOCKS5](https://server.localzet.com/projects/socks5): release 1.0.0, TCP CONNECT proxy; default configuration binds to loopback. [Release notes](https://github.com/localzet/SOCKS5/releases/tag/v1.0.0).
-- [Socket.IO](https://server.localzet.com/projects/socketio): release 2.0.0, in-memory adapter by default; the Tunnel-based cross-process broadcast path has a loopback integration test.
+- [Socket.IO](https://server.localzet.com/projects/socketio): release 2.0.1, in-memory adapter by default; Tunnel 3.x enables cross-process broadcast. Polling, WebSocket and two-process broadcast have loopback integration coverage. [Release notes](https://github.com/localzet/SocketIO/releases/tag/v2.0.1).
 - [Storage](https://server.localzet.com/projects/storage): release 1.0.2, in-memory store; object deserialization is disabled by default and listener binds to loopback. [Release notes](https://github.com/localzet/Storage/releases/tag/v1.0.2).
-- [Tunnel](https://server.localzet.com/projects/tunnel): release 3.0.2, inter-process messaging; transport authentication is not built in.
+- [Tunnel](https://server.localzet.com/projects/tunnel): release 3.0.2, inter-process messaging; transport authentication is not built in. [Release notes](https://github.com/localzet/Tunnel/releases/tag/v3.0.2).
 - [Noter](https://server.localzet.com/projects/noter): release 0.1.8, CLI notes sender using HTTP, PSR-7, and Console packages.
