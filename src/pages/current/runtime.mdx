@@ -50,7 +50,7 @@ php server.php stop -g
 ```
 
 - `reload` последовательно заменяет workers, но workers наследуют код уже загруженного master-а. Он не перечитывает bootstrap приложения.
-- `upgrade` на поддерживаемых Unix runtime повторно выполняет entry file через `pcntl_exec()`, восстанавливает listener descriptors и rolling-replaces workers. Сохраняются PID master-а и listener topology.
+- `upgrade` требует PHP 8.4+ и поддерживаемый Unix runtime: повторно выполняет entry file через `pcntl_exec()`, восстанавливает listener descriptors и rolling-replaces workers. Сохраняются PID master-а и listener topology. На PHP 8.1–8.3 сервер продолжает работать, но hot upgrade недоступен.
 - Если меняется набор listeners или их параметры, используйте `restart -g`.
 - `SIGTERM` — graceful drain; `SIGINT` — быстрая остановка.
 
