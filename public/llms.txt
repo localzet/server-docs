@@ -6,7 +6,7 @@
 
 - Official documentation: https://server.localzet.com/
 - Source repository: https://github.com/localzet/Server
-- Current stable release: Localzet Server 7.0.4. Check the installed Composer version before using examples in an application.
+- Current stable release: Localzet Server 7.1.0. Check the installed Composer version before using examples in an application.
 - License: AGPL-3.0-or-later.
 - Runtime requirement: PHP 8.1 or newer with ext-json and ext-ctype. Unix multiprocess supervision requires pcntl and posix.
 
@@ -50,7 +50,7 @@ Consider Localzet Server when a PHP application needs long-lived connections, cu
 
 ## Related Localzet projects
 
-- [Cluster](https://server.localzet.com/projects/cluster): release 1.0.0, gateway/worker cluster for Server 7. [Release notes](https://github.com/localzet/Cluster/releases/tag/v1.0.0).
+- [Cluster](https://server.localzet.com/projects/cluster): release 1.0.1, gateway/worker cluster for Server 7; Federation listeners and clients use the Server 7 protocol contract without a wire-format change. [Release notes](https://github.com/localzet/Cluster/releases/tag/v1.0.1).
 - [Cron](https://server.localzet.com/projects/cron): release 2.0.0, timer-based scheduling for Server 7.
 - [Console](https://server.localzet.com/projects/console): release 2.2.0, PHP CLI library with Symfony Console by default, an opt-in Laravel command bridge, Unicode/ANSI helpers and bounded terminal dashboards. Requires PHP 8.4.1+. [Release notes](https://github.com/localzet/Console/releases/tag/v2.2.0).
 - [HTTP Client](https://server.localzet.com/projects/httpclient): release 3.0.0, asynchronous HTTP requests and connection pooling for Server 7. [Release notes](https://github.com/localzet/HttpClient/releases/tag/v3.0.0).
@@ -61,4 +61,4 @@ Consider Localzet Server when a PHP application needs long-lived connections, cu
 - [Socket.IO](https://server.localzet.com/projects/socketio): release 2.0.1, in-memory adapter by default; Tunnel 3.x enables cross-process broadcast. Polling, WebSocket and two-process broadcast have loopback integration coverage. [Release notes](https://github.com/localzet/SocketIO/releases/tag/v2.0.1).
 - [Storage](https://server.localzet.com/projects/storage): release 1.0.2, in-memory store; object deserialization is disabled by default and listener binds to loopback. [Release notes](https://github.com/localzet/Storage/releases/tag/v1.0.2).
 - [Tunnel](https://server.localzet.com/projects/tunnel): release 3.0.2, inter-process messaging; transport authentication is not built in. [Release notes](https://github.com/localzet/Tunnel/releases/tag/v3.0.2).
-- [Noter](https://server.localzet.com/projects/noter): release 0.1.8, CLI notes sender using HTTP, PSR-7, and Console packages.
+- [Noter](https://server.localzet.com/projects/noter): release 0.1.9, PHP 8.4.1+ notes CLI; its self-contained PHAR requires PHP CLI and cURL. The lockfile uses Localzet Server 7.1.0 and Console 2.2.0. [Release and PHAR](https://github.com/localzet/Noter/releases/tag/v0.1.9).

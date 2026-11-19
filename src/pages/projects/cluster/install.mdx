@@ -1,12 +1,12 @@
 # Установка Cluster
 
-Cluster пока не зарегистрирован в Packagist. Релиз `v1.0.0` доступен через Git-репозиторий:
+Cluster пока не зарегистрирован в Packagist. Выпуск `v1.0.1` доступен через Git-репозиторий:
 
 ```sh
 composer config repositories.localzet-cluster vcs https://github.com/localzet/Cluster
-composer require localzet/cluster:^1.0
+composer require localzet/cluster:^1.0.1
 ```
 
-Cluster 1.x поддерживает Localzet Server `^7.0`. Проверьте итоговую версию в `composer.lock` перед развёртыванием.
+Cluster 1.x поддерживает Localzet Server `^7.0`, включая Server 7.1.0. Проверьте итоговую версию в `composer.lock` перед развёртыванием.
 
 Создайте сильный случайный общий секрет и передайте его всем узлам через защищённую конфигурацию. Не помещайте секрет в репозиторий, командную историю, образ контейнера или публичные логи.
