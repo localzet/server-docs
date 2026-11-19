@@ -43,12 +43,28 @@ Server::runAll();
 - `onError(TcpConnection $connection, Throwable $exception)` — ошибка соединения/обработки;
 - `onBufferFull` и `onBufferDrain` — обратная связь по send buffer;
 - `onServerStart`, `onServerStop`, `onServerReload`, `onServerExit` — lifecycle server/worker;
+- `Server::onBeforeRun(callable $callback)` — один вызов при запуске команды `start`, после разбора команды и до обычного запуска runtime;
+- `Server::onWorkerStart(callable $callback)` — один вызов в каждом процессе после создания event loop; callback получает `Server`;
 - `onWebSocketConnect`, `onWebSocketConnected`, `onWebSocketPing`, `onWebSocketPong`, `onWebSocketClose` — WebSocket lifecycle.
 
 Callback должен быть коротким и не выполнять блокирующие операции в event loop. Для HTTP `onMessage` получает `Request`; для raw TCP тип сообщения определяет protocol.
 
+`onBeforeRun` не вызывается для управляющих команд (`status`, `stop`, `reload` и других). При обычном запуске listener-ы ещё не bind-ятся; во время `upgrade` callback вызывается повторно в новом image до восстановления runtime. Если callback выбрасывает исключение, этот путь запуска прерывается. `onWorkerStart` вызывается до `listen()` и `onServerStart`; исключение из него инициирует graceful shutdown всей группы процессов. В single-process режиме callback выполняется один раз для процесса.
+
+```php
+Server::onBeforeRun(static function (): void {
+    // Validate deployment settings before listeners are bound.
+});
+
+Server::onWorkerStart(static function (Server $server): void {
+    // Initialize resources owned by this process.
+});
+```
+
 ## Методы
 
-Публичные методы включают `listen()`, `unlisten()`, `pauseAccept()`, `resumeAccept()`, `getSocketName()`, `getMainSocket()`, `getProcessedMessages()` и `getWorkerUptime()`. Статические методы включают `getAllServers()`, `getStatus()`, `getVersion()`, `getEventLoop()`, `stopAll()` и `reloadAll()`.
+Публичные методы включают `listen()`, `unlisten()`, `pauseAccept()`, `resumeAccept()`, `getSocketName()`, `getMainSocket()`, `getProcessedMessages()` и `getWorkerUptime()`. Статические методы включают `getAllServers()`, `getStatus()`, `getVersion()`, `getEventLoop()`, `stopAll()`, `requestShutdown()`, `reloadAll()`, `onBeforeRun()` и `onWorkerStart()`.
+
+`Server::requestShutdown(int $code = 0, mixed $log = '')` предназначен для вызова из worker-а: он просит master остановить всю группу и завершает текущий процесс с graceful drain. В однопроцессном режиме метод останавливает текущий сервер.
 
 Для администрирования процесса предпочитайте поддерживаемый CLI (`status`, `connections`, `capabilities`, `reload`, `upgrade`, `restart`, `stop`), а не прямое изменение внутренних статических свойств.

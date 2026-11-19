@@ -50,11 +50,38 @@ php server.php stop -g
 ```
 
 - `reload` последовательно заменяет workers, но workers наследуют код уже загруженного master-а. Он не перечитывает bootstrap приложения.
-- `upgrade` на поддерживаемых Unix runtime повторно выполняет entry file через `pcntl_exec()`, восстанавливает listener descriptors и rolling-replaces workers. Сохраняются PID master-а и listener topology.
+- `upgrade` требует PHP 8.4+ и поддерживаемый Unix runtime: повторно выполняет entry file через `pcntl_exec()`, восстанавливает listener descriptors и rolling-replaces workers. Сохраняются PID master-а и listener topology. На PHP 8.1–8.3 сервер продолжает работать, но hot upgrade недоступен.
 - Если меняется набор listeners или их параметры, используйте `restart -g`.
 - `SIGTERM` — graceful drain; `SIGINT` — быстрая остановка.
 
 Перед автоматизацией проверьте фактическую среду командами `status --json` и `capabilities --json`. Для supervisor сигналов убедитесь, что посылаете их master-процессу.
+
+## Lifecycle callbacks
+
+Для общей проверки конфигурации перед запуском зарегистрируйте `Server::onBeforeRun()`. Она выполняется один раз при входе в путь `start`, после разбора CLI-команды и до обычного запуска runtime. Управляющие команды не запускают callback. При `upgrade` новый image также проходит путь `start` и вызывает callback повторно перед восстановлением runtime, поэтому проверка должна быть идемпотентной. При обычном холодном запуске исключение прерывает старт до bind listener-ов.
+
+`Server::onWorkerStart()` выполняется один раз в каждом процессе после создания event loop, до того, как worker начнёт принимать соединения и вызовет `onServerStart`. Callback получает текущий `Server`. При нескольких workers он запускается отдельно в каждом worker-е; в однопроцессном режиме — один раз. Поэтому общую сетевую проверку размещайте в `onBeforeRun`, а в `onWorkerStart` — локальную инициализацию процесса или его таймеров.
+
+Исключение из `onWorkerStart` завершает запуск fail-closed: текущий worker запрашивает graceful shutdown всей группы. Для штатной остановки из прикладного worker callback используйте `Server::requestShutdown()`:
+
+```php
+use localzet\Server;
+use localzet\Timer;
+
+Server::onBeforeRun(static function (): void {
+    // Check shared startup requirements before binding listeners.
+});
+
+Server::onWorkerStart(static function (Server $server): void {
+    Timer::delay(3600, static function (): void {
+        Server::requestShutdown(0, 'Scheduled graceful shutdown');
+    });
+});
+
+Server::runAll();
+```
+
+В Unix многопроцессном режиме `requestShutdown()` просит master остановить все workers; затем процессы закрывают активные соединения штатным способом. При single-process запуске останавливается текущий процесс. Этот API не заменяет защиту доступа к административным действиям приложения.
 
 ## PID, startup lock и status-файлы
 

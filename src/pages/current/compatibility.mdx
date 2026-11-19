@@ -44,7 +44,7 @@ export const description = 'Требования Localzet Server 7.0.4, изме
 - Минимальное требование текущего кода: PHP `>=8.1`; `ext-json` и `ext-ctype` обязательны.
 - Основная CI-матрица выполняется на Linux с PHP 8.1–8.5.
 - Windows использует отдельный backend и предназначен для однопроцессного режима; платформа не входит в указанную Linux CI-матрицу.
-- На Unix supervisor и несколько workers требуют `pcntl` и `posix`. Hot upgrade также зависит от поддержки передачи listening descriptors; проверяйте runtime-команду `capabilities`.
+- На Unix supervisor и несколько workers требуют `pcntl` и `posix`. Hot upgrade требует PHP 8.4+, `ext-sockets` с `SOCK_CLOEXEC` и передачи listening descriptors. На PHP 8.1–8.3 сервер работает без hot upgrade; проверяйте runtime-команду `capabilities`.
 
 ## Optional интеграции и event loop
 
