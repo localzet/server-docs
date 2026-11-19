@@ -19,7 +19,7 @@ Open http://localhost:3000 during development. Build output is `out/`; the postb
 
 ## Documentation scope
 
-The Server handbook describes the 7.x development version. The project switcher also provides separate documentation areas for Cluster, Cron, HTTP Client, MQTT, PSR-7, Proxy, SOCKS5, Socket.IO, Storage, Tunnel and Noter. Each area has its own sidebar, search results, project metadata and compatibility notes.
+The Server handbook describes the current stable release, 7.1.0. The project switcher also provides separate documentation areas for Cluster, Cron, HTTP Client, MQTT, PSR-7, Proxy, SOCKS5, Socket.IO, Storage, Tunnel and Noter. Each area has its own sidebar, search results, project metadata and compatibility notes.
 
 Older pages remain in the archive, carry an archive notice, and are excluded from the search index and sitemap. The site is primarily Russian and is not fully bilingual. Related-project pages reflect the checked out source and Composer lock state; they do not imply production readiness or unverified runtime behavior.
 
@@ -31,7 +31,7 @@ Older pages remain in the archive, carry an archive notice, and are excluded fro
 - `public`: static assets.
 - `scripts/generate-sitemap.js`: sitemap generation.
 
-CI builds and lints the site on pushes and pull requests. GitHub Pages deployment is performed only by manually dispatching `.github/workflows/deploy.yml` from the intended branch. A successful static build does not verify runtime behavior of the Server library; dependency audit findings are a separate check.
+CI builds and lints the site on pushes and pull requests. GitHub Pages deploys after a push to `main`; pull requests only build and validate the site. The deployment workflow can also be dispatched manually. A successful static build does not verify runtime behavior of the Server library; dependency audit findings are a separate check.
 
 ## Author and license
 

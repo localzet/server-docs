@@ -1,11 +1,21 @@
 export const pageTitle = 'Совместимость и сравнение версий'
-export const description = 'Требования Localzet Server 7.0.4, изменения между выпусками 7.0.2–7.0.4 и сравнение с архивным выпуском 4.5.3.'
+export const description = 'Требования Localzet Server 7.1.0, новые lifecycle API, ограничения hot upgrade и сравнение с предыдущими выпусками.'
 
 # Совместимость и сравнение версий
 
-Последний опубликованный пакет — `v7.0.4`; его исходники совпадают с текущим `main`. Устанавливайте стабильный выпуск через `composer require localzet/server:^7.0`. Для разработки доступны исходники `7.0.x-dev`.
+Последний опубликованный пакет — `v7.1.0`. Устанавливайте его через `composer require localzet/server:^7.1`. Пакеты `^7.0` также допускают обновление в пределах Server 7; перед развёртыванием сверяйте выбранную версию через `composer show localzet/server`.
 
-### Изменения в выпусках 7.0.3 и 7.0.4
+### Изменения в выпуске 7.1.0
+
+| Область | Server 7.0.4 | Server 7.1.0 |
+|---|---|---|
+| Lifecycle callbacks | Нет общих startup и worker-start hooks | Добавлены `Server::onBeforeRun()` и `Server::onWorkerStart()` |
+| Остановка группы | Worker не мог запросить штатную остановку всей группы через публичный API | Добавлен `Server::requestShutdown()`; на Unix master завершает workers с graceful drain |
+| Hot upgrade | Возможность зависела от возможностей runtime и передачи listener descriptors | Требуются PHP 8.4+ и `ext-sockets` с `SOCK_CLOEXEC`; при отсутствии флага сервер запускается без hot upgrade |
+
+PHP 8.1–8.3 остаются поддерживаемыми для обычного запуска. Они не предоставляют нужный API создания socket pair с `SOCK_CLOEXEC`, поэтому hot upgrade там отключён.
+
+### Предыдущие исправления в выпусках 7.0.3 и 7.0.4
 
 | Область | Server 7.0.2 | Server 7.0.4 |
 |---|---|---|
@@ -19,15 +29,15 @@ export const description = 'Требования Localzet Server 7.0.4, изме
 
 Ниже сравниваются исходники текущего выпуска с тегом `v4.5.3`. Это сравнение исходного кода и манифестов, а не гарантия совместимости конкретного приложения.
 
-| Область | `v4.5.3` | Текущий выпуск `v7.0.4` |
+| Область | `v4.5.3` | Текущий выпуск `v7.1.0` |
 |---|---|---|
 | PHP и обязательные зависимости | PHP `^8.1 \|\| ^8.2`; обязательны `ext-sockets`, `ext-pcntl`, `ext-posix`, `localzet/events` | PHP `>=8.1`; обязательны `ext-json` и `ext-ctype`; остальные интеграции объявлены как optional |
 | Event loop | Собственный набор Linux drivers, включая `StreamSelect`, `ext-uv`, `ext-event` и `ext-ev` | `EventLoopFactory`: `event` → `ev` → Revolt → встроенный `Select`; Windows имеет отдельную реализацию, Swoole/Swow выбираются явно |
 | Gateway и proxy | В исходниках тега нет компонентов `Gateway/HttpReverseProxy` и `Proxy/TcpProxy` | Добавлены HTTP/1.x reverse proxy, raw TCP proxy и общий `UpstreamPool` |
-| Hot upgrade | В исходниках тега нет `Runtime/HotUpgradeBroker` | Добавлен Unix hot upgrade с `pcntl_exec()` и передачей listener descriptors на поддерживаемой среде |
+| Hot upgrade | В исходниках тега нет `Runtime/HotUpgradeBroker` | Unix hot upgrade сохраняет listener descriptors; требуется PHP 8.4+ с нужной поддержкой socket flags |
 | Публичный API | Сигнатуры и реализация отражают контракт тега 4.5.3 | API и runtime изменялись; используйте справочник текущей версии и проверяйте приложение тестами |
 
-Ссылки на исходники: [`v4.5.3` composer.json](https://github.com/localzet/Server/blob/v4.5.3/composer.json), [`v7.0.4` composer.json](https://github.com/localzet/Server/blob/v7.0.4/composer.json), [сравнение тегов](https://github.com/localzet/Server/compare/v4.5.3...v7.0.4).
+Ссылки на исходники: [`v4.5.3` composer.json](https://github.com/localzet/Server/blob/v4.5.3/composer.json), [`v7.1.0` composer.json](https://github.com/localzet/Server/blob/v7.1.0/composer.json), [сравнение тегов](https://github.com/localzet/Server/compare/v4.5.3...v7.1.0), [изменения 7.0.4 → 7.1.0](https://github.com/localzet/Server/compare/v7.0.4...v7.1.0).
 
 ## Перед обновлением приложения
 

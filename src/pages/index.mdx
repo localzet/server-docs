@@ -1,21 +1,21 @@
 import {HeroPattern} from '@/components/HeroPattern'
 
-export const pageTitle = 'Localzet Server 7 — документация и руководство'
-export const description = 'Официальная документация Localzet Server: асинхронный PHP runtime для HTTP/1.x, WebSocket, TCP и UDP, с event loop и управлением worker-процессами.'
+export const pageTitle = 'Localzet Server 7.1.0 — документация и руководство'
+export const description = 'Официальная документация Localzet Server 7.1.0: PHP runtime для HTTP/1.x, WebSocket, TCP и UDP, event loop, worker-процессов и управления жизненным циклом.'
 
 <HeroPattern />
 
 # Localzet Server
 
-Последняя опубликованная версия Localzet Server — **7.0.4**. Это PHP-библиотека для серверных приложений с долгоживущими соединениями, несколькими сетевыми протоколами и управлением worker-процессами. Текущий выпуск ограничивает HTTP framing, укрепляет работу с PID/runtime-файлами и RESP2, а также исправляет поведение TCP proxy при ошибках upstream.
+Последняя опубликованная версия Localzet Server — **7.1.0**. Это PHP-библиотека для серверных приложений с долгоживущими соединениями, несколькими сетевыми протоколами и управлением worker-процессами. В версии 7.1.0 появились lifecycle callbacks для запуска и штатной остановки worker-ов; hot upgrade использует передачу listener-ов на поддерживаемой среде.
 
-Пакет `localzet/server:^7.0` устанавливается через Composer. Проверяйте фактически выбранную версию командой `composer show localzet/server`; таблица [совместимости](/current/compatibility) описывает требования и изменения при переходе с предыдущих выпусков.
+Пакет `localzet/server:^7.1` устанавливается через Composer. Проверяйте фактически выбранную версию командой `composer show localzet/server`; таблица [совместимости](/current/compatibility) описывает требования и изменения при переходе с предыдущих выпусков.
 
 <div className="not-prose mx-auto my-8 grid w-full max-w-3xl gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:mx-[calc(50%_-_min(50%,33rem))]">
     <div className="rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"><strong>HTTP/1.x и TLS</strong><p className="mb-0 mt-2 text-sm text-slate-600 dark:text-slate-300">HTTP-запросы, ответы, потоковая отдача файлов и SSE.</p></div>
     <div className="rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"><strong>TCP, UDP, WebSocket</strong><p className="mb-0 mt-2 text-sm text-slate-600 dark:text-slate-300">Встроенные протоколы и интерфейс для пользовательского framing.</p></div>
     <div className="rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"><strong>Event loop</strong><p className="mb-0 mt-2 text-sm text-slate-600 dark:text-slate-300">Select, Revolt, ext-event, ext-ev и явно выбранные Swoole/Swow.</p></div>
-    <div className="rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"><strong>Worker lifecycle</strong><p className="mb-0 mt-2 text-sm text-slate-600 dark:text-slate-300">Статус, graceful stop, rolling reload и Unix hot upgrade.</p></div>
+    <div className="rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"><strong>Worker lifecycle</strong><p className="mb-0 mt-2 text-sm text-slate-600 dark:text-slate-300">Lifecycle callbacks, graceful shutdown, rolling reload и hot upgrade на поддерживаемой среде.</p></div>
 </div>
 
 ## Как читать документацию
@@ -45,4 +45,4 @@ export const description = 'Официальная документация Loca
 
 Сервер реализует HTTP/1.x, TLS поверх PHP streams, WebSocket, TCP и UDP. Gateway включает raw TCP proxy и потоковый HTTP/1.x reverse proxy с WebSocket Upgrade. Он не является HTTP/2/3 ingress, API management платформой или системой service discovery. В проекте нет встроенной аутентификации приложения, rate limiter или гарантии производительности для произвольной нагрузки.
 
-Справочные страницы, которые не входят в текущую документацию, помечены как архивные. Для актуального кода начинайте с раздела **Текущая версия · 7.x** в меню.
+Справочные страницы, которые не входят в текущую документацию, помечены как архивные. Для актуального кода начинайте с раздела **Текущая версия · 7.1.0** в меню.
