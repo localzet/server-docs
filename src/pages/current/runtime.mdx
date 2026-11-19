@@ -56,6 +56,33 @@ php server.php stop -g
 
 Перед автоматизацией проверьте фактическую среду командами `status --json` и `capabilities --json`. Для supervisor сигналов убедитесь, что посылаете их master-процессу.
 
+## Lifecycle callbacks
+
+Для общей проверки конфигурации перед запуском зарегистрируйте `Server::onBeforeRun()`. Она выполняется один раз при входе в путь `start`, после разбора CLI-команды и до обычного запуска runtime. Управляющие команды не запускают callback. При `upgrade` новый image также проходит путь `start` и вызывает callback повторно перед восстановлением runtime, поэтому проверка должна быть идемпотентной. При обычном холодном запуске исключение прерывает старт до bind listener-ов.
+
+`Server::onWorkerStart()` выполняется один раз в каждом процессе после создания event loop, до того, как worker начнёт принимать соединения и вызовет `onServerStart`. Callback получает текущий `Server`. При нескольких workers он запускается отдельно в каждом worker-е; в однопроцессном режиме — один раз. Поэтому общую сетевую проверку размещайте в `onBeforeRun`, а в `onWorkerStart` — локальную инициализацию процесса или его таймеров.
+
+Исключение из `onWorkerStart` завершает запуск fail-closed: текущий worker запрашивает graceful shutdown всей группы. Для штатной остановки из прикладного worker callback используйте `Server::requestShutdown()`:
+
+```php
+use localzet\Server;
+use localzet\Timer;
+
+Server::onBeforeRun(static function (): void {
+    // Check shared startup requirements before binding listeners.
+});
+
+Server::onWorkerStart(static function (Server $server): void {
+    Timer::delay(3600, static function (): void {
+        Server::requestShutdown(0, 'Scheduled graceful shutdown');
+    });
+});
+
+Server::runAll();
+```
+
+В Unix многопроцессном режиме `requestShutdown()` просит master остановить все workers; затем процессы закрывают активные соединения штатным способом. При single-process запуске останавливается текущий процесс. Этот API не заменяет защиту доступа к административным действиям приложения.
+
 ## PID, startup lock и status-файлы
 
 По умолчанию PID-файл сохраняет путь, зависящий от entry script. Status snapshot и startup lock находятся в отдельном каталоге временных файлов, созданном с правами `0700` и проверкой владельца. Запись PID и JSON snapshot выполняется через временный файл и атомарную замену.
