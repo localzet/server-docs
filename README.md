@@ -19,9 +19,11 @@ Open http://localhost:3000 during development. Build output is `out/`; the postb
 
 ## Documentation scope
 
-The Server handbook describes the current stable release, 7.1.0. The project switcher also provides separate documentation areas for Cluster, Cron, HTTP Client, MQTT, PSR-7, Proxy, SOCKS5, Socket.IO, Storage, Tunnel and Noter. Each area has its own sidebar, search results, project metadata and compatibility notes.
+The Server handbook describes the current stable release, 7.2.0. The project switcher also provides separate documentation areas for Cluster, Cron, HTTP Client, MQTT, PSR-7, Proxy, SOCKS5, Socket.IO, Storage, Tunnel, Noter, and Triangle Media. Each area has its own sidebar, search results, project metadata and compatibility notes. Media documents the published v1.1.0 Engine 8 package separately from the prepared but unreleased 2.0.0 Engine 9 migration.
 
-Older pages remain in the archive, carry an archive notice, and are excluded from the search index and sitemap. The site is primarily Russian and is not fully bilingual. Related-project pages reflect the checked out source and Composer lock state; they do not imply production readiness or unverified runtime behavior.
+The AI-readable project map is available at [`public/llms.txt`](public/llms.txt); public pages are indexed in `public/sitemap.xml` and `public/robots.txt`.
+
+Older pages remain in the archive, carry an archive notice, and are excluded from the search index and sitemap. The Server handbook is primarily Russian; selected related-project guides are available in English and Russian. Related-project pages reflect checked out sources and verified release status; they do not imply production readiness or unverified runtime behavior.
 
 ## Source layout
 

@@ -24,6 +24,7 @@ const projects = [
     {id: 'storage', title: 'Storage', href: '/projects/storage'},
     {id: 'tunnel', title: 'Tunnel', href: '/projects/tunnel'},
     {id: 'noter', title: 'Noter', href: '/projects/noter'},
+    {id: 'media', title: 'Media', href: '/projects/media'},
 ]
 
 export const Header = forwardRef(function Header({className}, ref) {

@@ -11,7 +11,7 @@ import '@/styles/tailwind.css'
 import 'focus-visible'
 
 const SITE_URL = 'https://server.localzet.com'
-const DEFAULT_TITLE = 'Localzet Server — документация версии 7.1.0'
+const DEFAULT_TITLE = 'Localzet Server 7.2.0 — документация'
 const DEFAULT_DESCRIPTION = 'Официальная документация Localzet Server: асинхронный PHP runtime для HTTP/1.x, WebSocket, TCP и UDP, с event loop и управлением worker-процессами.'
 const CLUSTER_TITLE = 'Localzet Cluster — документация'
 const CLUSTER_DESCRIPTION = 'Документация Localzet Cluster: распределённая архитектура Gateway/Business Worker для приложений на PHP, регистрация узлов и маршрутизация клиентских соединений.'
@@ -35,6 +35,25 @@ function isCurrentDocumentation(pathname) {
 
 function isClusterDocumentation(pathname) {
     return pathname.startsWith('/projects/cluster')
+}
+
+function getMediaLocalePaths(pathname) {
+    const russianRoot = '/projects/media'
+    const englishRoot = `${russianRoot}/en`
+
+    if (pathname === russianRoot || pathname === englishRoot) {
+        return {ru: russianRoot, en: englishRoot}
+    }
+
+    if (pathname.startsWith(`${englishRoot}/`)) {
+        return {ru: pathname.replace(englishRoot, russianRoot), en: pathname}
+    }
+
+    if (pathname.startsWith(`${russianRoot}/`)) {
+        return {ru: pathname, en: pathname.replace(russianRoot, englishRoot)}
+    }
+
+    return null
 }
 
 const RELATED_PROJECTS = {
@@ -81,6 +100,19 @@ const RELATED_PROJECTS = {
     storage: ['Localzet Storage', 'Client/server shared in-memory store for Localzet Server. Object deserialization is disabled by default.', 'https://github.com/localzet/Storage'],
     tunnel: ['Localzet Tunnel', 'Client/server messaging channel for Localzet Server processes.', 'https://github.com/localzet/Tunnel'],
     noter: ['Noter', 'Command-line utility for creating and managing notes; it uses Localzet HTTP Client transitively.', 'https://github.com/localzet/Noter'],
+    media: [
+        'Triangle Media',
+        'Image upload and processing plugin for Triangle Engine 9: validates local files and public HTTP(S) URLs, converts images, applies bounded transformations, and stores metadata through host adapters.',
+        'https://github.com/Triangle-org/Media',
+        'Engine 9 migration is under review; no stable Engine 9 package release has been verified.',
+        [
+            'Accept multipart uploads and remote HTTP(S) image URLs',
+            'Validate MIME type, upload size, decoded pixels, and animated frame count',
+            'Convert accepted images to PNG and store image metadata through the host database adapter',
+            'Apply crop, resize, pixelize, and cover transformations with ImageMagick resource limits',
+            'Pin remote DNS resolution and reject non-public destinations to reduce SSRF risk',
+        ],
+    ],
 }
 
 export default function App({Component, pageProps}) {
@@ -94,6 +126,7 @@ export default function App({Component, pageProps}) {
     const description = pageProps.description ?? (cluster ? CLUSTER_DESCRIPTION : relatedProject?.[1] ?? DEFAULT_DESCRIPTION)
     const canonicalPath = router.asPath.split(/[?#]/, 1)[0]
     const currentUrl = `${cluster ? 'https://server.localzet.com' : SITE_URL}${canonicalPath}`
+    const mediaLocalePaths = projectId === 'media' ? getMediaLocalePaths(router.pathname) : null
     const robots = current ? 'index,follow' : 'noindex,follow'
     const graph = {
         '@context': 'https://schema.org',
@@ -123,7 +156,7 @@ export default function App({Component, pageProps}) {
                 runtimePlatform: 'PHP 8.1 or newer',
                 version: cluster
                     ? 'current Cluster source, requires Server ^7.0'
-                    : relatedProject?.[3] ?? (relatedProject ? 'current repository source' : '7.1.0'),
+                    : relatedProject?.[3] ?? (relatedProject ? 'current repository source' : '7.2.0'),
                 license: 'https://spdx.org/licenses/AGPL-3.0-or-later.html',
                 author: {
                     '@type': 'Person',
@@ -186,6 +219,11 @@ export default function App({Component, pageProps}) {
                 <title>{router.pathname === '/' ? DEFAULT_TITLE : `${title} — ${cluster ? 'Localzet Cluster' : relatedProject?.[0] ?? 'Localzet Server'}`}</title>
                 <meta name="description" content={description} />
                 <link rel="canonical" href={currentUrl} />
+                {mediaLocalePaths && <>
+                    <link rel="alternate" hrefLang="ru" href={`${SITE_URL}${mediaLocalePaths.ru}`} />
+                    <link rel="alternate" hrefLang="en" href={`${SITE_URL}${mediaLocalePaths.en}`} />
+                    <link rel="alternate" hrefLang="x-default" href={`${SITE_URL}${mediaLocalePaths.ru}`} />
+                </>}
                 <link rel="alternate" type="text/plain" href={`${SITE_URL}/llms.txt`} title="AI-readable project guide" />
                 <meta name="author" content="Ivan Zorin" />
                 <meta name="publisher" content="Localzet Group" />

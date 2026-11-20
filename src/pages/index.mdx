@@ -1,13 +1,13 @@
 import {HeroPattern} from '@/components/HeroPattern'
 
-export const pageTitle = 'Localzet Server 7.1.0 — документация и руководство'
-export const description = 'Официальная документация Localzet Server 7.1.0: PHP runtime для HTTP/1.x, WebSocket, TCP и UDP, event loop, worker-процессов и управления жизненным циклом.'
+export const pageTitle = 'Localzet Server 7.2.0 — документация и руководство'
+export const description = 'Официальная документация Localzet Server 7.2.0: PHP runtime для HTTP/1.x, WebSocket, TCP и UDP, event loop, worker-процессов и управления жизненным циклом.'
 
 <HeroPattern />
 
 # Localzet Server
 
-Последняя опубликованная версия Localzet Server — **7.1.0**. Это PHP-библиотека для серверных приложений с долгоживущими соединениями, несколькими сетевыми протоколами и управлением worker-процессами. В версии 7.1.0 появились lifecycle callbacks для запуска и штатной остановки worker-ов; hot upgrade использует передачу listener-ов на поддерживаемой среде.
+Последняя опубликованная версия Localzet Server — **7.2.0**. Это PHP-библиотека для серверных приложений с долгоживущими соединениями, несколькими сетевыми протоколами и управлением worker-процессами. Для перехода с предыдущего выпуска смотрите [сравнение версий и изменений поведения](/current/compatibility).
 
 Пакет `localzet/server:^7.1` устанавливается через Composer. Проверяйте фактически выбранную версию командой `composer show localzet/server`; таблица [совместимости](/current/compatibility) описывает требования и изменения при переходе с предыдущих выпусков.
 
@@ -45,4 +45,4 @@ export const description = 'Официальная документация Loca
 
 Сервер реализует HTTP/1.x, TLS поверх PHP streams, WebSocket, TCP и UDP. Gateway включает raw TCP proxy и потоковый HTTP/1.x reverse proxy с WebSocket Upgrade. Он не является HTTP/2/3 ingress, API management платформой или системой service discovery. В проекте нет встроенной аутентификации приложения, rate limiter или гарантии производительности для произвольной нагрузки.
 
-Справочные страницы, которые не входят в текущую документацию, помечены как архивные. Для актуального кода начинайте с раздела **Текущая версия · 7.1.0** в меню.
+Справочные страницы, которые не входят в текущую документацию, помечены как архивные. Для актуального кода начинайте с раздела **Версия 7.2.0** в меню.

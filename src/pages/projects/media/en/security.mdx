@@ -1,0 +1,32 @@
+export const pageTitle = 'Triangle Media: security and operations'
+export const description = 'Triangle Media security model for project tokens, registration, trusted proxies, SSRF controls, ImageMagick limits, and file storage.'
+
+# Security and operations
+
+Triangle Media processes untrusted images and URLs. Treat the upload route as a public application boundary and set access controls, limits, and outbound network policy at the host level.
+
+## Access and tokens
+
+- `project_registration` is disabled for new installations. Enable it only behind application authentication or another appropriate access policy.
+- Installation preserves existing configuration. After an upgrade, check that `project_registration = true` was not carried forward unintentionally.
+- A project token is a bearer secret for uploads. Keep it out of public logs, analytics events, URLs, and shared links.
+- The plugin does not implement user authentication or authorization. Protect upload and registration routes with application middleware or a reverse proxy.
+- The built-in rate limiter is disabled by default. Enable it together with a working storage adapter, and review the concurrency of `get/set/increment`.
+
+## Client IP and proxies
+
+`Request::getRequestIp()` supplies the author field and rate-limit key. Engine ignores forwarded headers from untrusted peers. Configure only your reverse proxy addresses in Server/Engine. Without a trusted proxy configuration, the direct network peer is used.
+
+## Remote URLs and SSRF
+
+The downloader allows HTTP(S) on standard ports, rejects credentials and non-public IPs, and rejects domains with any non-public DNS result. It pins a validated address for the request, disables redirects and proxies, and bounds time and response bytes.
+
+These controls reduce SSRF risk, but do not replace an egress firewall, DNS policy, or environment-level network restrictions. Do not re-enable arbitrary user-controlled redirects through a separate proxy.
+
+## Images and storage
+
+Uploads and later processing are bounded by MIME type, source size, frame count, total pixel count, ImageMagick memory, disk, and time limits. Keep the system ImageMagick policy enabled and keep the extension patched.
+
+The default `image_path` is inside `public_path()`. Store source files outside the web root when the application architecture permits; directory permissions must prevent arbitrary file upload or execution. Restrict access to the directory and outbound server connections.
+
+Processed-image caching uses the host storage adapter. The rate limiter and processing cache share that service, while the adapter controls cache expiration.

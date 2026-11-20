@@ -1,0 +1,67 @@
+export const pageTitle = 'Triangle Media: загрузка изображений'
+export const description = 'Практическое руководство по multipart-загрузке, загрузке по ссылке, регистрации проекта и ответам API Triangle Media.'
+
+# Загрузка изображений
+
+Маршрут по умолчанию: `POST /app/media/upload`. Он принимает один из двух вариантов: multipart-файл в поле `file` или URL в поле `link`. В обоих случаях требуется токен проекта в поле `token`.
+
+## Получите токен проекта
+
+Маршрут регистрации `GET/POST /app/media/project` выключен настройкой `project_registration = false`. Включайте его только если приложение защищает маршрут авторизацией или другой подходящей политикой доступа.
+
+При включённой регистрации отправьте поля формы:
+
+```sh
+curl -X POST 'https://app.example.test/app/media/project' \
+  -H 'Accept: application/json' \
+  -F 'name=My application' \
+  -F 'description=Profile image uploads' \
+  -F 'email=owner@example.test'
+```
+
+Ответ содержит сгенерированный `token`. Считайте его bearer-секретом. Если публичная регистрация не нужна, создайте запись проекта административным кодом приложения; поля и имя коллекции описаны в [контракте адаптера](/projects/media/configuration).
+
+## Загрузите локальный файл
+
+```sh
+curl -X POST 'https://app.example.test/app/media/upload' \
+  -H 'Accept: application/json' \
+  -F 'token=PROJECT_TOKEN' \
+  -F 'file=@./photo.jpg'
+```
+
+Не задавайте вручную `Content-Type` для multipart: curl добавляет границу формы. Плагин проверяет статус загруженного файла, его фактический MIME-тип и размер. MIME, присланный браузером, не считается доверенным источником.
+
+## Загрузите публичную ссылку
+
+```sh
+curl -X POST 'https://app.example.test/app/media/upload' \
+  -H 'Accept: application/json' \
+  -F 'token=PROJECT_TOKEN' \
+  -F 'link=https://images.example.test/photo.jpg'
+```
+
+Допустимы HTTP и HTTPS на стандартных портах. URL с userinfo, приватный/зарезервированный IP, непубличный DNS-ответ и redirect отклоняются. Ответ сервера ограничен размером `max_file_size` и таймаутом.
+
+## Ответ
+
+При `Accept: application/json` Engine обычно оборачивает ответ в объект со `status` и `data`. Полезная нагрузка успешной загрузки содержит:
+
+```json
+{
+  "message": "Image uploaded",
+  "id": "generated-image-id",
+  "url": "https://cdn.example.test/media/generated-image-id",
+  "mime": "image/png",
+  "width": 1200,
+  "height": 800,
+  "color": "#aabbcc",
+  "size": 84231
+}
+```
+
+Используйте `id` для маршрута [обработки изображения](/projects/media/processing). URL зависит от `image_uri`; это только адрес, который вернул плагин, он не настраивает CDN и web server.
+
+## Ошибки запроса
+
+Контроллер отклоняет неподдерживаемый метод, отсутствующие данные, неверный токен, невалидный файл, неверные поля проекта и запросы сверх rate limit. Типовые коды — 400, 403, 405, 422 и 429; итоговый HTTP status зависит также от `app.http_always_200` приложения.

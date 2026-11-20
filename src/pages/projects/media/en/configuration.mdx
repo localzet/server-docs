@@ -1,0 +1,54 @@
+export const pageTitle = 'Triangle Media: configuration and adapters'
+export const description = 'Reference for Triangle Media settings, ImageMagick limits, database and storage adapters, and the records written by the plugin.'
+
+# Configuration and adapters
+
+Defaults live in `src/Config/app.php` and are installed into `config/plugin/triangle/media/app.php`. Installation copies missing files only; review existing configuration manually after upgrades.
+
+## Settings
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `enable` | `true` | Plugin configuration flag. |
+| `project_registration` | `false` | Enables `GET` and `POST` on the project registration route. |
+| `image_uri` | `https://example.ru/media/` | Public base URL; it should end in `/`. |
+| `image_path` | `public_path() . '/media/upload/'` | Directory for converted files; it must be writable. |
+| `max_file_size` | 15 MiB | Maximum source file or downloaded body size. |
+| `max_image_pixels` | 40,000,000 | Total pixel limit across all frames; also bounds filter output dimensions. |
+| `max_image_frames` | 50 | Maximum input frame count; checked on uploads and when processing stored images. |
+| `max_image_memory` | 256 MiB | ImageMagick `MEMORY` and `MAP` resource limits. |
+| `max_image_disk` | 512 MiB | ImageMagick disk resource limit. |
+| `max_image_time` | 10 s | ImageMagick time limit. |
+| `target_type` / `target_ext` | `image/png` / `png` | Response MIME type and saved image extension. |
+| `mime_types` | JPEG, PNG, GIF, BMP, TIFF | Allowed source MIME types, checked against file contents rather than browser headers. |
+| `database.images` / `database.projects` | `Media_Images` / `Media_Projects` | Table or collection names used by the database adapter. |
+| `rate_limiter.enable` | `false` | Enables the built-in request limiter. |
+| `rate_limiter.quota` / `cycle` | `3` / `60` | Allowed requests per time window, in seconds. |
+
+Choose limits for the application's memory, disk, and expected workloads. Raising a per-request limit does not replace system-level ImageMagick policy.
+
+## Adapter contracts
+
+The plugin calls this database interface:
+
+```php
+db()->insert($table, $record);
+$project = db()->where('token', $token)->getOne($projectsTable);
+$duplicate = db()->where('hash', $hash)->getOne($imagesTable);
+```
+
+Project records contain `name`, `description`, `email`, and `token`. Project lookup must return an `id` field for the upload controller. Image records contain `author`, `filepath`, `width`, `height`, `color`, `mime`, `size`, `hash`, and `projectId`.
+
+The storage service must support:
+
+```php
+storage()->get($key);
+storage()->set($key, $value, $ttl); // rate limiter
+storage()->increment($key);
+```
+
+The processed-image cache also calls `storage()->set($requestUri, $imageBytes)` without a TTL. Cache expiration is controlled by the adapter or application policy. The rate limiter uses a read/set/increment sequence; check that your storage semantics match the expected concurrency.
+
+## View integration
+
+Controllers call `view('index')`, `view('form')`, and `view('image', $variables)`. The package does not ship templates. Add them to the host application or replace these routes with its own controllers. The `image` template receives an `imageURL` variable.

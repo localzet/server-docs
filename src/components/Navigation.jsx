@@ -174,7 +174,7 @@ function NavigationGroup({group, className}) {
 
 const serverNavigation = [
     {
-        title: 'Текущая версия · 7.1.0',
+        title: 'Текущая версия · 7.2.0',
         links: [
             {title: 'Обзор и версия', href: '/'},
             {title: 'Установка и первый сервер', href: '/current/start'},
@@ -300,6 +300,28 @@ const projectNavigation = {
     storage: [{title: 'Storage', links: [{title: 'Обзор и безопасность', href: '/projects/storage'}, {title: 'Сервер и клиент', href: '/projects/storage/start'}, {title: 'Операции и ограничения', href: '/projects/storage/reference'}]}],
     tunnel: [{title: 'Tunnel', links: [{title: 'Обзор и протокол', href: '/projects/tunnel'}, {title: 'События и очереди', href: '/projects/tunnel/start'}, {title: 'Клиент, форматы и доставка', href: '/projects/tunnel/reference'}]}],
     noter: [{title: 'Noter', links: [{title: 'Обзор', href: '/projects/noter'}, {title: 'Установка и отправка заметки', href: '/projects/noter/start'}, {title: 'Настройка сервера-приёмника', href: '/projects/noter/reference'}]}],
+    media: [
+        {title: 'Triangle Media · Русский', links: [
+            {title: 'Обзор', href: '/projects/media'},
+            {title: 'Установка и первый запуск', href: '/projects/media/start'},
+            {title: 'Совместимость и переход', href: '/projects/media/compatibility'},
+            {title: 'Конфигурация и адаптеры', href: '/projects/media/configuration'},
+            {title: 'Загрузка изображений', href: '/projects/media/upload'},
+            {title: 'Обработка и выдача', href: '/projects/media/processing'},
+            {title: 'Безопасность и эксплуатация', href: '/projects/media/security'},
+            {title: 'Тесты и ограничения', href: '/projects/media/testing'},
+        ]},
+        {title: 'Triangle Media · English', links: [
+            {title: 'Overview', href: '/projects/media/en'},
+            {title: 'Installation and first run', href: '/projects/media/en/start'},
+            {title: 'Compatibility and migration', href: '/projects/media/en/compatibility'},
+            {title: 'Configuration and adapters', href: '/projects/media/en/configuration'},
+            {title: 'Uploading images', href: '/projects/media/en/upload'},
+            {title: 'Processing and delivery', href: '/projects/media/en/processing'},
+            {title: 'Security and operations', href: '/projects/media/en/security'},
+            {title: 'Tests and limits', href: '/projects/media/en/testing'},
+        ]},
+    ],
 }
 
 export function getNavigation(pathname) {

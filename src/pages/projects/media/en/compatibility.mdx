@@ -1,0 +1,29 @@
+export const pageTitle = 'Triangle Media: compatibility and Engine 9 migration'
+export const description = 'Compare the previous Media integration contract with Triangle Engine 9, including dependencies, uploaded files, request IP handling, and safe registration defaults.'
+
+# Compatibility and migration
+
+The published `v1.1.0` tag requires `triangle/engine:^8.1`. The prepared next major, `2.0.0`, requires `triangle/engine:^9.0` and targets Engine 9 with Localzet Server 7. PHP 8.1 remains the minimum. These major versions cannot share one Composer dependency graph.
+
+Release `2.0.0` has not been published. Check the package version resolved by your lock file and the [repository](https://github.com/Triangle-org/Media) first.
+
+## Application changes
+
+| Area | Previous integration contract | Engine 9 |
+| --- | --- | --- |
+| Composer | The package depended on Engine 8 | Dependency is `triangle/engine:^9.0`; do not mix it with the previous package in one lock file. |
+| Multipart file | Controllers expected a legacy upload object and read from the global request | Engine returns `Triangle\Engine\File`; the controller validates its type, upload status, and client filename from the current `Request`. |
+| Form fields and token | Read through the global request helper | Token, file, and URL are read from the injected request object. |
+| Client IP | Required an application helper | Uses `Request::getRequestIp()`; forwarding headers are considered only from trusted proxies. |
+| Project registration | Enabled in the template configuration | Disabled for new installations (`project_registration = false`). |
+| ImageMagick | Transformation output dimensions were not consistently bounded | Frame count, total pixels, and processing resources are limited. |
+
+## Migration sequence
+
+1. Move the application to Engine 9 and a compatible Server 7 release.
+2. Update Composer dependencies in a separate branch and inspect the resolved `composer.lock`.
+3. Review proxy configuration so only trusted peers can supply forwarded client IP headers.
+4. Check the installed `project_registration` value. `Install::install()` preserves existing settings, so an old `true` value remains after upgrade.
+5. Connect the Engine database and storage adapters, add test templates, and run application-level integration requests.
+
+Do not copy dependency versions between old and new applications. The application's Composer lock file is the source of truth for the resolved versions.
