@@ -13,7 +13,7 @@ TCP переносит поток байтов и сам по себе не со
 | `https://host:port` | HTTP/1.x поверх TLS stream context |
 | `websocket://host:port` | WebSocket поверх HTTP Upgrade |
 
-Ветка реализует HTTP/1.x, не HTTP/2 или HTTP/3. TLS требует корректных сертификата и ключа в stream context или завершения TLS на доверенном reverse proxy.
+Ветка реализует HTTP/1.x, не HTTP/2 или HTTP/3. TLS требует корректных сертификата и ключа в stream context или завершения TLS на доверенном reverse proxy. На TLS listener можно включить взаимную проверку клиентских сертификатов через `LOCALZET_SSL_VERIFY_PEER=true` и CA-файл `LOCALZET_SSL_CAFILE`; см. [модель безопасности](/current/security).
 
 ## Пользовательский TCP-протокол
 
