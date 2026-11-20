@@ -30,7 +30,7 @@ function InfoIcon(props) {
 export function Note({children}) {
     return (
         <div
-            className="my-6 flex gap-2.5 rounded-2xl border border-sky-500/20 bg-sky-50/50 p-4 leading-6 text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/5 dark:text-sky-200 dark:[--tw-prose-links-hover:theme(colors.sky.300)] dark:[--tw-prose-links:theme(colors.white)]">
+            className="my-6 flex gap-2.5 rounded-2xl border border-sky-500/20 bg-sky-50/50 p-4 leading-6 text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/5 dark:text-sky-200 dark:[--tw-prose-links-hover:var(--color-sky-300)] dark:[--tw-prose-links:var(--color-white)]">
             <InfoIcon
                 className="mt-1 h-4 w-4 flex-none fill-sky-500 stroke-white dark:fill-sky-200/20 dark:stroke-sky-200"/>
             <div className="[&>:first-child]:mt-0 [&>:last-child]:mb-0">
@@ -66,7 +66,7 @@ export function Properties({children}) {
         <div className="my-6">
             <ul
                 role="list"
-                className="m-0 max-w-[calc(theme(maxWidth.lg)-theme(spacing.8))] list-none divide-y divide-slate-900/5 p-0 dark:divide-white/5"
+                className="m-0 max-w-[31rem] list-none divide-y divide-slate-900/5 p-0 dark:divide-white/5"
             >
                 {children}
             </ul>

@@ -47,7 +47,7 @@ function Anchor({id, inView, children}) {
         >
             {inView && (
                 <div
-                    className="absolute ml-[calc(-1*var(--width))] mt-1 hidden w-[var(--width)] opacity-0 transition [--width:calc(2.625rem+0.5px+50%-min(50%,calc(theme(maxWidth.lg)+theme(spacing.8))))] group-hover:opacity-100 group-focus:opacity-100 md:block lg:z-50 2xl:[--width:theme(spacing.10)]">
+                    className="absolute ml-[calc(-1*var(--width))] mt-1 hidden w-[var(--width)] opacity-0 transition [--width:calc(2.625rem+0.5px+50%-min(50%,35rem))] group-hover:opacity-100 group-focus:opacity-100 md:block lg:z-50 2xl:[--width:2.5rem]">
                     <div
                         className="group/anchor block h-5 w-5 rounded-lg bg-slate-50 ring-1 ring-inset ring-slate-300 transition hover:ring-slate-500 dark:bg-slate-800 dark:ring-slate-700 dark:hover:bg-slate-700 dark:hover:ring-slate-600">
                         <AnchorIcon
