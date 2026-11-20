@@ -38,7 +38,7 @@ export const Header = forwardRef(function Header({className}, ref) {
             ref={ref}
             className={clsx(
                 className,
-                'fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-4 px-4 transition sm:px-6 lg:left-72 lg:z-30 lg:px-8 xl:left-80',
+                'fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-2 px-4 transition sm:gap-4 sm:px-6 lg:left-72 lg:z-30 lg:px-8 xl:left-80',
                 !isInsideMobileNavigation &&
                 'backdrop-blur-sm dark:backdrop-blur lg:left-72 xl:left-80',
                 isInsideMobileNavigation
@@ -58,18 +58,18 @@ export const Header = forwardRef(function Header({className}, ref) {
                 )}
             />
             <Search/>
-            <div className="flex items-center gap-5 lg:hidden">
+                <div className="flex items-center gap-2 sm:gap-5 lg:hidden">
                 <MobileNavigation/>
                 <Link href="/" aria-label="Home">
                     <Logo />
                 </Link>
             </div>
-            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-4">
                 <label className="sr-only" htmlFor="project-switcher">Выбрать проект</label>
                 <select
                     id="project-switcher"
                     aria-label="Выбрать проект"
-                    className="w-28 min-w-0 rounded-md border border-slate-900/10 bg-white/70 px-2 py-1.5 text-xs text-slate-700 dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 sm:w-36 sm:text-sm"
+                    className="w-28 min-w-[5rem] rounded-md border border-slate-900/10 bg-white/70 px-1.5 py-1.5 text-xs text-slate-700 dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 sm:w-36 sm:px-2 sm:text-sm"
                     value={currentProject}
                     onChange={(event) => router.push(projects.find((project) => project.id === event.target.value)?.href ?? '/')}
                 >

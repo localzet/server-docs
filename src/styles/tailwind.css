@@ -1,3 +1,6 @@
+@import 'tailwindcss';
+@config '../../tailwind.config.js';
+
 @layer base {
     /*:root {*/
     /*  --shiki-color-text: theme('colors.white');*/
@@ -26,7 +29,3 @@
         display: none;
     }
 }
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;

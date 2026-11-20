@@ -137,7 +137,7 @@ function CodeGroupHeader({title, children, selectedIndex}) {
 
     return (
         <div
-            className="flex min-h-[calc(theme(spacing.12)+1px)] flex-wrap items-start gap-x-4 border-b border-slate-700 bg-slate-800 px-4 dark:border-slate-800 dark:bg-transparent">
+            className="flex min-h-[calc(3rem+1px)] flex-wrap items-start gap-x-4 border-b border-slate-700 bg-slate-800 px-4 dark:border-slate-800 dark:bg-transparent">
             {title && (
                 <h3 className="mr-auto pt-3 text-xs font-semibold text-white">
                     {title}

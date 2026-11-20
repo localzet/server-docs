@@ -1,7 +1,7 @@
 import {mdxAnnotations} from 'mdx-annotations'
 import {visit} from 'unist-util-visit'
 import rehypeMdxTitle from 'rehype-mdx-title'
-import shiki from 'shiki'
+import {createHighlighter} from 'shiki'
 import {toString} from 'mdast-util-to-string'
 import * as acorn from 'acorn'
 import {slugifyWithCounter} from '@sindresorhus/slugify'
@@ -19,12 +19,59 @@ function rehypeParseCodeBlocks() {
     }
 }
 
+let highlighterPromise
 let highlighter
+let languageLoads = new Map()
+
+const codeTheme = {
+    name: 'localzet-css-variables',
+    type: 'dark',
+    colors: {
+        'editor.foreground': 'var(--shiki-color-text)',
+        'editor.background': 'transparent',
+    },
+    tokenColors: [
+        {
+            scope: ['constant', 'constant.numeric', 'constant.language', 'constant.character'],
+            settings: {foreground: 'var(--shiki-token-constant)'},
+        },
+        {scope: ['string'], settings: {foreground: 'var(--shiki-token-string)'}},
+        {scope: ['comment'], settings: {foreground: 'var(--shiki-token-comment)'}},
+        {
+            scope: ['keyword', 'storage.type', 'storage.modifier'],
+            settings: {foreground: 'var(--shiki-token-keyword)'},
+        },
+        {scope: ['variable.parameter'], settings: {foreground: 'var(--shiki-token-parameter)'}},
+        {
+            scope: ['entity.name.function', 'support.function'],
+            settings: {foreground: 'var(--shiki-token-function)'},
+        },
+        {scope: ['punctuation'], settings: {foreground: 'var(--shiki-token-punctuation)'}},
+    ],
+}
+
+async function getHighlighter() {
+    highlighterPromise ??= createHighlighter({themes: [codeTheme], langs: []})
+    highlighter = await highlighterPromise
+
+    return highlighter
+}
+
+async function loadLanguage(language) {
+    let loaded = await getHighlighter()
+
+    if (!languageLoads.has(language)) {
+        languageLoads.set(language, loaded.loadLanguage(language))
+    }
+
+    await languageLoads.get(language)
+
+    return loaded
+}
 
 function rehypeShiki() {
     return async (tree) => {
-        highlighter =
-            highlighter ?? (await shiki.getHighlighter({theme: 'css-variables'}))
+        let codeBlocks = []
 
         visit(tree, 'element', (node) => {
             if (node.tagName === 'pre' && node.children[0]?.tagName === 'code') {
@@ -34,21 +81,29 @@ function rehypeShiki() {
                 node.properties.code = textNode.value
 
                 if (node.properties.language) {
-                    let tokens = highlighter.codeToThemedTokens(
-                        textNode.value,
-                        node.properties.language
-                    )
-
-                    textNode.value = shiki.renderToHtml(tokens, {
-                        elements: {
-                            pre: ({children}) => children,
-                            code: ({children}) => children,
-                            line: ({children}) => `<span>${children}</span>`,
-                        },
+                    codeBlocks.push({
+                        textNode,
+                        code: textNode.value,
+                        language: node.properties.language,
                     })
                 }
             }
         })
+
+        for (let block of codeBlocks) {
+            let loaded = await loadLanguage(block.language)
+            let html = loaded.codeToHtml(block.code, {
+                lang: block.language,
+                theme: codeTheme.name,
+            })
+            let match = html.match(/^<pre[^>]*><code[^>]*>([\s\S]*)<\/code><\/pre>$/)
+
+            if (!match) {
+                throw new Error(`Shiki returned unexpected HTML for ${block.language}`)
+            }
+
+            block.textNode.value = match[1]
+        }
     }
 }
 
