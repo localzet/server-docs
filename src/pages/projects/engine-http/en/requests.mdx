@@ -1,0 +1,37 @@
+export const pageTitle = 'HTTP requests and responses in Engine HTTP'
+export const description = 'How the adapter dispatches requests through Router and Middleware and preserves response status, headers, and body.'
+
+# HTTP requests and responses
+
+## Request path
+
+Localzet Server accepts the connection and parses the HTTP message. Engine HTTP sets the current request and connection in Engine Context, then resolves a callback by method and path. The adapter checks cached callbacks, unsafe URIs, static files, registered Router routes, controller routes, and fallback handlers.
+
+Router matches the route. Middleware wraps the callback, while Triangle Engine resolves controllers and dependencies. The adapter does not provide authentication; configure it in the application or its middleware.
+
+## Handler result
+
+A handler can return a Server or Engine response. For a base Server 7 HTTP response, the adapter preserves the status, headers, and body. Other values are wrapped in an Engine response with status 200 and a string representation. Exceptions use the configured error response path.
+
+~~~php
+use localzet\Server\Protocols\Http\Response;
+use Triangle\Router;
+
+Router::any('/health', static fn () => new Response(
+    200,
+    ['Content-Type' => 'application/json'],
+    '{"status":"ok"}',
+));
+~~~
+
+The application owns the body and headers. Do not return user input as HTML without context-aware encoding.
+
+## Keep-alive and files
+
+Sending accounts for the HTTP version and request Connection header. For HTTP/1.1 without an explicit close, the adapter keeps the connection open; it also accounts for a chunked Transfer-Encoding response. Server handles byte delivery, framing, and backpressure.
+
+Static files are returned as file responses. PHP files under the public path are executed only when app.support_php_files is explicitly enabled; the default is disabled.
+
+## Русский
+
+См. [обработку запросов и ответов на русском](/projects/engine-http/requests).

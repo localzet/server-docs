@@ -1,0 +1,32 @@
+export const pageTitle = 'Engine WS handshake and messages'
+export const description = 'The WebSocket upgrade sequence, route middleware, and incoming-frame handling in Triangle Engine WS.'
+
+# Handshake and message handling
+
+## Before upgrade
+
+Server passes the HTTP Upgrade request to the Engine WS callback. The adapter saves a Triangle Request on the connection, validates the URI, and matches a GET route. Route middleware runs during the handshake and can allow the upgrade or return an HTTP error. The message handler itself is not invoked at this stage.
+
+If the path is missing, the method is not allowed, or middleware rejects the request, Engine WS closes the HTTP connection with the corresponding status. Use this stage to check authorization and Origin before opening a WebSocket session.
+
+## After upgrade
+
+For an incoming frame, the adapter sets the current connection and saved request in Engine Context. The frame payload is available as Request::ws_buffer; the route callback runs after the message arrives. Request and connection context is removed in a finally block.
+
+~~~php
+use Triangle\Router;
+use Triangle\Ws\App;
+
+Router::any('/echo', static fn () => 'echo:' . (App::request()?->ws_buffer ?? ''));
+Router::collect([]);
+~~~
+
+A string result is sent as the frame body. If a callback returns an HTTP Response, only its body is sent in the WebSocket frame; HTTP status and headers are not part of that frame.
+
+## Broadcast and closure
+
+sendToAll and sendToGroup use connections known to the current process. Use a broker or explicit IPC for inter-process delivery. If required, define application-level reconnect, delivery acknowledgement, and deduplication policies.
+
+## Русский
+
+См. [handshake и обработку сообщений на русском](/projects/engine-ws/messages).

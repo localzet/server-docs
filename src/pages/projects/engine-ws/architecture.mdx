@@ -1,0 +1,32 @@
+export const pageTitle = 'Конфигурация и архитектура Engine WS'
+export const description = 'Границы WebSocket-адаптера, значения конфигурации и модель памяти соединений.'
+
+# Конфигурация и архитектура
+
+## Поток обработки
+
+~~~text
+Localzet Server: TCP listener + WebSocket protocol
+        ↓ HTTP upgrade callback
+Triangle Engine WS: URI check + Router dispatch + handshake middleware
+        ↓ upgrade
+frame → request context → callback → WebSocket body
+~~~
+
+Engine WS наследует Triangle Engine App. Протокол WebSocket и управление соединением принадлежат Server; Engine WS хранит route request в контексте соединения, передаёт каждый frame callback-у и предоставляет методы отправки.
+
+## Конфигурация приложения
+
+Файл app задаёт debug, имя приложения, суффикс контроллера и повторное использование контроллеров. По умолчанию debug выключен, имя — Triangle App, суффикс контроллера пустой, reuse включён. Значения можно задать через APP_DEBUG, APP_NAME, CONTROLLER_SUFFIX и CONTROLLER_REUSE.
+
+Настройка listener-а, числа worker-ов, TLS, таймаутов и сетевых ограничений относится к Server и приложению. Engine WS не создаёт отдельные серверные процессы.
+
+## Память соединений
+
+Карта соединений и групп хранится в статических свойствах внутри процесса. В многопроцессной конфигурации каждый worker видит только свои соединения. Перезапуск worker-а удаляет эту карту; межпроцессной репликации или durable registry в пакете нет.
+
+Engine WS и Engine HTTP нельзя подключать одновременно: Composer manifest задаёт взаимный conflict.
+
+## English
+
+See [architecture and configuration in English](/projects/engine-ws/en/architecture).

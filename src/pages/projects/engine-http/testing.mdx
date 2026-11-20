@@ -1,0 +1,30 @@
+export const pageTitle = 'Тесты и пределы покрытия Engine HTTP'
+export const description = 'Как запускать проверки Engine HTTP и что подтверждает loopback-тест на Localzet Server 7.'
+
+# Тесты и пределы покрытия
+
+## Локальные проверки
+
+Script composer test запускает проверку совместимости ответа и HTTP loopback fixture:
+
+~~~sh
+composer test
+~~~
+
+Проверка Server 7 использует временное Composer окружение и соседние исходники Server, Engine, Router и Middleware:
+
+~~~sh
+bash tools/test-server7-local.sh
+~~~
+
+20 ноября 2026 года локальный loopback-набор подтвердил получение HTTP-запроса через реальный сокет и сохранение кода 202, заголовка и тела базового ответа Server 7. Fixture использует один worker и очищает созданные процессы и временные файлы.
+
+## Что не проверяется
+
+Набор не проверяет TLS, reverse proxy, HTTP/2, несколько worker-ов, отказ внешнего хранилища или production-нагрузку. Engine HTTP 3.0.0 опубликован для Engine 9 и Server 7.1+. Успешная локальная проверка не равна GitHub Actions и не проверяет production-настройки.
+
+Перед релизом проверьте CI ветки и интеграцию полного приложения. Сверяйте lock-файл и фактически разрешённые версии Composer. Перед production проверьте актуальный Composer lock и CI приложения.
+
+## English
+
+See [tests and coverage limits in English](/projects/engine-http/en/testing).

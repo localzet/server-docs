@@ -1,0 +1,36 @@
+export const pageTitle = 'Engine HTTP architecture and configuration'
+export const description = 'The HTTP adapter boundary and its interaction with Server, Engine, Router, and Middleware.'
+
+# Architecture and configuration
+
+## Components
+
+~~~text
+Localzet Server
+  listener, HTTP framing, connection lifecycle, event loop
+        ↓ request callback
+Triangle Engine HTTP
+  callback selection, static files, response adaptation
+        ↓
+Router → Middleware → application controller or function
+~~~
+
+Triangle Engine HTTP extends the base Triangle Engine App. It connects Server's HTTP callback to Engine types and routing components. Server remains responsible for listeners and worker processes.
+
+## Application configuration
+
+The app configuration defines the application name, plugin URI and alias, controller suffix, and controller reuse. Defaults can be set through APP_NAME, APP_PLUGIN_ALIAS, APP_PLUGIN_URI, CONTROLLER_SUFFIX, and CONTROLLER_REUSE.
+
+The static configuration enables file serving through STATIC_ENABLE, whose current default is true. A plugin public path can be configured per plugin; otherwise the application public directory is used.
+
+PHP execution under the public path has a separate app.support_php_files option, disabled by default. Do not enable it for user uploads.
+
+## State boundary
+
+Engine Context is scoped to the current process and Fiber/coroutine. It is cleared after the response is sent and is not shared between workers. Store shared state externally or use an explicit inter-process mechanism.
+
+Engine HTTP and Engine WS declare a Composer conflict. Install only the adapter that matches the application's connection model.
+
+## Русский
+
+См. [архитектуру и конфигурацию на русском](/projects/engine-http/architecture).

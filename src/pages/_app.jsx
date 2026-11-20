@@ -38,13 +38,46 @@ function isClusterDocumentation(pathname) {
 }
 
 const RELATED_PROJECTS = {
+    engine: [
+        'Triangle Engine',
+        'PHP application engine for Triangle with request handling, routing integration, service lifecycle, and runtime helpers.',
+        'https://github.com/Triangle-org/Engine',
+        'Stable release 9.0.0 for Localzet Server 7.1+.',
+        [
+            'PHP application engine for Triangle projects',
+            'Request, response, context, bootstrap, and service-container integration',
+            'Current stable package targets Localzet Server 7.1+',
+        ],
+    ],
+    'engine-http': [
+        'Triangle Engine HTTP',
+        'HTTP adapter connecting Triangle applications, routes, middleware, controllers, and responses to Localzet Server.',
+        'https://github.com/Triangle-org/Engine-HTTP',
+        'Stable release 3.0.0 for Engine 9 and Localzet Server 7.1+.',
+        [
+            'Dispatch HTTP requests into Triangle routes and controllers',
+            'Integrate route middleware and normalize HTTP responses',
+            'Use Localzet Server as the listener and network runtime',
+        ],
+    ],
+    'engine-ws': [
+        'Triangle Engine WS',
+        'WebSocket adapter for Triangle applications with handshake routing, message callbacks, and process-local connection groups.',
+        'https://github.com/Triangle-org/Engine-WS',
+        'Stable release 2.0.0 for Engine 9 and Localzet Server 7.1+.',
+        [
+            'Route HTTP upgrade handshakes through Triangle middleware',
+            'Dispatch WebSocket messages to route callbacks',
+            'Keep connection groups local to each worker process',
+        ],
+    ],
     cron: ['Localzet Cron', 'Timer based scheduling for Localzet Server.', 'https://github.com/localzet/Cron'],
     httpclient: ['Localzet HTTP Client', 'Asynchronous HTTP requests and connection pooling for Localzet Server.', 'https://github.com/localzet/HttpClient'],
-    mqtt: ['Localzet MQTT', 'Incomplete MQTT 3/5 client port. Runtime compatibility and broker integration are not established.', 'https://github.com/localzet/MQTT'],
+    mqtt: ['Localzet MQTT', 'MQTT 3.1.1 and MQTT 5 client for Localzet Server with TCP/TLS and QoS 0/1/2.', 'https://github.com/localzet/MQTT'],
     psr7: ['Localzet PSR-7', 'PSR-7 HTTP message objects, streams and URI utilities for Server 7.', 'https://github.com/localzet/PSR-7'],
     proxy: ['Localzet Proxy', 'Experimental HTTP forward proxy with an empty-by-default exact host and port allowlist. Client authentication and DNS/private-address policy remain deployment responsibilities.', 'https://github.com/localzet/Proxy'],
     socks5: ['Localzet SOCKS5', 'SOCKS5 TCP CONNECT proxy for Localzet Server with loopback-first configuration.', 'https://github.com/localzet/SOCKS5'],
-    socketio: ['Localzet Socket.IO', 'Socket.IO server implementation with a Server 7 protocol adapter. Cross-process Tunnel delivery requires an unpublished Server 7-compatible Tunnel release.', 'https://github.com/localzet/SocketIO'],
+    socketio: ['Localzet Socket.IO', 'Socket.IO server implementation for Server 7. Cross-process broadcast uses Tunnel 3; authentication remains application-specific.', 'https://github.com/localzet/SocketIO'],
     storage: ['Localzet Storage', 'Client/server shared in-memory store for Localzet Server. Object deserialization is disabled by default.', 'https://github.com/localzet/Storage'],
     tunnel: ['Localzet Tunnel', 'Client/server messaging channel for Localzet Server processes.', 'https://github.com/localzet/Tunnel'],
     noter: ['Noter', 'Command-line utility for creating and managing notes; it uses Localzet HTTP Client transitively.', 'https://github.com/localzet/Noter'],
@@ -54,6 +87,7 @@ export default function App({Component, pageProps}) {
     const router = useRouter()
     const projectId = router.pathname.startsWith('/projects/') ? router.pathname.split('/')[2] : null
     const relatedProject = RELATED_PROJECTS[projectId]
+    const language = router.pathname.split('/').includes('en') ? 'en' : 'ru'
     const cluster = isClusterDocumentation(router.pathname)
     const current = isCurrentDocumentation(router.pathname) || cluster || Boolean(relatedProject)
     const title = pageProps.pageTitle ?? pageProps.title ?? DEFAULT_TITLE
@@ -67,10 +101,10 @@ export default function App({Component, pageProps}) {
             {
                 '@type': 'WebSite',
                 '@id': `${SITE_URL}/#website`,
-                name: cluster ? CLUSTER_TITLE : 'Localzet Server — документация',
+                name: cluster ? CLUSTER_TITLE : relatedProject?.[0] ?? 'Localzet Server — документация',
                 url: SITE_URL,
                 description,
-                inLanguage: 'ru',
+                inLanguage: language,
                 publisher: {'@id': `${SITE_URL}/#publisher`},
             },
             {
@@ -87,14 +121,16 @@ export default function App({Component, pageProps}) {
                 codeRepository: cluster ? 'https://github.com/localzet/Cluster' : relatedProject?.[2] ?? 'https://github.com/localzet/Server',
                 programmingLanguage: 'PHP',
                 runtimePlatform: 'PHP 8.1 or newer',
-                version: cluster ? 'current Cluster source, requires Server ^7.0' : relatedProject ? 'current repository source' : '7.1.0',
+                version: cluster
+                    ? 'current Cluster source, requires Server ^7.0'
+                    : relatedProject?.[3] ?? (relatedProject ? 'current repository source' : '7.1.0'),
                 license: 'https://spdx.org/licenses/AGPL-3.0-or-later.html',
                 author: {
                     '@type': 'Person',
                     name: 'Ivan Zorin',
                     url: 'https://github.com/localzet',
                 },
-                featureList: relatedProject ? [relatedProject[1]] : cluster ? [
+                featureList: relatedProject ? (relatedProject[4] ?? [relatedProject[1]]) : cluster ? [
                     'Gateway and Business Worker cluster topology',
                     'Register service for node discovery',
                     'Client and group message routing',
@@ -113,7 +149,7 @@ export default function App({Component, pageProps}) {
                 name: title,
                 description,
                 url: currentUrl,
-                inLanguage: 'ru',
+                inLanguage: language,
                 isPartOf: {'@id': `${SITE_URL}/#website`},
                 about: {'@id': `${SITE_URL}/#software`},
                 ...(router.pathname !== '/' && {
@@ -153,16 +189,16 @@ export default function App({Component, pageProps}) {
                 <link rel="alternate" type="text/plain" href={`${SITE_URL}/llms.txt`} title="AI-readable project guide" />
                 <meta name="author" content="Ivan Zorin" />
                 <meta name="publisher" content="Localzet Group" />
-                <meta property="og:locale" content="ru_RU" />
+                <meta property="og:locale" content={language === 'en' ? 'en_US' : 'ru_RU'} />
                 <meta property="og:type" content={router.pathname === '/' ? 'website' : 'article'} />
-                    <meta property="og:site_name" content={cluster ? CLUSTER_TITLE : relatedProject?.[0] ?? 'Localzet Server — документация'} />
+                <meta property="og:site_name" content={cluster ? CLUSTER_TITLE : relatedProject?.[0] ?? 'Localzet Server — документация'} />
                 <meta property="og:url" content={currentUrl} />
                 <meta property="og:title" content={title} />
                 <meta property="og:description" content={description} />
                 <meta property="og:image" content={`${SITE_URL}/images/server-docs-social.png`} />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
-                    <meta property="og:image:alt" content={cluster ? 'Localzet Cluster — Gateway и Business Worker для PHP' : 'Localzet Server — асинхронный PHP runtime для HTTP, WebSocket, TCP и UDP'} />
+                <meta property="og:image:alt" content={cluster ? 'Localzet Cluster — Gateway и Business Worker для PHP' : relatedProject?.[0] ?? 'Localzet Server — асинхронный PHP runtime для HTTP, WebSocket, TCP и UDP'} />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:site" content="@localzet" />
                 <meta name="twitter:creator" content="@localzet" />

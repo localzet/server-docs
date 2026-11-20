@@ -1,0 +1,88 @@
+export const pageTitle = 'Установка и запуск Triangle Engine WS 2'
+export const description = 'Полный минимальный WebSocket bootstrap Triangle: Composer, маршрут /echo, callbacks Localzet Server и проверка обмена сообщениями.'
+
+# Установка и первый запуск
+
+Пример запускает WebSocket endpoint на loopback-интерфейсе. Для production настройте TLS, аутентификацию, проверку Origin, лимиты сообщений и graceful shutdown.
+
+## 1. Установите пакет
+
+Нужен PHP 8.1 или новее.
+
+~~~sh
+composer require localzet/server:^7.1 triangle/engine-ws:^2.0
+composer show localzet/server
+composer show triangle/engine
+composer show triangle/engine-ws
+composer check-platform-reqs
+~~~
+
+Engine WS 2 требует Engine 9, Router 2 и Middleware 2. Engine WS 1.x рассчитан на прежнюю связку Engine 8 / Server 4. Сравнение описано в [совместимости](/projects/engine-ws/compatibility).
+
+## 2. Создайте server.php
+
+~~~php
+<?php
+
+declare(strict_types=1);
+
+use localzet\Server;
+use localzet\Server\Protocols\Http;
+use Monolog\Logger;
+use Triangle\Engine\Config;
+use Triangle\Engine\Container;
+use Triangle\Engine\Context;
+use Triangle\Router;
+use Triangle\Ws\App;
+
+require __DIR__ . '/vendor/autoload.php';
+
+Context::init();
+Config::set([
+    'app' => [
+        'plugin_uri' => 'app',
+        'plugin_alias' => 'plugin',
+        'debug' => false,
+        'controller_reuse' => true,
+    ],
+    'container' => new Container(),
+]);
+
+Router::any('/echo', static fn (): string =>
+    'echo:' . (App::request()?->ws_buffer ?? '')
+);
+Router::collect([]);
+
+Http::requestClass(Triangle\Request::class);
+$app = new App(Triangle\Request::class, new Logger('triangle-ws'));
+
+$server = new Server('websocket://127.0.0.1:8081');
+$server->count = 1;
+$server->onWebSocketConnect = [$app, 'onWebsocketConnect'];
+$server->onMessage = [$app, 'onMessage'];
+$server->onClose = [$app, 'onClose'];
+
+Server::runAll();
+~~~
+
+## 3. Запустите и проверьте
+
+Запустите listener:
+
+~~~sh
+php server.php
+~~~
+
+Подключитесь любым WebSocket-клиентом к ws://127.0.0.1:8081/echo и отправьте сообщение hello. Обработчик должен вернуть echo:hello. Для локальной проверки можно использовать websocat:
+
+~~~sh
+websocat ws://127.0.0.1:8081/echo
+~~~
+
+Остановите локальный процесс сочетанием Ctrl+C.
+
+Маршрут и его middleware проверяются во время handshake. Размер сообщений, аутентификация, авторизация, проверка Origin и лимит частоты должны быть настроены в приложении и Server. Группы соединений не разделяются между worker-ами.
+
+## English
+
+See the [complete English install and startup guide](/projects/engine-ws/en/install).

@@ -1,0 +1,22 @@
+export const pageTitle = 'Безопасность и эксплуатация Engine WS'
+export const description = 'Проверки WebSocket handshake, авторизация, таймауты и ограничения локальных групп соединений.'
+
+# Безопасность и эксплуатация
+
+## Проверка handshake
+
+Handshake проходит через URI-проверку, Router и маршрутные middleware до upgrade. Проверяйте право пользователя на подключение и допустимый Origin в middleware. Не переносите авторизацию, которая должна выполняться до upgrade, только в callback первого frame.
+
+Сам Engine WS не задаёт пользовательскую модель, токены или политику origin. Настройте их в приложении. Проверяйте размер frame, число соединений, handshake timeout и idle timeout в конфигурации Server.
+
+## TLS и доверенная сеть
+
+TLS и завершение TLS на reverse proxy настраиваются на стороне Server или инфраструктуры. Наличие Engine WS не подтверждает TLS или корректную передачу заголовков proxy. Не доверяйте forwarded headers, если соединение может прийти напрямую.
+
+## Рассылка и отказоустойчивость
+
+sendToGroup и sendToAll работают только с соединениями текущего процесса. Не используйте эти методы как кластерную рассылку без отдельного broker/IPC. Для важных сообщений задайте прикладные правила повторной доставки, ограничения очередей и reconnect.
+
+## English
+
+See [security and operations in English](/projects/engine-ws/en/security).

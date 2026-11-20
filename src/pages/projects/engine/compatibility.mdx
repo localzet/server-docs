@@ -1,0 +1,49 @@
+export const pageTitle = 'Совместимость Triangle Engine и Localzet Server'
+export const description = 'Сравнение Triangle Engine 8 и 9: версии PHP, Localzet Server, зависимостей и поведения helpers при переходе на Server 7.'
+
+# Совместимость и переход
+
+Основная версия Engine определяет поддерживаемую основную версию Localzet Server и контракты глобальных helpers. Устанавливайте согласованный набор компонентов.
+
+| Triangle Engine | Localzet Server | Совместимость |
+| --- | --- | --- |
+| 9.0.0 | 7.1+ | Текущая версия; поддерживаемая связка для новых приложений |
+| 8.1.11 | 4.x | Предыдущая версия; используйте только в приложениях, которые остаются на Server 4 |
+
+Релизы: [Engine 9.0.0](https://github.com/Triangle-org/Engine/releases/tag/v9.0.0), [Engine HTTP 3.0.0](https://github.com/Triangle-org/Engine-HTTP/releases/tag/v3.0.0), [Engine WS 2.0.0](https://github.com/Triangle-org/Engine-WS/releases/tag/v2.0.0).
+
+## Что изменилось
+
+| Область | Engine 8.1.11 + Server 4 | Engine 9.0.0 + Server 7.1 |
+| --- | --- | --- |
+| Composer | Пакет Engine требует localzet/server версии 4 | Engine требует localzet/server версии 7.1 или новее в рамках 7.x |
+| PHP | Требования зафиксированы старым манифестом Engine 8 | PHP 8.1+, ext-intl и ext-json |
+| Глобальный response() | В зависимости от порядка загрузки мог разрешаться в helper Engine | Helper Server возвращает HTTP Response |
+| Глобальный json() | Возвращал JSON-строку | Helper Server создаёт JSON Response |
+| Глобальный redirect() | Helper Engine мог конфликтовать с уже загруженной функцией | Helper Server создаёт Response и удаляет CR/LF из Location |
+| Helpers Engine | Имена пересекались с глобальными функциями | Для контракта Engine используйте triangle_response(), triangle_json() и triangle_redirect() |
+| Контекст обработчика | Выбор ключа зависел от event loop class Server 4 | Активный PHP Fiber используется для изоляции interleaved обработчиков |
+
+responseJson() вызывает JSON-кодировщик Engine напрямую: объект Server Response не передаётся туда, где ожидается строка тела. Перед обновлением найдите вызовы response(), json() и redirect() и проверьте требуемый ими тип результата.
+
+## Переход на Engine 9
+
+1. В тестовой ветке обновите Server до версии 7.1 и Engine до 9.
+2. Если приложению нужен HTTP, установите Engine HTTP версии 3; для WebSocket установите Engine WS версии 2. Эти адаптеры нельзя устанавливать вместе.
+3. Обновите Router и Middleware до версии 2; Composer разрешит их транзитивно.
+4. Выполните composer update и проверьте composer.lock, затем запустите тесты приложения.
+5. Проверьте запуск, обработку ошибок, cleanup Context, TLS, таймеры, пользовательские процессы и сетевые интеграции.
+6. Переключайте production только после прохождения CI и интеграционных проверок самого приложения.
+
+~~~sh
+composer require localzet/server:^7.1 triangle/engine:^9.0
+composer show triangle/engine
+composer show localzet/server
+composer check-platform-reqs
+~~~
+
+Engine 8.1.11 не поддерживает Server 7. Engine 9 не предназначен для Server 4. Не обновляйте только один пакет, оставляя другой на несовместимой основной версии.
+
+## English
+
+See the [English compatibility and migration table](/projects/engine/en/compatibility).

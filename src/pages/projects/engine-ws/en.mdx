@@ -1,0 +1,37 @@
+export const pageTitle = 'Triangle Engine WS 2 documentation'
+export const description = 'Engine WS 2.0.0 documentation: Triangle WebSocket applications on Localzet Server 7, handshake, message routes, context, and security.'
+
+# Triangle Engine WS
+
+Engine WS connects Localzet Server's WebSocket transport to Triangle applications. It matches the HTTP upgrade request to a route, runs middleware to check the handshake, and invokes the route handler when a frame arrives.
+
+Server owns the listener, WebSocket framing, event loop, and worker lifecycle. Engine provides application types and Fiber context. Engine WS adds callbacks, request context, and message-sending helpers.
+
+## Current version
+
+The current release is **2.0.0**. It targets PHP 8.1+, Engine 9, Router 2, Middleware 2, and Localzet Server 7.1+.
+
+~~~sh
+composer require localzet/server:^7.1 triangle/engine-ws:^2.0
+composer show triangle/engine-ws
+composer show triangle/engine
+composer show localzet/server
+composer check-platform-reqs
+~~~
+
+Version 1.x belongs to the previous Engine 8 / Server 4 compatibility set. See the [compatibility guide](/projects/engine-ws/en/compatibility) for a direct comparison. Engine WS and Engine HTTP cannot be installed in one Composer project.
+
+## Guides
+
+- [Installation and a working WebSocket endpoint](/projects/engine-ws/en/install)
+- [Handshake and message handling](/projects/engine-ws/en/messages)
+- [Architecture and configuration](/projects/engine-ws/en/architecture)
+- [Security and operations](/projects/engine-ws/en/security)
+- [Compatibility between 1.x and 2.x](/projects/engine-ws/en/compatibility)
+- [Tests and coverage limits](/projects/engine-ws/en/testing)
+
+## Limits
+
+Connection maps and groups live in process memory and are not synchronized between workers or hosts. Use a separate broker or IPC component for cross-process fan-out. Engine WS does not provide distributed rooms, durable delivery, or a complete authentication system.
+
+Read the [Russian overview](/projects/engine-ws).

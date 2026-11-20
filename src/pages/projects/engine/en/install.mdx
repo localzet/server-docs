@@ -1,0 +1,43 @@
+export const pageTitle = 'Install Triangle Engine 9'
+export const description = 'Install Triangle Engine 9.0.0 and Localzet Server 7.1 with Composer, check the PHP platform, and choose an HTTP or WebSocket adapter.'
+
+# Install
+
+## Install compatible packages
+
+For a new Engine 9 application on Server 7.1, run:
+
+~~~sh
+composer require localzet/server:^7.1 triangle/engine:^9.0
+composer show triangle/engine
+composer show localzet/server
+composer check-platform-reqs
+~~~
+
+For an HTTP application, add Engine HTTP:
+
+~~~sh
+composer require triangle/engine-http:^3.0
+~~~
+
+For a WebSocket application, add Engine WS:
+
+~~~sh
+composer require triangle/engine-ws:^2.0
+~~~
+
+Engine HTTP and Engine WS declare a mutual Composer conflict. Choose one adapter per application. Complete listener setup and first-request examples are available in the [Engine HTTP guide](/projects/engine-http/en/install) and the [Engine WS guide](/projects/engine-ws/en/install).
+
+## Verify the installation
+
+~~~sh
+composer show localzet/server
+composer show triangle/engine
+composer check-platform-reqs
+~~~
+
+After adding an adapter, check its version and run the application's integration tests. A successful Composer resolution checks dependency constraints; it does not verify the application's listener configuration or runtime behavior.
+
+## Upgrade from Engine 8
+
+Engine 8.1.11 targets Server 4. Engine 9 targets Server 7.1 and changes global helper behavior. Read the [compatibility table](/projects/engine/en/compatibility), then change the Engine and Server major versions together in a test branch.

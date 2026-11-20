@@ -1,0 +1,35 @@
+export const pageTitle = 'Helpers и API Triangle Engine'
+export const description = 'Ключевые классы и helper-функции Triangle Engine, включая явные triangle_* имена для поведения Engine на Server 7.'
+
+# Helpers и API
+
+Engine регистрирует `src/functions.php` через Composer `autoload.files`. Поэтому функции становятся доступными после загрузки `vendor/autoload.php`, если другой пакет не объявил одноимённую global function раньше.
+
+## Helpers ответов
+
+```php
+$json = triangle_json(['ok' => true]);
+$response = responseJson(['ok' => true], 200);
+$redirect = triangle_redirect('/account', 302);
+$envelope = triangle_response(['id' => 42], 200);
+```
+
+- `triangle_json(mixed $value, int $flags = ...)` возвращает JSON-строку с defaults Engine.
+- `responseJson($data, int $status = 200, array $headers = [], int $options = ...)` строит `Triangle\Engine\Response` с `application/json`.
+- `responseBlob(string $blob, string $type = 'text/plain')` строит ответ Engine с заданным content type.
+- `triangle_response(mixed $data = '', int $status = 200, array $headers = [], bool $raw = false)` формирует envelope `{status, data}` и учитывает `app.debug`, `app.http_always_200`, `request()->expectsJson()` и доступность `responseView()`.
+- `triangle_redirect(string $location, int $status = 302, array $headers = [])` возвращает ответ Engine и удаляет CR/LF из `Location`.
+
+Если используется Localzet Server 7, функции `response()`, `json()` и `redirect()` принадлежат Server и возвращают Server Response. Не заменяйте их Engine-функциями без явного обновления вызова; смотрите [таблицу совместимости](/projects/engine/compatibility).
+
+## Контекст и приложение
+
+`Triangle\Engine\Context` предоставляет статические `get()`, `set()`, `delete()`, `has()`, `onDestroy()` и `destroy()`. Вызывайте `destroy()` в `finally` или в эквивалентной гарантированной точке завершения запроса/task.
+
+`Triangle\Engine\App` предоставляет `connection(): ?TcpConnection`, `request(): ?Request` и `server(): ?Server` для обработчика приложения, который наследуется от этого класса. Класс абстрактный; он не является готовым HTTP router-ом.
+
+## Request и Response
+
+`Triangle\Engine\Request` наследует `localzet\Server\Protocols\Http\Request` и переопределяет `file()` для объектов Engine `File`. `Triangle\Engine\Response` наследует Server HTTP Response; в нём доступны методы родительского ответа и `exception(?Throwable $throwable = null)`.
+
+Сверяйте параметры и возвращаемые типы с исходниками выбранной версии Engine и Localzet Server: Engine 8.1.11 для Server 4 и Engine 9.0.0 для Server 7 имеют разные глобальные helpers. Подробнее — в [таблице совместимости](/projects/engine/compatibility).

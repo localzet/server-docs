@@ -1,0 +1,45 @@
+export const pageTitle = 'Triangle Engine and Localzet Server compatibility'
+export const description = 'Comparison of Triangle Engine 8 and 9: PHP and Server requirements, dependencies, and helper behavior when moving to Server 7.'
+
+# Compatibility and migration
+
+The Engine major version determines the supported Localzet Server major version and the global helper contract. Install a compatible set of components.
+
+| Triangle Engine | Localzet Server | Compatibility |
+| --- | --- | --- |
+| 9.0.0 | 7.1+ | Current release; supported set for new applications |
+| 8.1.11 | 4.x | Previous release; use only in applications that remain on Server 4 |
+
+Releases: [Engine 9.0.0](https://github.com/Triangle-org/Engine/releases/tag/v9.0.0), [Engine HTTP 3.0.0](https://github.com/Triangle-org/Engine-HTTP/releases/tag/v3.0.0), [Engine WS 2.0.0](https://github.com/Triangle-org/Engine-WS/releases/tag/v2.0.0).
+
+## What changed
+
+| Area | Engine 8.1.11 + Server 4 | Engine 9.0.0 + Server 7.1 |
+| --- | --- | --- |
+| Composer | Engine requires Localzet Server 4 | Engine requires Localzet Server 7.1 or later within 7.x |
+| PHP | Requirements come from the older Engine 8 manifest | PHP 8.1+, ext-intl, and ext-json |
+| Global response() | Depending on load order, it could resolve to the Engine helper | The Server helper returns an HTTP Response |
+| Global json() | Returned a JSON string | The Server helper creates a JSON Response |
+| Global redirect() | The Engine helper could collide with an already-loaded function | The Server helper creates a Response and strips CR/LF from Location |
+| Engine-specific helpers | Names overlapped with global functions | Use triangle_response(), triangle_json(), and triangle_redirect() for Engine behavior |
+| Request context | The key depended on the Server 4 event-loop class | The active PHP Fiber is used to isolate interleaved handlers |
+
+responseJson() calls the Engine JSON encoder directly. It does not pass a Server Response object where a body string is expected. Before upgrading, find calls to response(), json(), and redirect() and verify the expected return type at each call site.
+
+## Upgrade to Engine 9
+
+1. Upgrade Server to 7.1 and Engine to 9 together in a test branch.
+2. If the application uses HTTP, install Engine HTTP 3; for WebSocket, install Engine WS 2. The adapters cannot be installed together.
+3. Upgrade Router and Middleware to version 2; Composer resolves them transitively.
+4. Run composer update, review composer.lock, and run the application test suite.
+5. Verify startup, exception handling, Context cleanup, TLS, timers, custom processes, and network integrations.
+6. Move to production only after the application CI and integration checks pass.
+
+~~~sh
+composer require localzet/server:^7.1 triangle/engine:^9.0
+composer show triangle/engine
+composer show localzet/server
+composer check-platform-reqs
+~~~
+
+Engine 8.1.11 does not support Server 7. Engine 9 is not intended for Server 4. Do not upgrade only one package while leaving the other on an incompatible major version.

@@ -1,0 +1,45 @@
+export const pageTitle = 'Triangle Engine 9 — документация'
+export const description = 'Документация Triangle Engine 9.0.0: PHP runtime для приложений Triangle, совместимый с Localzet Server 7.1 и пакетами семейства Triangle.'
+
+# Triangle Engine
+
+Triangle Engine — базовый runtime-слой Triangle Framework. Он предоставляет типы запросов и ответов, конфигурацию, контекст выполнения, bootstrap-компоненты и helpers. Сетевой listener, event loop, HTTP framing, таймеры и управление worker-процессами принадлежат [Localzet Server](/current).
+
+## Актуальная версия и совместимость
+
+Текущая опубликованная версия Engine — **9.0.0**. Она рассчитана на PHP 8.1+ и Localzet Server 7.1+. Совместимая связка компонентов: Engine 9, Router 2, Middleware 2 и Server 7.1.
+
+~~~sh
+composer require localzet/server:^7.1 triangle/engine:^9.0
+composer show triangle/engine
+composer show localzet/server
+composer check-platform-reqs
+~~~
+
+При миграции с Engine 8 изучите [сравнение версий и изменений API](/projects/engine/compatibility). Не смешивайте Engine 8 / Server 4 и Engine 9 / Server 7 в одном lock-файле.
+
+## Разделы документации
+
+- [Требования и PHP-расширения](/projects/engine/requirements)
+- [Установка](/projects/engine/install)
+- [Запуск и конфигурация](/projects/engine/start)
+- [Архитектура и границы runtime](/projects/engine/architecture)
+- [Helpers и API](/projects/engine/helpers)
+- [Совместимость и переход с Engine 8](/projects/engine/compatibility)
+- [Тесты и ограничения покрытия](/projects/engine/testing)
+
+## Что входит в Engine
+
+- Triangle Engine Request и Response расширяют HTTP-типы Localzet Server для приложений Triangle.
+- Config, Environment и Path предоставляют доступ к конфигурации, окружению и путям проекта.
+- Context хранит состояние выполнения в контексте активного PHP Fiber и поддерживает cleanup callbacks.
+- support App регистрирует listener-ы и процессы из конфигурации и передаёт запуск Localzet Server.
+- Bootstrap подключает доступные компоненты и пользовательские bootstrap-классы.
+
+## Что Engine не делает
+
+Engine не является отдельным HTTP-сервером, reverse proxy, service discovery или системой деплоя. Он не добавляет сам по себе маршрутизацию, middleware, аутентификацию, базу данных или гарантии распределённого состояния. Для HTTP и WebSocket приложений установите соответствующий адаптер: [Engine HTTP](/projects/engine-http) или [Engine WS](/projects/engine-ws). Эти два адаптера конфликтуют в Composer и предназначены для разных приложений.
+
+## English
+
+Open the [English overview](/projects/engine/en) and its linked requirements, installation, runtime, and compatibility guides.

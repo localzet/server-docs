@@ -1,0 +1,32 @@
+export const pageTitle = 'Handshake и сообщения Engine WS'
+export const description = 'Порядок WebSocket upgrade, запуска route middleware и обработки входящего frame в Triangle Engine WS.'
+
+# Handshake и обработка сообщений
+
+## До upgrade
+
+Server передаёт HTTP Upgrade-запрос callback-у Engine WS. Адаптер сохраняет Triangle Request в контексте соединения, проверяет URI и сопоставляет GET-маршрут. Маршрутное middleware выполняется во время handshake, поэтому может разрешить upgrade или вернуть HTTP-ошибку. Сам обработчик сообщения на этой стадии не вызывается.
+
+Если путь не найден, метод не разрешён или middleware отклоняет handshake, Engine WS закрывает HTTP-соединение с соответствующим статусом. Используйте этот этап для проверки полномочий и origin до открытия WebSocket-сессии.
+
+## После upgrade
+
+На входящем frame адаптер ставит текущее соединение и сохранённый Request в Engine Context. Payload frame доступен как Request::ws_buffer; callback маршрута вызывается после получения сообщения. Контекст запроса и соединения удаляется в finally после обработки.
+
+~~~php
+use Triangle\Router;
+use Triangle\Ws\App;
+
+Router::any('/echo', static fn () => 'echo:' . (App::request()?->ws_buffer ?? ''));
+Router::collect([]);
+~~~
+
+Строковый результат отправляется как тело frame. Если callback вернул HTTP Response, в WebSocket frame передаётся только его body; HTTP status и headers не являются частью frame.
+
+## Рассылка и завершение
+
+Методы sendToAll и sendToGroup используют соединения, известные текущему процессу. Для межпроцессной рассылки подключите брокер или отдельный IPC-слой. Приложение должно явно задавать политику reconnect, подтверждения доставки и дедупликации, если они нужны.
+
+## English
+
+See [handshake and message handling in English](/projects/engine-ws/en/messages).

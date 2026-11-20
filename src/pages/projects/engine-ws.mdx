@@ -1,0 +1,39 @@
+export const pageTitle = 'Triangle Engine WS 2 — документация'
+export const description = 'Документация Engine WS 2.0.0: WebSocket-приложения Triangle на Localzet Server 7, handshake, маршруты сообщений, контекст и безопасность.'
+
+# Triangle Engine WS
+
+Engine WS связывает WebSocket transport Localzet Server с приложениями Triangle. Адаптер сопоставляет HTTP upgrade-запрос с маршрутом, запускает middleware проверки handshake, а затем вызывает обработчик маршрута при поступлении frame.
+
+Server отвечает за listener, WebSocket framing, event loop и жизненный цикл worker-процессов. Engine предоставляет типы приложения и Fiber-контекст. Engine WS добавляет callback-и, контекст запроса и методы отправки сообщений.
+
+## Актуальная версия
+
+Текущий опубликованный выпуск — **2.0.0**. Он рассчитан на PHP 8.1+, Engine 9, Router 2, Middleware 2 и Localzet Server 7.1+.
+
+~~~sh
+composer require localzet/server:^7.1 triangle/engine-ws:^2.0
+composer show triangle/engine-ws
+composer show triangle/engine
+composer show localzet/server
+composer check-platform-reqs
+~~~
+
+Версия 1.x относится к предыдущей совместимости Engine 8 / Server 4. Полное сравнение находится в [руководстве по совместимости](/projects/engine-ws/compatibility). Engine WS и Engine HTTP нельзя устанавливать в одном Composer-проекте.
+
+## Руководства
+
+- [Установка и рабочий WebSocket endpoint](/projects/engine-ws/install)
+- [Handshake и обработка сообщений](/projects/engine-ws/messages)
+- [Конфигурация и архитектура](/projects/engine-ws/architecture)
+- [Безопасность и эксплуатация](/projects/engine-ws/security)
+- [Совместимость 1.x и 2.x](/projects/engine-ws/compatibility)
+- [Тесты и пределы покрытия](/projects/engine-ws/testing)
+
+## Ограничения
+
+Карта подключений и группы хранятся в памяти процесса и не синхронизируются между worker-ами или узлами. Для межпроцессной рассылки используйте отдельный broker или IPC-компонент. Engine WS не реализует распределённые комнаты, durable delivery или готовую систему аутентификации.
+
+## English
+
+Open the [English overview](/projects/engine-ws/en).

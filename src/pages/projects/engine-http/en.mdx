@@ -1,0 +1,39 @@
+export const pageTitle = 'Triangle Engine HTTP 3.0 documentation'
+export const description = 'Engine HTTP 3.0.0 documentation: Triangle HTTP applications on Localzet Server 7, startup, routes, responses, configuration, and security.'
+
+# Triangle Engine HTTP
+
+Engine HTTP connects Triangle handlers to Localzet Server's HTTP runtime. It passes requests to Router, Middleware, controllers, and application callbacks. Server owns the listener, HTTP framing, event loop, and worker lifecycle; Engine provides application request types and context.
+
+## Current version
+
+The current release is **3.0.0**. It targets PHP 8.1+, ext-curl, Triangle Engine 9, Router 2, Middleware 2, and Localzet Server 7.1+.
+
+~~~sh
+composer require localzet/server:^7.1 triangle/engine-http:^3.0
+composer show triangle/engine-http
+composer show triangle/engine
+composer show localzet/server
+composer check-platform-reqs
+~~~
+
+Version 2.x targets Engine 8 and Server 4. The [compatibility guide](/projects/engine-http/en/compatibility) compares requirements and changes. Engine HTTP and Engine WS cannot be installed in the same Composer project.
+
+## Guides
+
+- [Installation and a working HTTP endpoint](/projects/engine-http/en/install)
+- [Request and response handling](/projects/engine-http/en/requests)
+- [Architecture and configuration](/projects/engine-http/en/architecture)
+- [Security and operations](/projects/engine-http/en/security)
+- [Compatibility between 2.x and 3.x](/projects/engine-http/en/compatibility)
+- [Tests and coverage limits](/projects/engine-http/en/testing)
+
+## Component boundary
+
+~~~text
+HTTP bytes → Localzet Server → Triangle Engine HTTP → Router / Middleware → application
+~~~
+
+Engine HTTP is not a standalone network server, load balancer, service-discovery system, or session store. Those capabilities require Server, other Triangle components, and application configuration.
+
+Read the [Russian overview](/projects/engine-http).

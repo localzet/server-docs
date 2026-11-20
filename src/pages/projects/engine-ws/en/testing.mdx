@@ -1,0 +1,30 @@
+export const pageTitle = 'Triangle Engine WS tests and coverage limits'
+export const description = 'What the current unit and loopback WebSocket tests cover and which scenarios remain untested.'
+
+# Tests and coverage limits
+
+## Run checks
+
+The regular suite uses PHPUnit:
+
+~~~sh
+composer test
+~~~
+
+For Server 7, the repository uses a temporary installation of sibling source checkouts:
+
+~~~sh
+bash tools/test-server7-local.sh
+~~~
+
+The current branch unit tests cover middleware rejection before upgrade, deferred frame callbacks, the saved handshake request, Fiber context across two interleaved callbacks, context cleanup, and compatibility with the base Server HTTP Response.
+
+The loopback integration starts one Server 7 process, sends a real HTTP WebSocket Upgrade, checks status 101, then sends a masked frame and verifies the echo payload. Unix process-control functions are required. With the older Engine/Server packages, this integration is skipped; run tools/test-server7-local.sh for the Server 7 source stack.
+
+## What is not covered
+
+The current checks do not cover TLS, reverse proxies, multiple workers, inter-process delivery, cluster fan-out, load, long reconnect sessions, or external broker failures. A local test is not a substitute for GitHub Actions or target-environment verification.
+
+## Русский
+
+См. [тесты и пределы покрытия на русском](/projects/engine-ws/testing).

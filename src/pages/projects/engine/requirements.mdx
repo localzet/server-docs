@@ -1,0 +1,33 @@
+export const pageTitle = 'Требования Triangle Engine 9'
+export const description = 'Требования опубликованного Triangle Engine 9.0.0: PHP, расширения и совместимость с Localzet Server 7.1.'
+
+# Требования
+
+## Опубликованный пакет
+
+Engine 9.0.0 требует:
+
+- PHP 8.1 или новее в ветке 8.x;
+- расширения ext-intl и ext-json;
+- Localzet Server ^7.1;
+- Monolog ^3.0;
+- PSR Container ^1.0 или ^2.0;
+- Symfony Cache и Translation версии ~6.4.0.
+
+Composer-манифест Engine запрещает Symfony Cache и Translation 7.0 или новее. Dev-зависимости пакета включают PHPUnit ^10.5 и Rector.
+
+Проверьте фактически выбранную версию и платформу:
+
+~~~sh
+composer show triangle/engine
+composer show localzet/server
+composer check-platform-reqs
+~~~
+
+## Среда выполнения
+
+Возможности процессов, event loop и транспорта определяются также [требованиями Localzet Server](/current/compatibility). Не предполагайте, что необязательное PHP-расширение для event loop установлено или выбрано: проверьте фактический runtime на целевом окружении.
+
+## Предыдущая версия
+
+Engine 8.1.11 относится к Server 4. Не переносите её ограничения в текущий релиз: сравнение основных версий доступно в [руководстве по совместимости](/projects/engine/compatibility).

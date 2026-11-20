@@ -11,6 +11,9 @@ import {useRouter} from 'next/router'
 const projects = [
     {id: 'server', title: 'Server', href: '/'},
     {id: 'cluster', title: 'Cluster', href: '/projects/cluster'},
+    {id: 'engine', title: 'Triangle Engine', href: '/projects/engine'},
+    {id: 'engine-http', title: 'Engine HTTP', href: '/projects/engine-http'},
+    {id: 'engine-ws', title: 'Engine WS', href: '/projects/engine-ws'},
     {id: 'cron', title: 'Cron', href: '/projects/cron'},
     {id: 'httpclient', title: 'HTTP Client', href: '/projects/httpclient'},
     {id: 'mqtt', title: 'MQTT', href: '/projects/mqtt'},

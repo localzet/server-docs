@@ -1,0 +1,30 @@
+export const pageTitle = 'Engine HTTP tests and coverage limits'
+export const description = 'How to run Engine HTTP checks and what the Localzet Server 7 loopback test verifies.'
+
+# Tests and coverage limits
+
+## Local checks
+
+The composer test script runs response compatibility and an HTTP loopback fixture:
+
+~~~sh
+composer test
+~~~
+
+The Server 7 check uses a temporary Composer environment with sibling Server, Engine, Router, and Middleware sources:
+
+~~~sh
+bash tools/test-server7-local.sh
+~~~
+
+On 20 November 2026, the local loopback suite confirmed a real HTTP request over a loopback socket and preservation of status 202, a header, and the body of a base Server 7 response. The fixture uses one worker and cleans up its processes and temporary files.
+
+## What the checks do not prove
+
+The suite does not test TLS, reverse proxy behavior, HTTP/2, multiple workers, external-store failures, or production load. Engine HTTP 3.0.0 is published for Engine 9 and Server 7.1+. A local check is separate from GitHub Actions and does not verify production configuration.
+
+Before release, check branch CI and integration-test the full application. Verify the Composer lock file and resolved versions. Before production, check the application's current Composer lock file and CI.
+
+## Русский
+
+См. [тесты и пределы покрытия на русском](/projects/engine-http/testing).

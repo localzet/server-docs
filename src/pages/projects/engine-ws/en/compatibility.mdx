@@ -1,0 +1,30 @@
+export const pageTitle = 'Engine WS 1 and 2 compatibility'
+export const description = 'Comparison of Engine WS 2.0.0 and the previous 1.x releases: Localzet Server, Triangle Engine, and WebSocket callback behavior.'
+
+# Compatibility and migration
+
+| Engine WS | Triangle Engine | Localzet Server | Status |
+| --- | --- | --- | --- |
+| 2.0.0 | 9.x | 7.1+ | Current release |
+| 1.x, including 1.1.1 | 8.x | 4.x | Previous combination |
+
+Release 2.0.0 targets PHP 8.1+, Router 2, and Middleware 2. Read the [release notes](https://github.com/Triangle-org/Engine-WS/releases/tag/v2.0.0).
+
+## Changes when moving from 1.x
+
+- Upgrade Server and Engine together to versions 7.1 and 9.
+- Upgrade Router and Middleware to version 2.
+- Localzet Server HTTP responses are converted without losing their status, headers, or body.
+- Request and connection context is cleared after handshake, frame handling, and close.
+- The handshake runs route middleware before upgrade; the frame callback runs after the connection opens.
+- Connection maps and groups remain process-local; version 2 does not add a cross-process broker or durable delivery.
+
+Engine WS conflicts with Engine HTTP. Install only one adapter per application. Before upgrading, run a test application that performs a real WebSocket handshake and frame exchange.
+
+~~~sh
+composer require localzet/server:^7.1 triangle/engine-ws:^2.0
+composer show triangle/engine-ws
+composer show triangle/engine
+composer show localzet/server
+composer check-platform-reqs
+~~~
