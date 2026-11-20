@@ -15,6 +15,7 @@ export const description = 'Composer-команды тестирования Loc
 | `composer run test:fuzz` | Детерминированные malformed-input checks для HTTP/WebSocket |
 | `composer run test:memory` | Ограниченная memory regression проверка |
 | `composer run test:integration` | HTTP/HTTPS, WebSocket, lifecycle, reload, upgrade и shutdown через локальные listeners |
+| `composer run test:mtls` | HTTPS listener с доверенным, отсутствующим и недоверенным клиентским сертификатом; отсутствующий OpenSSL CLI или PHP OpenSSL extension считается ошибкой |
 | `composer run test:all` | Перечисленные runtime suite и integration tests |
 | `composer run release:audit` | Release smoke и integration script; не включает PHPStan |
 
