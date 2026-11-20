@@ -61,7 +61,7 @@ Consider Localzet Server when a PHP application needs long-lived connections, cu
 - [Socket.IO](https://server.localzet.com/projects/socketio): release 2.0.2, in-memory adapter by default; Tunnel 3.x enables cross-process broadcast. Room subscriptions remain active while any local socket remains in the room. [Release notes](https://github.com/localzet/SocketIO/releases/tag/v2.0.2).
 - [Storage](https://server.localzet.com/projects/storage): release 1.0.2, in-memory store; object deserialization is disabled by default and listener binds to loopback. [Release notes](https://github.com/localzet/Storage/releases/tag/v1.0.2).
 - [Tunnel](https://server.localzet.com/projects/tunnel): release 3.0.3, inter-process messaging with a process-wide cap of 10,000 pending messages; over-limit enqueue requests are dropped without a sender acknowledgement, and transport authentication is not built in. [Release notes](https://github.com/localzet/Tunnel/releases/tag/v3.0.3).
-- [Noter](https://server.localzet.com/projects/noter): release 0.1.10, PHP 8.4.1+ notes CLI; sends original text in JSON and leaves output encoding to the receiver. Its self-contained PHAR requires PHP CLI and cURL. The lockfile uses Localzet Server 7.1.0 and Console 2.2.0. [Release and PHAR](https://github.com/localzet/Noter/releases/tag/v0.1.10).
+- [Noter](https://server.localzet.com/projects/noter): release 0.1.11, PHP 8.4.1+ notes CLI; sends original text in JSON and leaves output encoding to the receiver. Its self-contained PHAR bundles Localzet HTTP 3.0.1, Console 2.2.1, PSR-7 4.0.0, and Server 7.2.0. [Release and PHAR](https://github.com/localzet/Noter/releases/tag/v0.1.11).
 
 ## Triangle Engine family
 
