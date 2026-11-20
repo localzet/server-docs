@@ -1,0 +1,33 @@
+export const pageTitle = 'Тестирование Triangle Engine'
+export const description = 'Что проверяет текущий PHPUnit набор Triangle Engine и какие сетевые интеграции остаются за пределами пакета.'
+
+# Тесты и ограничения
+
+## Запуск объявленного набора
+
+В Engine объявлен script `composer test`, который запускает PHPUnit из `tests/phpunit.xml`:
+
+```sh
+composer install
+composer test
+```
+
+Набор включает unit-проверки `Config`, меж-Fiber изоляции контекста и взаимодействия с helper-ами Server 7. `tests/Integration/Server7HttpIntegrationTest.php` запускает отдельный Server 7 process, отправляет реальный HTTP-запрос по loopback-сокету, читает query-параметр через Engine Request и получает Engine Response с JSON-телом.
+
+## Что подтверждают тесты
+
+- Два interleaved PHP Fiber получают независимые значения контекста на event loop class `Select`.
+- JSON helpers Engine возвращают нужные типы и данные ответа при загруженном Server 7.
+- `triangle_redirect()` возвращает тип ответа Engine и очищает CR/LF из `Location`.
+- Глобальные `response()`, `json()` и `redirect()` сохраняют Server Response contract после автозагрузки Engine.
+- HTTP integration проходит через callback, в котором `Context::destroy()` вызывается в `finally`.
+
+## Что пока не проверяется этим набором
+
+HTTP integration ограничена одним loopback listener-ом, одним worker-ом и простым GET-запросом на Unix-системах. Она пропускается на Windows и когда недоступны `proc_open` или `posix_kill`. В Engine пока нет отдельного WebSocket или proxy integration suite. Эта проверка не доказывает TLS, обработку атакующего framing, несколько worker-ов, нагрузочную производительность или восстановление после отказа внешнего хранилища.
+
+Для этих сценариев используйте интеграционные проверки приложения и [Localzet Server test suite](/current/testing). Разделяйте результат unit-тестов, CI конкретной ветки и runtime-проверку на целевом окружении.
+
+## Опубликованная версия и границы проверок
+
+Engine 9.0.0 опубликован для Localzet Server 7.1+. [CI релиза](https://github.com/Triangle-org/Engine/actions) и локальный PHPUnit-набор подтверждают только перечисленные тесты. Они не проверяют TLS, несколько worker-ов, прокси или производительность; интеграционные тесты приложения остаются обязательными.

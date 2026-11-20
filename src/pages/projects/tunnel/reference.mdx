@@ -3,7 +3,9 @@ export const description = 'События, подписки, очереди, re
 
 # Tunnel: API и эксплуатация
 
-Требуются PHP 8.1+ и Localzet Server `^7.0`. Сервер создаётся как `new localzet\Tunnel\Server($socketName, $debug = false, $allowObjectSerialization = false)`; при заданном socket name он регистрирует один worker через bootstrap Server. `Client` — статический API и рассчитан на один соединённый Tunnel endpoint в каждом PHP-процессе. Релизная линия Tunnel `3.x` рассчитана на Server 7; несовместимая линия `2.x` предназначена для Server 4.
+Релиз [`v3.0.3`](https://github.com/localzet/Tunnel/releases/tag/v3.0.3) добавляет общий лимит в 10 000 ожидающих сообщений на процесс сервера.
+
+Требуются PHP 8.1+ и Localzet Server `^7.0`. Сервер создаётся как `new localzet\Tunnel\Server($socketName, $debug = false, $allowObjectSerialization = false)`; при заданном socket name он регистрирует один worker через bootstrap Server. `Client` — статический API и рассчитан на один соединённый Tunnel endpoint в каждом PHP-процессе. Версия Tunnel `3.x` рассчитана на Server 7; несовместимая версия `2.x` предназначена для Server 4.
 
 ## События
 
@@ -12,6 +14,8 @@ export const description = 'События, подписки, очереди, re
 ## Очереди
 
 `enqueue($channels, $data)` добавляет данные в именованную очередь. `watch($channels, $callback, $autoReserve = true)` начинает получать элементы; при авто-резервировании Tunnel запрашивает следующий элемент после завершения callback. `unwatch()` прекращает наблюдение, `reserve()` запрашивает элемент вручную. Очередь хранится только в RAM сервера, не является durable queue и теряется при рестарте. Для побочных эффектов используйте идемпотентные handlers; собственный механизм retry/dead-letter отсутствует.
+
+Все очереди одного процесса делят общий предел в 10 000 ожидающих сообщений. Если enqueue превысит предел, сервер не добавит ни одного сообщения из этого запроса; multi-channel запрос проверяется целиком. `Client::enqueue()` не возвращает подтверждение приёма, поэтому отправитель не может определить по результату вызова, была ли запись отклонена. Учитывайте это при проектировании повторной доставки и собственной обратной связи.
 
 ## Формат, безопасность и надёжность
 

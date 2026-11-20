@@ -1,0 +1,48 @@
+export const pageTitle = 'Запуск и конфигурация Triangle Engine'
+export const description = 'Как Triangle Engine собирает listener-ы из конфигурации и передаёт процессный запуск Localzet Server.'
+
+# Запуск и конфигурация
+
+Engine сам не открывает сокет. `support\App::run()` читает конфигурационный массив `server`, регистрирует основной listener и дополнительные `servers`/`process`, затем вызывает `localzet_start()` и `Server::runAll()`.
+
+## Конфигурация listener-а
+
+Triangle Full использует `config/server.php`. Сокращённый пример показывает форму конфигурации, которую читает `support\App::run()`:
+
+```php
+<?php
+
+return [
+    'name' => env('APP_NAME', 'Triangle App'),
+    'count' => env('SERVER_COUNT', cpu_count() * 4),
+    'listen' => env('SERVER_LISTEN', 'http://127.0.0.1:8000'),
+    'handler' => Triangle\Http\App::class,
+    'constructor' => [
+        'requestClass' => Triangle\Request::class,
+        'logger' => support\Log::channel(),
+        'basePath' => run_path(),
+        'appPath' => run_path('app'),
+        'configPath' => run_path('config'),
+        'publicPath' => run_path('public'),
+        'runtimePath' => run_path('runtime'),
+    ],
+    'master' => [
+        'pidFile' => 'triangle.pid',
+        'statusFile' => 'triangle.status',
+        'stdoutFile' => 'logs/stdout.log',
+        'logFile' => 'logs/server.log',
+    ],
+];
+```
+
+Это пример структуры из Triangle Full, а не конфигурация, которую Engine генерирует автоматически. Класс обработчика и его зависимости должны существовать в приложении. Значения `count`, `listen`, права пользователя, TLS context и файловые пути задайте согласно окружению.
+
+## Дополнительные endpoint-ы и процессы
+
+На Unix Engine объединяет массивы `servers` и `process` из общей и plugin-конфигурации. Имя процесса по умолчанию формируется из ключа конфигурации. Каждый элемент передаётся в `localzet_start()`; публичные параметры включают `listen`, `count`, `protocol`, `transport`, `server`, `handler`, `constructor` и `services`.
+
+При `GLOBAL_START` Engine регистрирует endpoints, но не вызывает `Server::runAll()`. Это позволяет приложению централизовать запуск нескольких частей. Используйте этот режим только если верхнеуровневый launcher действительно вызывает общий runtime.
+
+## Проверка запуска
+
+Узнайте точные команды проекта из его `master`, Composer scripts или release-инструкции. После запуска проверьте статус Server, слушающий адрес, worker-процессы и журналы. Команды управления Server описаны в [документации по runtime](/current/runtime).

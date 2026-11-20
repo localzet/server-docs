@@ -1,0 +1,36 @@
+export const pageTitle = 'Конфигурация и архитектура Engine HTTP'
+export const description = 'Границы HTTP-адаптера и его взаимодействие с Server, Engine, Router и Middleware.'
+
+# Конфигурация и архитектура
+
+## Компоненты
+
+~~~text
+Localzet Server
+  listener, HTTP framing, connection lifecycle, event loop
+        ↓ callback с запросом
+Triangle Engine HTTP
+  выбор callback-а, статические файлы, адаптация ответа
+        ↓
+Router → Middleware → контроллер или функция приложения
+~~~
+
+Triangle Engine HTTP наследует базовый Triangle Engine App. Он связывает HTTP callback Server с типами Engine и компонентами маршрутизации. Listener-ы и worker-процессы остаются ответственностью Server.
+
+## Конфигурация приложения
+
+Конфигурация app задаёт имя, plugin URI и alias, суффикс контроллера и повторное использование контроллеров. Их значения по умолчанию берутся из APP_NAME, APP_PLUGIN_ALIAS, APP_PLUGIN_URI, CONTROLLER_SUFFIX и CONTROLLER_REUSE.
+
+Конфигурация static включает раздачу статических файлов через STATIC_ENABLE; текущее значение по умолчанию — true. Для plugin public-каталога может быть задан отдельный путь, иначе используется публичный каталог приложения.
+
+Исполнение PHP-файлов в public-пути регулирует отдельная опция app.support_php_files; по умолчанию она выключена. Не включайте её для пользовательских загрузок.
+
+## Граница состояния
+
+Engine Context относится к текущему процессу и Fiber/coroutine. Он очищается после передачи ответа и не разделяется между worker-ами. Для общего состояния используйте внешнее хранилище или явный межпроцессный механизм.
+
+Engine HTTP и Engine WS объявляют конфликт Composer. Установите только адаптер, соответствующий модели соединения приложения.
+
+## English
+
+See [architecture and configuration in English](/projects/engine-http/en/architecture).

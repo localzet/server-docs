@@ -1,0 +1,32 @@
+export const pageTitle = 'Engine WS architecture and configuration'
+export const description = 'The WebSocket adapter boundary, configuration, and in-memory connection model.'
+
+# Architecture and configuration
+
+## Request flow
+
+~~~text
+Localzet Server: TCP listener + WebSocket protocol
+        ↓ HTTP upgrade callback
+Triangle Engine WS: URI check + Router dispatch + handshake middleware
+        ↓ upgrade
+frame → request context → callback → WebSocket body
+~~~
+
+Engine WS extends Triangle Engine App. Server owns the WebSocket protocol and connection lifecycle; Engine WS stores the route request on the connection, passes each frame to the callback, and provides message helpers.
+
+## Application configuration
+
+The app config sets debug, application name, controller suffix, and controller reuse. Defaults are debug off, name Triangle App, an empty controller suffix, and controller reuse on. Set them with APP_DEBUG, APP_NAME, CONTROLLER_SUFFIX, and CONTROLLER_REUSE.
+
+Listener count, TLS, timeouts, and network limits belong to Server and the application configuration. Engine WS does not create separate server processes.
+
+## Connection memory
+
+The connection map and groups are static in-process state. In a multi-process deployment, each worker sees only its own connections. Restarting a worker clears its map; the package has no inter-process replication or durable registry.
+
+Engine WS and Engine HTTP declare a Composer conflict.
+
+## Русский
+
+См. [архитектуру и конфигурацию на русском](/projects/engine-ws/architecture).

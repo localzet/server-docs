@@ -1,0 +1,45 @@
+export const pageTitle = 'Triangle Engine 9 documentation'
+export const description = 'Triangle Engine 9.0.0 documentation: PHP application runtime compatible with Localzet Server 7.1 and the Triangle component family.'
+
+# Triangle Engine
+
+Triangle Engine is the base runtime layer for Triangle Framework applications. It provides request and response types, configuration, execution context, bootstrap components, and helpers. Network listeners, the event loop, HTTP framing, timers, and worker lifecycle belong to [Localzet Server](/current).
+
+## Current version and compatibility
+
+The current published Engine version is **9.0.0**. It targets PHP 8.1+ and Localzet Server 7.1+. The compatible component set is Engine 9, Router 2, Middleware 2, and Server 7.1.
+
+~~~sh
+composer require localzet/server:^7.1 triangle/engine:^9.0
+composer show triangle/engine
+composer show localzet/server
+composer check-platform-reqs
+~~~
+
+If you are migrating from Engine 8, read the [version and API comparison](/projects/engine/en/compatibility). Do not mix Engine 8 / Server 4 and Engine 9 / Server 7 in one lock file.
+
+## Documentation
+
+- [Requirements and PHP extensions](/projects/engine/en/requirements)
+- [Install the package](/projects/engine/en/install)
+- [Start and configure an application](/projects/engine/en/start)
+- [Architecture and runtime boundaries](/projects/engine/en/architecture)
+- [Helpers and API](/projects/engine/en/helpers)
+- [Compatibility and migration from Engine 8](/projects/engine/en/compatibility)
+- [Tests and coverage limits](/projects/engine/en/testing)
+
+## Package contents
+
+- Triangle Engine Request and Response extend Localzet Server HTTP types for Triangle applications.
+- Config, Environment, and Path provide configuration, environment, and path access.
+- Context stores state for the active PHP Fiber and supports cleanup callbacks.
+- support App registers configured listeners and processes, then delegates startup to Localzet Server.
+- Bootstrap starts available components and application bootstrap classes.
+
+## What Engine does not provide
+
+Engine is not a standalone HTTP server, reverse proxy, service-discovery system, or deployment tool. It does not provide routing, middleware, authentication, a database, or distributed-state guarantees by itself. For HTTP or WebSocket applications, install the matching adapter: [Engine HTTP](/projects/engine-http/en) or [Engine WS](/projects/engine-ws/en). The two adapters conflict in Composer and are intended for separate applications.
+
+## Русская версия
+
+Откройте [обзор документации на русском](/projects/engine).

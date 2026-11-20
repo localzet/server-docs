@@ -1,0 +1,35 @@
+export const pageTitle = 'Triangle Engine helpers and API'
+export const description = 'Core Triangle Engine classes and response helpers, including triangle_* names that preserve Engine behavior with Server 7.'
+
+# Helpers and API
+
+Composer loads `src/functions.php` through the package `autoload.files` entry. Those global helpers become available after `vendor/autoload.php`, unless a dependency defined the same function earlier.
+
+## Response helpers
+
+```php
+$json = triangle_json(['ok' => true]);
+$response = responseJson(['ok' => true], 200);
+$redirect = triangle_redirect('/account', 302);
+$envelope = triangle_response(['id' => 42], 200);
+```
+
+- `triangle_json(mixed $value, int $flags = ...)` returns a JSON string using Engine defaults.
+- `responseJson($data, int $status = 200, array $headers = [], int $options = ...)` returns `Triangle\Engine\Response` with a JSON content type.
+- `responseBlob(string $blob, string $type = 'text/plain')` returns an Engine response with the specified content type.
+- `triangle_response(mixed $data = '', int $status = 200, array $headers = [], bool $raw = false)` creates the `{status, data}` envelope and considers `app.debug`, `app.http_always_200`, `request()->expectsJson()`, and whether `responseView()` is available.
+- `triangle_redirect(string $location, int $status = 302, array $headers = [])` returns an Engine response and strips CR/LF from the `Location` value.
+
+With Localzet Server 7 loaded, `response()`, `json()`, and `redirect()` are Server functions that return Server Responses. Do not substitute them for Engine helpers without updating the call site. See the [compatibility guide](/projects/engine/en/compatibility).
+
+## Context and application accessors
+
+`Triangle\Engine\Context` provides static `get()`, `set()`, `delete()`, `has()`, `onDestroy()`, and `destroy()` methods. Ensure `destroy()` runs in a `finally` block or another guaranteed request/task cleanup point.
+
+`Triangle\Engine\App` provides `connection(): ?TcpConnection`, `request(): ?Request`, and `server(): ?Server` accessors to handlers extending that abstract class. It is not a ready-made HTTP router.
+
+## Request and Response types
+
+`Triangle\Engine\Request` extends `localzet\Server\Protocols\Http\Request` and converts uploads into Engine `File` values. `Triangle\Engine\Response` extends the Server HTTP Response and exposes `exception(?Throwable $throwable = null)`.
+
+Verify signatures against the installed Engine and Server versions. Engine 8.1.11 for Server 4 and Engine 9.0.0 for Server 7 have different global helper behavior; see the [compatibility table](/projects/engine/en/compatibility).

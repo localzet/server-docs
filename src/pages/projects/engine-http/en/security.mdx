@@ -1,0 +1,26 @@
+export const pageTitle = 'Engine HTTP security and operations'
+export const description = 'URI checks, static-file boundaries, disabled PHP execution, and operational settings.'
+
+# Security and operations
+
+## Path validation
+
+The adapter validates the URI before routing and checks the path again after percent-decoding. An unsafe path is passed to the fallback with status 422. This routing-layer check does not replace filesystem isolation or process permissions.
+
+Static files are resolved below the computed public directory of the application or plugin. Keep secrets, configuration, and internal files outside public paths.
+
+## PHP execution
+
+Executing PHP files from a public path is disabled by default. Do not enable app.support_php_files for user-uploaded content. If required, restrict the source and directory permissions.
+
+## Headers and access
+
+Review effective CORS headers, trusted proxies, and TLS settings in the application and Server. The adapter does not provide authentication or prove that TLS or proxy mode is configured. Narrow origins, methods, and headers to the intended clients.
+
+## Operations
+
+Use Server configuration for connection and request-size limits, timeouts, and graceful shutdown. Keep test and production settings and secrets separate. Avoid logging tokens or personal information without an explicit retention policy.
+
+## Русский
+
+См. [безопасность и эксплуатацию на русском](/projects/engine-http/security).

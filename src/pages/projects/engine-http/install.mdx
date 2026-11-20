@@ -1,0 +1,90 @@
+export const pageTitle = 'Установка и первый запуск Engine HTTP 3'
+export const description = 'Полный минимальный пример HTTP-приложения Triangle: Composer, маршрут /health, listener Localzet Server и проверка curl.'
+
+# Установка и первый запуск
+
+Пример создаёт локальный HTTP endpoint. Для production отдельно настройте TLS, лимиты, логи, пользователя процесса и reverse proxy.
+
+## 1. Установите пакет
+
+Нужны PHP 8.1+ и расширение cURL.
+
+~~~sh
+composer require localzet/server:^7.1 triangle/engine-http:^3.0
+composer show localzet/server
+composer show triangle/engine
+composer show triangle/engine-http
+composer check-platform-reqs
+~~~
+
+Engine HTTP 3 требует Engine 9, Router 2 и Middleware 2. Composer устанавливает совместимые версии как транзитивные зависимости. Engine HTTP 2.x относится к прежней связке Engine 8 / Server 4; см. [сравнение версий](/projects/engine-http/compatibility).
+
+## 2. Создайте server.php
+
+~~~php
+<?php
+
+declare(strict_types=1);
+
+use localzet\Server;
+use localzet\Server\Protocols\Http;
+use localzet\Server\Protocols\Http\Response as ServerResponse;
+use Monolog\Logger;
+use Triangle\Engine\Config;
+use Triangle\Engine\Container;
+use Triangle\Engine\Context;
+use Triangle\Engine\Request;
+use Triangle\Http\App;
+use Triangle\Router;
+
+require __DIR__ . '/vendor/autoload.php';
+
+Context::init();
+Config::set([
+    'app' => [
+        'plugin_uri' => 'app',
+        'plugin_alias' => 'plugin',
+        'debug' => false,
+        'controller_reuse' => true,
+    ],
+    'container' => new Container(),
+]);
+
+Router::get('/health', static fn () => new ServerResponse(
+    200,
+    ['Content-Type' => 'text/plain; charset=utf-8'],
+    'ok',
+));
+Router::collect([]);
+
+Http::requestClass(Request::class);
+$app = new App(Request::class, new Logger('triangle-http'));
+
+$server = new Server('http://127.0.0.1:8080');
+$server->count = 1;
+$server->onMessage = [$app, 'onMessage'];
+
+Server::runAll();
+~~~
+
+## 3. Запустите и проверьте
+
+В первом терминале:
+
+~~~sh
+php server.php
+~~~
+
+В другом терминале:
+
+~~~sh
+curl -i http://127.0.0.1:8080/health
+~~~
+
+Ожидаемый ответ: статус 200, заголовок Content-Type со значением text/plain и тело ok. Остановите локальный процесс сочетанием Ctrl+C.
+
+Этот минимальный пример слушает только loopback-интерфейс. Для доступного извне production-сервиса настройте TLS и сетевую границу по [руководству Server](/current/security), а также проверьте правила [безопасности Engine HTTP](/projects/engine-http/security). CORS по умолчанию не разрешает сторонние origin: если он нужен, задайте точные значения app.http_headers.
+
+## English
+
+See the [complete English install and startup guide](/projects/engine-http/en/install).

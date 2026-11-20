@@ -1,0 +1,22 @@
+export const pageTitle = 'Engine WS security and operations'
+export const description = 'WebSocket handshake checks, authorization, timeouts, and process-local connection groups.'
+
+# Security and operations
+
+## Handshake checks
+
+The handshake passes URI validation, Router, and route middleware before upgrade. Check the user's right to connect and allowed Origin in middleware. Do not postpone authorization that must happen before upgrade until the first frame callback.
+
+Engine WS does not define the user model, tokens, or an Origin policy. Configure them in the application. Set frame-size limits, connection limits, handshake timeout, and idle timeout in Server.
+
+## TLS and trusted networks
+
+Configure TLS and reverse-proxy termination in Server or the infrastructure. Engine WS does not prove that TLS or proxy headers are configured. Do not trust forwarded headers when clients can connect directly.
+
+## Broadcast and failure handling
+
+sendToGroup and sendToAll only see connections in the current process. Do not use them as cluster broadcast without a broker or IPC. For important messages, define delivery retries, queue bounds, and reconnect behavior in the application.
+
+## Русский
+
+См. [безопасность и эксплуатацию на русском](/projects/engine-ws/security).

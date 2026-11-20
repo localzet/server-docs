@@ -1,0 +1,30 @@
+export const pageTitle = 'Тесты и ограничения Triangle Engine WS'
+export const description = 'Что проверяют unit и loopback WebSocket тесты текущей ветки и какие сценарии остаются за пределами покрытия.'
+
+# Тесты и ограничения покрытия
+
+## Запуск
+
+Обычный набор запускается PHPUnit:
+
+~~~sh
+composer test
+~~~
+
+Для Server 7 используется временная установка соседних исходников:
+
+~~~sh
+bash tools/test-server7-local.sh
+~~~
+
+В текущей ветке unit-тесты проверяют отказ middleware до upgrade, отложенный вызов frame callback-а, передачу сохранённого handshake request, Fiber-контекст между двумя interleaved callbacks, очистку контекста и совместимость с базовым HTTP Response Server.
+
+Loopback integration запускает один Server 7 процесс, отправляет настоящий HTTP WebSocket Upgrade, проверяет ответ 101 и затем передаёт masked frame. Проверяется echo payload. Для этого сценария нужны Unix process-control функции; на старом Engine/Server тест помечается skipped и следует запускать tools/test-server7-local.sh.
+
+## Что не проверено
+
+Текущие проверки не покрывают TLS, reverse proxy, несколько worker-ов, межпроцессную рассылку, кластерный fan-out, нагрузку, длительный reconnect или отказ внешнего broker-а. Локальный результат не заменяет GitHub Actions и проверку целевого окружения.
+
+## English
+
+See [tests and coverage limits in English](/projects/engine-ws/en/testing).

@@ -1,0 +1,33 @@
+export const pageTitle = 'Triangle Engine 9 requirements'
+export const description = 'PHP, extension, and Localzet Server requirements for the published Triangle Engine 9.0.0 package.'
+
+# Requirements
+
+## Published package
+
+Engine 9.0.0 requires:
+
+- PHP 8.1 or later in the 8.x series;
+- ext-intl and ext-json;
+- Localzet Server ^7.1;
+- Monolog ^3.0;
+- PSR Container ^1.0 or ^2.0;
+- Symfony Cache and Translation ~6.4.0.
+
+The Engine Composer manifest conflicts with Symfony Cache and Translation 7.0 or later. Package development dependencies include PHPUnit ^10.5 and Rector.
+
+Check the versions Composer resolved and the active PHP platform:
+
+~~~sh
+composer show triangle/engine
+composer show localzet/server
+composer check-platform-reqs
+~~~
+
+## Runtime environment
+
+Process, event-loop, and transport capabilities also depend on [Localzet Server requirements](/current/compatibility). Do not assume that an optional event-loop extension is installed or selected. Verify the runtime and PHP extensions in the target environment.
+
+## Previous version
+
+Engine 8.1.11 targets Server 4. Do not apply its requirements to the current release. See the [compatibility guide](/projects/engine/en/compatibility) for a direct version comparison.

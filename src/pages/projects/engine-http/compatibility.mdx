@@ -1,0 +1,22 @@
+export const pageTitle = 'Совместимость Engine HTTP 2 и 3'
+export const description = 'Таблица совместимости Engine HTTP 3.0.0 и прежней версии 2.x: Localzet Server, Engine, PHP и важные изменения конфигурации.'
+
+# Совместимость и переход
+
+| Engine HTTP | Triangle Engine | Localzet Server | Статус |
+| --- | --- | --- | --- |
+| 3.0.0 | 9.x | 7.1+ | Текущий выпуск |
+| 2.x, включая 2.0.11 | 8.x | 4.x | Предыдущая связка |
+
+Engine HTTP 3.0.0 требует PHP 8.1+ и ext-curl. В версии 3 манифест задаёт Engine 9, Router 2 и Middleware 2. Релиз: [v3.0.0](https://github.com/Triangle-org/Engine-HTTP/releases/tag/v3.0.0).
+
+## Изменения при переходе с 2.x
+
+- Обновите Engine и Server до основных версий 9 и 7.1 одновременно.
+- Обновите Router и Middleware до версии 2.
+- Если обработчик возвращает HTTP Response Localzet Server, версия 3 сохраняет его статус, заголовки и тело.
+- Заголовки ответа Engine 9 читаются из app.http_headers.
+- CORS не разрешён по умолчанию. Если приложению нужен доступ с другого origin, задайте конкретные origin, методы и заголовки и не включайте credentials для произвольных origin.
+- Engine HTTP объявляет конфликт с Engine WS; эти адаптеры должны находиться в разных Composer-проектах.
+
+Перед обновлением поменяйте constraints в тестовой ветке, разрешите зависимости заново, запустите тесты приложения и проверьте настройки reverse proxy и TLS. Команда для текущей версии описана в [установке](/projects/engine-http/install).

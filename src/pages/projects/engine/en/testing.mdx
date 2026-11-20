@@ -1,0 +1,33 @@
+export const pageTitle = 'Triangle Engine tests and coverage limits'
+export const description = 'What the Triangle Engine PHPUnit suite covers and which network integration scenarios are outside its current scope.'
+
+# Tests and coverage limits
+
+## Run the declared suite
+
+Engine declares a `composer test` script that runs PHPUnit through `tests/phpunit.xml`:
+
+```sh
+composer install
+composer test
+```
+
+The unit suite covers `Config`, Fiber context isolation, and helper interoperability with Server 7. `tests/Integration/Server7HttpIntegrationTest.php` starts a separate Server 7 process, sends a real loopback HTTP request, reads a query parameter through Engine Request, and receives an Engine Response with a JSON body.
+
+## What the tests prove
+
+- Two interleaved PHP Fibers keep separate context values with the `Select` event-loop class.
+- Engine JSON helpers return the expected response type and payload when Server 7 is loaded.
+- `triangle_redirect()` returns the Engine response type and strips CR/LF from `Location`.
+- Global `response()`, `json()`, and `redirect()` retain the Server Response contract after Engine autoload.
+- The HTTP integration exercises a request callback that calls `Context::destroy()` in a `finally` block.
+
+## What is not covered yet
+
+The HTTP integration is limited to one loopback listener, one worker, and a simple GET on Unix. It is skipped on Windows and when `proc_open` or `posix_kill` is unavailable. Engine has no separate WebSocket or proxy integration suite. This test does not prove TLS, hostile framing behavior, multi-worker operation, load performance, or recovery from external-store failures.
+
+Use application-level integration checks and the [Localzet Server test suite](/current/testing) for those scenarios. Report unit tests, branch CI, and runtime verification as separate evidence.
+
+## Published version and verification limits
+
+Engine 9.0.0 is published for Localzet Server 7.1+. [Release CI](https://github.com/Triangle-org/Engine/actions) and the local PHPUnit suite prove only the listed checks. They do not cover TLS, multiple workers, proxies, or performance; application-level integration tests are still required.

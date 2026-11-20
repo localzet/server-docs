@@ -227,6 +227,68 @@ const clusterNavigation = [
 ]
 
 const projectNavigation = {
+    'engine-http': [
+        {title: 'Triangle Engine HTTP · Русский', links: [
+            {title: 'Обзор и совместимость', href: '/projects/engine-http'},
+            {title: 'Установка и запуск', href: '/projects/engine-http/install'},
+            {title: 'Обработка запросов и ответов', href: '/projects/engine-http/requests'},
+            {title: 'Конфигурация и архитектура', href: '/projects/engine-http/architecture'},
+            {title: 'Совместимость', href: '/projects/engine-http/compatibility'},
+            {title: 'Безопасность и эксплуатация', href: '/projects/engine-http/security'},
+            {title: 'Тесты и ограничения', href: '/projects/engine-http/testing'},
+        ]},
+        {title: 'Triangle Engine HTTP · English', links: [
+            {title: 'Overview and compatibility', href: '/projects/engine-http/en'},
+            {title: 'Installation and startup', href: '/projects/engine-http/en/install'},
+            {title: 'Requests and responses', href: '/projects/engine-http/en/requests'},
+            {title: 'Configuration and architecture', href: '/projects/engine-http/en/architecture'},
+            {title: 'Compatibility', href: '/projects/engine-http/en/compatibility'},
+            {title: 'Security and operations', href: '/projects/engine-http/en/security'},
+            {title: 'Testing and limits', href: '/projects/engine-http/en/testing'},
+        ]},
+    ],
+    'engine-ws': [
+        {title: 'Triangle Engine WS · Русский', links: [
+            {title: 'Обзор и совместимость', href: '/projects/engine-ws'},
+            {title: 'Установка и запуск', href: '/projects/engine-ws/install'},
+            {title: 'Handshake и сообщения', href: '/projects/engine-ws/messages'},
+            {title: 'Конфигурация и архитектура', href: '/projects/engine-ws/architecture'},
+            {title: 'Совместимость', href: '/projects/engine-ws/compatibility'},
+            {title: 'Безопасность и эксплуатация', href: '/projects/engine-ws/security'},
+            {title: 'Тесты и ограничения', href: '/projects/engine-ws/testing'},
+        ]},
+        {title: 'Triangle Engine WS · English', links: [
+            {title: 'Overview and compatibility', href: '/projects/engine-ws/en'},
+            {title: 'Installation and startup', href: '/projects/engine-ws/en/install'},
+            {title: 'Handshake and messages', href: '/projects/engine-ws/en/messages'},
+            {title: 'Configuration and architecture', href: '/projects/engine-ws/en/architecture'},
+            {title: 'Compatibility', href: '/projects/engine-ws/en/compatibility'},
+            {title: 'Security and operations', href: '/projects/engine-ws/en/security'},
+            {title: 'Testing and limits', href: '/projects/engine-ws/en/testing'},
+        ]},
+    ],
+    engine: [
+        {title: 'Triangle Engine · Русский', links: [
+            {title: 'Обзор и статус версии', href: '/projects/engine'},
+            {title: 'Требования', href: '/projects/engine/requirements'},
+            {title: 'Установка', href: '/projects/engine/install'},
+            {title: 'Запуск и конфигурация', href: '/projects/engine/start'},
+            {title: 'Архитектура и runtime', href: '/projects/engine/architecture'},
+            {title: 'Помощники и API', href: '/projects/engine/helpers'},
+            {title: 'Совместимость', href: '/projects/engine/compatibility'},
+            {title: 'Тесты и ограничения', href: '/projects/engine/testing'},
+        ]},
+        {title: 'Triangle Engine · English', links: [
+            {title: 'Overview and release status', href: '/projects/engine/en'},
+            {title: 'Requirements', href: '/projects/engine/en/requirements'},
+            {title: 'Installation', href: '/projects/engine/en/install'},
+            {title: 'Startup and configuration', href: '/projects/engine/en/start'},
+            {title: 'Architecture and runtime', href: '/projects/engine/en/architecture'},
+            {title: 'Helpers and API', href: '/projects/engine/en/helpers'},
+            {title: 'Compatibility and migration', href: '/projects/engine/en/compatibility'},
+            {title: 'Tests and coverage limits', href: '/projects/engine/en/testing'},
+        ]},
+    ],
     console: [{title: 'Console', links: [{title: 'Обзор', href: '/projects/console'}, {title: 'Установка и команды', href: '/projects/console/start'}, {title: 'Laravel bridge и TUI', href: '/projects/console/reference'}]}],
     cron: [{title: 'Cron', links: [{title: 'Обзор', href: '/projects/cron'}, {title: 'Установка и расписания', href: '/projects/cron/start'}, {title: 'API и эксплуатация', href: '/projects/cron/reference'}]}],
     httpclient: [{title: 'HTTP Client', links: [{title: 'Обзор', href: '/projects/httpclient'}, {title: 'Первый запрос', href: '/projects/httpclient/start'}, {title: 'Запросы и обработка ответов', href: '/projects/httpclient/reference'}]}],
