@@ -1,9 +1,18 @@
 export const pageTitle = 'Совместимость и сравнение версий'
-export const description = 'Требования Localzet Server 7.1.0, новые lifecycle API, ограничения hot upgrade и сравнение с предыдущими выпусками.'
+export const description = 'Совместимость Localzet Server 7.2.0, настройка взаимной проверки TLS-сертификатов, исправления lifecycle и сравнение с предыдущими выпусками.'
 
 # Совместимость и сравнение версий
 
-Последний опубликованный пакет — `v7.1.0`. Устанавливайте его через `composer require localzet/server:^7.1`. Пакеты `^7.0` также допускают обновление в пределах Server 7; перед развёртыванием сверяйте выбранную версию через `composer show localzet/server`.
+Последний выпуск — `v7.2.0`. Устанавливайте его через `composer require localzet/server:^7.2`. Пакеты `^7.0` также допускают обновление в пределах Server 7; перед развёртыванием сверяйте выбранную версию через `composer show localzet/server`.
+
+### Изменения в выпуске 7.2.0
+
+| Область | Server 7.1.0 | Server 7.2.0 |
+|---|---|---|
+| Взаимная проверка TLS | Настройка не была описана отдельным проверенным сценарием | Документация показывает настройку client CA; интеграционный тест проверяет доверенный, отсутствующий и недоверенный сертификат до вызова HTTP callback |
+| Graceful shutdown во время callback | Отложенное закрытие соединения хранилось как динамическое поле connection | Состояние хранится в `WeakMap` сервера и применяется после завершения callback |
+
+mTLS использует стандартные TLS stream-context параметры PHP. Проверка цепочки сертификатов не сопоставляет сертификат с пользователем приложения и не заменяет авторизацию.
 
 ### Изменения в выпуске 7.1.0
 
@@ -29,7 +38,7 @@ PHP 8.1–8.3 остаются поддерживаемыми для обычн�
 
 Ниже сравниваются исходники текущего выпуска с тегом `v4.5.3`. Это сравнение исходного кода и манифестов, а не гарантия совместимости конкретного приложения.
 
-| Область | `v4.5.3` | Текущий выпуск `v7.1.0` |
+| Область | `v4.5.3` | Текущий выпуск `v7.2.0` |
 |---|---|---|
 | PHP и обязательные зависимости | PHP `^8.1 \|\| ^8.2`; обязательны `ext-sockets`, `ext-pcntl`, `ext-posix`, `localzet/events` | PHP `>=8.1`; обязательны `ext-json` и `ext-ctype`; остальные интеграции объявлены как optional |
 | Event loop | Собственный набор Linux drivers, включая `StreamSelect`, `ext-uv`, `ext-event` и `ext-ev` | `EventLoopFactory`: `event` → `ev` → Revolt → встроенный `Select`; Windows имеет отдельную реализацию, Swoole/Swow выбираются явно |
@@ -37,7 +46,7 @@ PHP 8.1–8.3 остаются поддерживаемыми для обычн�
 | Hot upgrade | В исходниках тега нет `Runtime/HotUpgradeBroker` | Unix hot upgrade сохраняет listener descriptors; требуется PHP 8.4+ с нужной поддержкой socket flags |
 | Публичный API | Сигнатуры и реализация отражают контракт тега 4.5.3 | API и runtime изменялись; используйте справочник текущей версии и проверяйте приложение тестами |
 
-Ссылки на исходники: [`v4.5.3` composer.json](https://github.com/localzet/Server/blob/v4.5.3/composer.json), [`v7.1.0` composer.json](https://github.com/localzet/Server/blob/v7.1.0/composer.json), [сравнение тегов](https://github.com/localzet/Server/compare/v4.5.3...v7.1.0), [изменения 7.0.4 → 7.1.0](https://github.com/localzet/Server/compare/v7.0.4...v7.1.0).
+Ссылки на исходники: [`v4.5.3` composer.json](https://github.com/localzet/Server/blob/v4.5.3/composer.json), [`v7.2.0` composer.json](https://github.com/localzet/Server/blob/v7.2.0/composer.json), [сравнение тегов](https://github.com/localzet/Server/compare/v4.5.3...v7.2.0), [изменения 7.1.0 → 7.2.0](https://github.com/localzet/Server/compare/v7.1.0...v7.2.0).
 
 ## Перед обновлением приложения
 
