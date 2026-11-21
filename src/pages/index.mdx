@@ -1,15 +1,15 @@
 import {HeroPattern} from '@/components/HeroPattern'
 
-export const pageTitle = 'Localzet Server 7.2.1 — документация и руководство'
-export const description = 'Официальная документация Localzet Server 7.2.1: PHP runtime для HTTP/1.x, WebSocket, TCP и UDP, event loop, worker-процессов и управления жизненным циклом.'
+export const pageTitle = 'Localzet Server 7.2.2 — документация и руководство'
+export const description = 'Официальная документация Localzet Server 7.2.2: PHP runtime для HTTP/1.x, WebSocket, TCP и UDP, event loop, worker-процессов и управления жизненным циклом.'
 
 <HeroPattern />
 
 # Localzet Server
 
-Последняя опубликованная версия Localzet Server — **7.2.1**. Это PHP-библиотека для серверных приложений с долгоживущими соединениями, несколькими сетевыми протоколами и управлением worker-процессами. Для перехода с предыдущего выпуска смотрите [сравнение версий и изменений поведения](/current/compatibility).
+Последняя опубликованная версия Localzet Server — **7.2.2**. Это PHP-библиотека для серверных приложений с долгоживущими соединениями, несколькими сетевыми протоколами и управлением worker-процессами. Для перехода с предыдущего выпуска смотрите [сравнение версий и изменений поведения](/current/compatibility).
 
-Пакет `localzet/server:^7.1` устанавливается через Composer. Проверяйте фактически выбранную версию командой `composer show localzet/server`; таблица [совместимости](/current/compatibility) описывает требования и изменения при переходе с предыдущих выпусков.
+Пакет `localzet/server:^7.2` устанавливается через Composer. Проверяйте фактически выбранную версию командой `composer show localzet/server`; таблица [совместимости](/current/compatibility) описывает требования и изменения при переходе с предыдущих выпусков.
 
 <div className="not-prose mx-auto my-8 grid w-full max-w-3xl gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:mx-[calc(50%_-_min(50%,33rem))]">
     <div className="rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"><strong>HTTP/1.x и TLS</strong><p className="mb-0 mt-2 text-sm text-slate-600 dark:text-slate-300">HTTP-запросы, ответы, потоковая отдача файлов и SSE.</p></div>
@@ -45,4 +45,4 @@ export const description = 'Официальная документация Loca
 
 Сервер реализует HTTP/1.x, TLS поверх PHP streams, WebSocket, TCP и UDP. Gateway включает raw TCP proxy и потоковый HTTP/1.x reverse proxy с WebSocket Upgrade. Он не является HTTP/2/3 ingress, API management платформой или системой service discovery. В проекте нет встроенной аутентификации приложения, rate limiter или гарантии производительности для произвольной нагрузки.
 
-Справочные страницы, которые не входят в текущую документацию, помечены как архивные. Для актуального кода начинайте с раздела **Версия 7.2.1** в меню.
+Справочные страницы, которые не входят в текущую документацию, помечены как архивные. Для актуального кода начинайте с раздела **Версия 7.2.2** в меню.

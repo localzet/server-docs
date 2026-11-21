@@ -174,7 +174,7 @@ function NavigationGroup({group, className}) {
 
 const serverNavigation = [
     {
-        title: 'Текущая версия · 7.2.1',
+        title: 'Текущая версия · 7.2.2',
         links: [
             {title: 'Обзор и версия', href: '/'},
             {title: 'Установка и первый сервер', href: '/current/start'},

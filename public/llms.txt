@@ -6,7 +6,7 @@
 
 - Official documentation: https://server.localzet.com/
 - Source repository: https://github.com/localzet/Server
-- Current stable release: Localzet Server 7.2.2. The TLS `onConnect` callback runs only after a successful handshake; plain TCP behavior is unchanged. Integration coverage includes trusted, missing, and untrusted client certificates. Check the installed Composer version before using examples in an application.
+- Current stable release: Localzet Server 7.2.2. The TLS `onConnect` callback runs only after a successful handshake; plain TCP behavior is unchanged. HTTP and WebSocket codecs close a TLS connection when ALPN selects anything other than `http/1.1`; HTTP/2 is not implemented. Integration coverage includes trusted, missing, and untrusted client certificates. Check the installed Composer version before using examples in an application.
 - License: AGPL-3.0-or-later.
 - Runtime requirement: PHP 8.1 or newer with ext-json and ext-ctype. Unix multiprocess supervision requires pcntl and posix.
 
