@@ -1,0 +1,10 @@
+export const pageTitle = 'Эксплуатация и ограничения WS'
+export const description = 'Один worker, broadcast внутри процесса и сетевые границы.'
+
+# Эксплуатация и ограничения WS
+
+Конфигурация текущего checkout задаёт `websocket://0.0.0.0:8080`, `Triangle\Ws\App`, `count = 1` и `max_package_size = 10 * 1024 * 1024`. README характеризует шаблон как однопроцессный экспериментальный WebSocket-first проект. Ограничьте входящий порт firewall/TLS proxy, контролируйте размер сообщений и реализуйте прикладную аутентификацию/origin policy.
+
+`sendToAll()` направляет сообщение соединениям серверов внутри текущего процесса. `sendToGroup()` использует path текущего WebSocket request как scope; это не абстрактная именованная группа. Ни один метод не координирует broadcast между процессами/узлами и не предоставляет shared state. Для горизонтального масштабирования нужен внешний broker/shared-state и routing слой.
+
+Callbacks выполняются в event-loop контексте: не блокируйте их долгими сетевыми/CPU задачами. Durable message delivery, retries, replay и exactly-once не заявлены.

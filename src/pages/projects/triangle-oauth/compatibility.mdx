@@ -1,0 +1,23 @@
+export const pageTitle = 'Совместимость и проверки Triangle OAuth'
+export const description = 'Различия published v3.0.9 и текущего preview checkout, ограничения тестов и проверка integrations.'
+
+# Версии, совместимость и проверки
+
+## Релиз и preview — разные состояния
+
+| Источник | Ревизия | PHP и основные зависимости |
+| --- | --- | --- |
+| Published release | `v3.0.9` | PHP `^8.2`, `localzet/http:^2.0`, ext-mbstring/json/curl; Engine не объявлен в runtime `require` тега |
+| Current checkout preview | `gc66280e` (4 commits after tag) | те же требования плюс `triangle/engine:^8.1` |
+
+Установка опубликованной версии: `composer require triangle/oauth:^3.0`. Текущий checkout не является релизом; сверяйте commit и Composer lock отдельно.
+
+## Автоматические проверки
+
+В `composer.json` нет test/lint scripts и в checkout нет тестового каталога. CI в текущей ветке проверяет manifest/lock, устанавливает зависимости без scripts, запускает синтаксический `php -l`, а тесты запускает условно только при наличии Composer test script. Поэтому интеграционные OAuth flows, callback state, provider API и секреты не проверяются автоматическими тестами пакета.
+
+## Ручной integration checklist
+
+На отдельном provider app проверьте: redirect на provider, отказ пользователя, callback с неверным/пропущенным state, успешный обмен authorization code, сохранение session между запросами, истёкший/отозванный token и выдачу минимально необходимых profile fields. Выполняйте эти проверки на staging credentials, не публикуя tokens.
+
+Источники: [tag v3.0.9 manifest](https://github.com/Triangle-org/OAuth/blob/v3.0.9/composer.json), [preview commit `gc66280e`](https://github.com/Triangle-org/OAuth/commit/gc66280e), [OAuth2 state handling](https://github.com/Triangle-org/OAuth/blob/gc66280e/src/OAuth/Adapter/OAuth2.php).

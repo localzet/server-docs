@@ -1,0 +1,15 @@
+export const pageTitle = 'Triangle View 2.1.0 — application templates'
+export const description = 'Triangle View 2.1.0 guide: installation, PHP templates, optional adapters, configuration, and output safety.'
+
+# Triangle View
+
+Triangle View connects PHP templates and optional Blade, Twig, or ThinkPHP engines to responses in a Triangle Engine application.
+
+**Version:** 2.1.0 · **PHP:** 8.1+ · **Engine:** `^8.1 || ^9.0` · **Package:** `triangle/view`.
+
+- [Install and return a first response](triangle-view/en/install)
+- [Render templates and pass data](triangle-view/en/usage)
+- [Configure handlers and secure output](triangle-view/en/operations)
+- [Compatibility and testing](triangle-view/en/compatibility)
+
+The default `raw` handler includes `.phtml` files as PHP and does not escape HTML automatically. Escape values from users or external sources in the template. Variables passed directly to `view()` take precedence over values previously assigned to the current request.

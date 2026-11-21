@@ -1,0 +1,10 @@
+export const pageTitle = 'Web configuration and operations'
+export const description = 'Set safe CORS/debug values, listener, and worker count.'
+
+# Web configuration and operations
+
+`config/server.php` defines `listen`, `count`, handler, paths, and logs. The template listens on loopback `http://127.0.0.1:8000` and defaults workers to `cpu_count() * 4`. Size concurrency for the application and use a configured TLS reverse proxy when external access is needed.
+
+The template `config/app.php` sets `debug=true` and broad CORS values: `Access-Control-Allow-Origin: *`, credentials `true`, and wildcard methods/headers. Disable debug before production and specify exact origins, methods, headers, and credential policy; do not deploy sample settings without review.
+
+Keep secrets out of tracked config and protect `.env`, runtime, and logs. Check write permissions, database/session availability, body/package size limits, and upstream timeouts. `composer.json` declares no operational health checks or test scripts; add application-level checks.

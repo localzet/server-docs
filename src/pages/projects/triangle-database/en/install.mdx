@@ -1,0 +1,27 @@
+export const pageTitle = 'Install Triangle Database'
+export const description = 'PHP/Illuminate requirements and initial connection setup.'
+
+# Install Triangle Database
+
+Triangle Database 2.0.0 requires PHP `^8.2`, Engine `^9.0`, Illuminate Database/Events/Pagination `^12.0`, and Symfony VarDumper `^7.4`.
+
+```sh
+composer require triangle/database:^2.0
+composer show triangle/database triangle/engine illuminate/database illuminate/events illuminate/pagination
+```
+
+Install the PDO extension for the SQL driver you select. After Engine bootstrap, the package loads `Triangle\Database\Bootstrap`. If the application does not publish config automatically, `Triangle\Database\Install::install()` copies a missing `config/database.php` and leaves an existing file untouched.
+
+Minimal SQLite connection for a check:
+
+```php
+return [
+    'default' => 'sqlite',
+    'persistent' => false,
+    'connections' => [
+        'sqlite' => ['driver' => 'sqlite', 'database' => ':memory:', 'prefix' => ''],
+    ],
+];
+```
+
+For persistent storage, set `database` to a file path or configure the selected driver. Supply credentials through the environment and keep them out of the repository.

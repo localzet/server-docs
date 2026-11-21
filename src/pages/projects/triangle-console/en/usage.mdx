@@ -1,0 +1,43 @@
+export const pageTitle = 'Commands and the Illuminate bridge'
+export const description = 'Create Symfony commands, discover them, and explicitly add Illuminate commands.'
+
+# Commands and the Illuminate bridge
+
+Create a PSR-4 autoloadable command under `app/command`:
+
+```php
+<?php
+
+namespace app\command;
+
+use localzet\Console\Commands\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+final class ReportCommand extends Command
+{
+    protected static string $defaultName = 'app:report';
+    protected static string $defaultDescription = 'Show report status';
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $output->writeln('Report is ready.');
+        return self::SUCCESS;
+    }
+}
+```
+
+After Engine bootstrap, run `$console = new Triangle\Console\Console(); exit($console->run());`. CLI arguments go to the inherited `run()` method; invoke the application entry point with `list` or `app:report`. `config/command.php` is an array of class names, each requiring a Symfony-compatible `defaultName`. Enabled plugin command directories are discovered too.
+
+### Illuminate Console
+
+The bridge is explicit, for example when composing a console manually:
+
+```php
+$console = (new Triangle\Console\Console([], false))
+    ->useIlluminate(new Illuminate\Container\Container());
+$console->addIlluminateCommand(new App\Console\Commands\ReportCommand());
+$console->run();
+```
+
+The second argument `false` disables automatic package command registration. Pass the container expected by your Illuminate commands. Regular commands continue to use the Symfony API.

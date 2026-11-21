@@ -1,0 +1,13 @@
+export const pageTitle = 'Совместимость и проверки Web'
+export const description = 'Engine 8.1 требования и границы доступных package tests.'
+
+# Совместимость и проверки Web
+
+Тег `v8.0.1` и текущий checkout Web требуют Engine `^8.1` и перечисленные компоненты своих поддерживаемых major линий. Composer constraint `^8.1` не включает Engine 9. До обновления компонента сравните его constraints с `composer.json` приложения и проверьте lock.
+
+```sh
+composer validate --strict --no-check-publish
+composer show triangle/web triangle/engine triangle/engine-http
+```
+
+Манифест не объявляет `test` или `lint` scripts; отдельного test suite в checkout нет. Эти команды проверяют метаданные/разрешение, но не HTTP поведение. Добавьте integration checks для маршрутов, статических файлов, middleware, views, sessions и ошибочных запросов. Текущий README содержит только badges; факты страницы взяты из `master`, config и example controller/route.

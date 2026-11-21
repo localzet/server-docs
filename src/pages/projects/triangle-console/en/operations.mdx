@@ -1,0 +1,14 @@
+export const pageTitle = 'Configuration and packaging'
+export const description = 'Configure build commands and understand their operational limits.'
+
+# Configuration and packaging
+
+The `config/console.php` template contains `service.name` and a `build` section: input/output directories, exclusion pattern and file list, PHAR/binary filenames, stub, PHAR signature algorithm, and private-key path. `Triangle\Console\Install::install()` does not replace existing files, so compare and update old config manually.
+
+Built-in source commands include `make:command`, `make:controller`, `make:middleware`, `make:model`, `app:create`, `plugin:create`, `build:phar`, and `build:bin`. Check exact arguments with `list` and `help <command>` on the installed entry point.
+
+## Artifacts and secrets
+
+The default binary config targets PHP 8.4 and `memory_limit = 256M`. `ext-zip` is suggested for build bin; `ext-openssl` is suggested for OpenSSL PHAR signing. Verify required extensions before building. Ensure `.env`, credentials, and signing keys are absent from output: `.env` is excluded in the template, but inspect every artifact. Packaging does not make source extraction or analysis impossible.
+
+Keep keys outside the checkout with restricted access. Avoid secrets in CLI arguments because process lists or logs may expose them. Test the artifact on each target OS separately.

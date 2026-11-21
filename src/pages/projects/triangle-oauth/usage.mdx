@@ -1,0 +1,40 @@
+export const pageTitle = 'OAuth авторизация и callback Triangle OAuth'
+export const description = 'Конфигурация провайдера, разделение начала OAuth flow и callback, получение профиля пользователя.'
+
+# Начало авторизации и callback
+
+Менеджер создаётся с массивом конфигурации либо путём к PHP-файлу, optional storage и logger. Провайдер должен быть указан в `providers` и явно включён через `enabled`.
+
+```php
+$config = [
+    'callback' => 'https://app.example.test/oauth/google/callback',
+    'providers' => [
+        'google' => [
+            'enabled' => true,
+            'keys' => [
+                'id' => getenv('GOOGLE_CLIENT_ID'),
+                'secret' => getenv('GOOGLE_CLIENT_SECRET'),
+            ],
+            'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
+        ],
+    ],
+];
+$oauth = new \Triangle\OAuth($config);
+$result = $oauth->authenticate('google');
+```
+
+На authorization-start request `authenticate()` возвращает `Triangle\Engine\Response` с redirect; верните этот response из Engine handler. При callback обработайте запрос тем же provider config и тем же пользовательским session context. Успешный callback возвращает provider adapter:
+
+```php
+$result = $oauth->authenticate('google');
+if ($result instanceof \Triangle\Engine\Response) {
+    return $result;
+}
+
+$profile = $result->getUserProfile();
+// Сопоставьте $profile->identifier с локальной учётной записью.
+```
+
+Пример показывает ветвление ответа, но не является полным controller: приложение должно обеспечить корректный callback route, session cookie, обработку отказа провайдера и собственное сопоставление identity. Не связывайте учётные записи только по email без отдельной проверки модели доверия.
+
+Поддержка profile/contact методов зависит от конкретного adapter. Не переносите scopes и поля профиля одного провайдера на другой.

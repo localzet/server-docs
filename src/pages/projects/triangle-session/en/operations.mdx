@@ -1,0 +1,10 @@
+export const pageTitle = 'Session operations and security'
+export const description = 'Configure backend/cookies and understand process-local boundaries.'
+
+# Session operations and security
+
+Supported `SESSION_TYPE` values are `file` (default), `redis`, `redis_cluster`, and `mongo`. Connection settings live under `session.config.<driver>`. Local files are not shared storage across workers on separate hosts; use Redis/Cluster/Mongo or a shared filesystem when supported by the deployment.
+
+Template cookie settings: name `PHPSID`, `http_only=true`, `secure=false`, empty domain and SameSite. Set `SESSION_COOKIE_SECURE=true` for HTTPS. Configure domain, path, and SameSite for actual origins and cross-site flows; avoid unnecessarily broad cookie scope. `SESSION_LIFETIME` and `SESSION_COOKIE_LIFETIME` are separate durations.
+
+Restrict access to session storage, do not log session values, and use trusted storage only. Do not retain request/session scope in long-lived worker state.

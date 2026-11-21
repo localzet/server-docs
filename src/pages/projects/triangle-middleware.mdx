@@ -1,0 +1,54 @@
+export const pageTitle = 'Triangle Middleware'
+export const description = 'HTTP middleware-компонент Triangle: конфигурация цепочек приложения, плагинов, маршрутов и контроллеров.'
+
+# Triangle Middleware
+
+Triangle Middleware предоставляет общий контракт обработчика и загрузчик middleware для приложений Triangle. Он собирает списки из конфигурации приложения и плагинов, а также из маршрута и атрибутов контроллера. Вызов цепочки и преобразование результата в HTTP response выполняет интеграция приложения, например Triangle HTTP; этот пакет сам по себе не является HTTP-сервером.
+
+Опубликованный релиз — [2.0.3](https://github.com/Triangle-org/Middleware/releases/tag/v2.0.3). Требования: PHP `^8.1`, `triangle/router:^2.0`, `triangle/engine:^8.1 || ^9.0`. Текущий checkout `2eade42` — четыре коммита после релизного тега; он сохраняет эти constraints и добавляет CI/regression checks, которых нет в самом теге.
+
+```sh
+composer require triangle/middleware:^2.0
+composer show triangle/middleware triangle/engine triangle/router
+```
+
+## Контракт middleware
+
+```php
+<?php
+use Triangle\Middleware\MiddlewareInterface;
+
+final class RequestLogMiddleware implements MiddlewareInterface
+{
+    public function process($request, callable $handler)
+    {
+        // Inspect the request before passing it downstream.
+        return $handler($request);
+    }
+}
+```
+
+`process($request, callable $handler)` может вернуть собственный результат, не вызывая handler, либо вызвать `$handler($request)` и вернуть downstream результат. Параметры и результат не типизированы. Несмотря на название интерфейса и ссылку на PSR-15, интерфейс не реализует строгий PSR-15/PSR-7 контракт: типы request/response и handler отличаются. Сверьте типы с интегрирующим HTTP-компонентом.
+
+## Регистрация и область действия
+
+Шаблон `config/middleware.php` содержит пустой список. Записи должны быть массивом классов с методом `process`; интерфейс необязателен для классов, регистрируемых через конфигурацию. Пример:
+
+```php
+return [
+    '@' => [RequestLogMiddleware::class],
+    'api' => [ApiAccessMiddleware::class],
+];
+```
+
+Ключ `@` означает глобальный уровень, пустой ключ — уровень приложения по умолчанию, ключ `api` — named app. Bootstrap также собирает статические middleware Engine и конфигурацию приложений/плагинов. Маршруты могут добавлять middleware через router; атрибут `#[Triangle\Annotation\Middleware(SomeMiddleware::class)]` доступен на классе/методе контроллера, также читается публичное default-свойство `middleware` контроллера. Класс атрибута входит в Engine.
+
+`Bootstrap::getMiddleware($plugin, $app, $controller, $route, $withGlobal)` возвращает подготовленные callable-методы `process`; при `withGlobal: false` глобальные элементы опускаются. Список кэшируется в статическом состоянии процесса: повторная загрузка в том же процессе дополняет состояние, а не очищает его. Проверяйте фактический порядок в вашей интеграции перед зависимостью от порядка побочных эффектов.
+
+## Проверки и ограничения
+
+В текущем checkout доступны `composer lint` и `composer test`; они добавлены после опубликованного v2.0.3. Regression suite проверяет scopes global/plugin/app middleware, исключение global через `withGlobal: false`, неверную структуру и отсутствие `process`. Сама suite отсутствует в release tag и не запускает полный HTTP request/response цикл. Для этого добавьте integration test в приложение с теми версиями Engine, Router и HTTP, которые реально развёрнуты. Не используйте middleware как место для долгих блокирующих операций в event-loop обработчике.
+
+## Практические руководства
+
+[Установка](/projects/triangle-middleware/install) · [Использование](/projects/triangle-middleware/usage) · [Эксплуатация](/projects/triangle-middleware/operations) · [Совместимость и тесты](/projects/triangle-middleware/compatibility).

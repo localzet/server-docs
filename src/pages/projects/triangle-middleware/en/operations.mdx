@@ -1,0 +1,10 @@
+export const pageTitle = 'Middleware operations and security'
+export const description = 'Configuration validation, process state, and HTTP contract boundaries.'
+
+# Middleware operations and security
+
+Each config value must be a list of classes, and each class must have a `process` method. The loader does not require the interface, but implementing it helps static checks. A malformed shape or missing method throws `RuntimeException`.
+
+Middleware storage is process-static. Calling `load()` again appends entries and does not clear old ones. Do not reload configuration in a long-lived worker unless process state is intentionally reset or the worker is restarted.
+
+`MiddlewareInterface::process($request, callable $handler)` does not type request/response and does not use PSR-15 `RequestHandlerInterface`; do not assume strict PSR-7/15 compatibility. Validate inputs in middleware, avoid long blocking work on an event loop, and define error responses in the HTTP integration. Configure and test CORS/auth policy at the application boundary.

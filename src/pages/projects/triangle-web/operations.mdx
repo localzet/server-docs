@@ -1,0 +1,10 @@
+export const pageTitle = 'Настройка и эксплуатация Web'
+export const description = 'Безопасные значения CORS/debug, listener и worker count.'
+
+# Настройка и эксплуатация Web
+
+В `config/server.php` находятся `listen`, `count`, handler, пути и логи. Исходный шаблон слушает loopback `http://127.0.0.1:8000`, а число workers по умолчанию — `cpu_count() * 4`. Подбирайте concurrency под приложение и развертывайте за настроенным TLS reverse proxy, если нужен внешний доступ.
+
+В `config/app.php` шаблон включает `debug=true` и широкие CORS значения: `Access-Control-Allow-Origin: *`, credentials `true`, методы/headers `*`. До production отключите debug и задайте точные origins, методы, headers и credentials; не используйте sample-настройки без пересмотра.
+
+Секреты храните вне tracked config, защитите `.env`, runtime и логи. Проверьте права записи, доступность database/session storage, ограничения body/package sizes и upstream timeouts. `composer.json` не задаёт операционных health checks или test scripts — добавьте проверки на уровне приложения.

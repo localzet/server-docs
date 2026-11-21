@@ -1,0 +1,19 @@
+export const pageTitle = 'Install Triangle Console'
+export const description = 'Composer requirements and integration with Triangle Engine.'
+
+# Install Triangle Console
+
+Triangle Console 2.0.0 targets PHP `^8.4.1`, Triangle Engine `^9.0`, Localzet Console `^2.2`, Symfony Console and Process `^8.1`.
+
+```sh
+composer require triangle/console:^2.0
+composer show triangle/console triangle/engine localzet/console symfony/console symfony/process
+```
+
+Use the project lock file as the deployment source of truth; `composer show` reports resolved versions. This package does not replace the base CLI library: it extends Localzet Console with Engine integration, application commands, and plugin discovery.
+
+## Bootstrap
+
+Load Composer autoloading and bootstrap/configure Triangle Engine before creating `Triangle\Console\Console`. With Engine loaded, Console reads `config/console.php` and `config/command.php`, discovers classes in `app/command`, and scans enabled plugins. A project entry point usually owns this bootstrap; do not create a second, inconsistent bootstrap.
+
+For manual configuration installation, call `Triangle\Console\Install::install()` in the Engine installer context. It copies missing templates and leaves existing application files unchanged. Compare the resulting `config/console.php` with the settings needed by your project.

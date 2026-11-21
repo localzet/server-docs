@@ -1,0 +1,33 @@
+export const pageTitle = 'Triangle Router route definitions and dispatch'
+export const description = 'HTTP methods, parameters, optional segments, groups, and FOUND, NOT_FOUND, and METHOD_NOT_ALLOWED results.'
+
+# Define routes
+
+## Methods and parameters
+
+```php
+$router->addRoute(['GET', 'POST'], '/users/{id:\\d+}', $handler);
+$router->addGroup('/api', static function (Triangle\Router $router): void {
+    $router->addRoute('GET', '/users/{id}', $showUser);
+});
+```
+
+`$handler` must be callable (or a valid `[ClassName::class, 'method']` pair); a descriptive string alone is not a valid handler.
+
+The standard parser uses `{name}` for a segment that does not contain `/`; a custom regular expression can be written as `{id:\\d+}`. Optional segments use square brackets at the end of a pattern, such as `/articles[/{id}]`; an optional segment in the middle is unsupported. Groups add a shared prefix.
+
+The Router class also provides `get`, `post`, `put`, `patch`, `delete`, `head`, `options`, and `any` shortcuts. `resource()` creates resource routes for controller actions. Check the exact methods and route names in the API for your version.
+
+## Read dispatch results
+
+`dispatch($method, $path)` returns an array with one of these statuses:
+
+- `Dispatcher::FOUND`: `[FOUND, $handler, $params]`.
+- `Dispatcher::NOT_FOUND`: no route matched.
+- `Dispatcher::METHOD_NOT_ALLOWED`: the second item contains allowed HTTP methods.
+
+For 405, the application should return an `Allow` header listing the allowed methods. The dispatcher does not create responses for 404 or 405. For `FOUND`, the application resolves the callback and passes parameters according to its own contract.
+
+## Cached standalone dispatcher
+
+`cachedRouteDispatcher($definition, ['cacheFile' => $path])` saves generated route data to a PHP file and reuses it on the next startup unless `cacheDisabled` is enabled. Place the cache in a directory writable by the application but not served over HTTP; never accept this PHP file's contents from a user.

@@ -1,0 +1,48 @@
+export const pageTitle = 'Triangle Media — image upload and processing'
+export const description = 'Triangle Media documentation for Triangle Engine 9: installation, local and remote uploads, ImageMagick transformations, configuration, security, and tests.'
+
+# Triangle Media
+
+Triangle Media is an image plugin for Triangle Engine applications. It accepts uploaded files and public HTTP(S) URLs, validates the source, transforms the image, stores metadata through host adapters, and serves results through plugin routes.
+
+The latest published Media tag is `v1.1.0`, which requires Triangle Engine `^8.1`. This handbook describes preparation of the next major release `2.0.0` for Engine 9 and Server 7. It has not been published yet. Check `composer.lock` and the [repository pull requests](https://github.com/Triangle-org/Media/pulls) before relying on these examples.
+
+## What the package does
+
+- Accepts one multipart file or an image URL.
+- Checks file contents, allowed MIME type, and source size.
+- Bounds decoded pixel count, animation frame count, and ImageMagick resources.
+- Converts accepted images to the configured format, PNG by default.
+- Stores image metadata through the host database adapter.
+- Supports `crop`, `resize`, `pixelize`, and `cover` transformations.
+- Restricts remote downloads by validating DNS results, pinning a public address, and disabling redirects.
+
+The plugin is not a CDN, object store, application authentication system, or outbound firewall. Database and cache adapters and HTML templates remain the host application's responsibility.
+
+## Start here
+
+- [Installation and first run](/projects/media/en/start)
+- [Compatibility and migration to Engine 9](/projects/media/en/compatibility)
+- [Configuration and adapters](/projects/media/en/configuration)
+- [Uploading images and registering projects](/projects/media/en/upload)
+- [Image transformations and delivery](/projects/media/en/processing)
+- [Security and operations](/projects/media/en/security)
+- [Tests and known limits](/projects/media/en/testing)
+
+## Requirements
+
+PHP 8.1+, Triangle Engine 9, the `curl`, `fileinfo`, and `imagick` PHP extensions, a writable image directory, and compatible host adapters. See [installation](/projects/media/en/start) and [configuration](/projects/media/en/configuration) for the integration contract.
+
+## Default routes
+
+With `app.plugin_uri = 'app'`, the plugin uses these paths. Changing the application prefix changes every route.
+
+| Route | Method | Purpose |
+| --- | --- | --- |
+| `/app/media` | `GET` | Renders `index`; a valid `token` query parameter may be stored in a seven-day cookie. |
+| `/app/media/project` | `GET`, `POST` | Project registration is disabled by default; when enabled, the route renders a form and creates project tokens. |
+| `/app/media/upload` | `POST` | Accepts a file in `file` or a URL in `link`; requires a project token. |
+| `/app/media/image/{id}` | `GET` | Renders the image page. |
+| `/app/media/processing/{id}/{filter}/{params}` | `GET` | Returns transformed image bytes with the configured image MIME type. |
+
+For request examples, response shape, and token handling, see [Uploading images](/projects/media/en/upload).

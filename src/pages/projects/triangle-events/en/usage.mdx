@@ -1,0 +1,41 @@
+export const pageTitle = 'Triangle Events API and usage'
+export const description = 'Exact and prefix listeners, removal, dispatch order, and the return semantics of Events::emit().'
+
+# Register and dispatch
+
+## Exact and prefix listeners
+
+```php
+use support\Events;
+
+$id = Events::on('user.*', static function (array $data, string $event): void {
+    // event is, for example, user.created
+});
+
+Events::on('user.created', static fn (array $data) => audit($data));
+Events::emit('user.created', ['id' => 7]);
+Events::off('user.*', $id);
+```
+
+`*` denotes a prefix only when it is the final character. Matching exact and prefix listeners run in registration order. Each callback receives the data first and the actual event name second.
+
+## `emit()` results
+
+By default, `emit($name, $data)` returns an array of listener responses in execution order. The source `catch` branch adds a `Throwable` to this array and continues traversal, but v2.0.0 had a logger initialization bug on this path; v2.0.1 fixes it and adds a regression check with a throwing listener. A listener returning `false` stops subsequent listeners. With `$halt = true`, the method returns the first non-null response, or `null` when none exists.
+
+```php
+$responses = Events::emit('cache.refresh', ['key' => 'catalog']);
+$first = Events::emit('permission.check', $subject, true);
+```
+
+Do not treat `halt` as transaction or guaranteed-delivery semantics. It only stops the synchronous listener traversal.
+
+## Subscription management
+
+- `Events::on(string $name, callable|array $listener): int` returns an ID.
+- `Events::off(string $name, int $id): int` removes a listener registered under that name; pass the same trailing `*` for a prefix.
+- `Events::getListeners(string $name): array` returns matching callbacks.
+- `Events::list(): array` lists subscriptions and IDs.
+- `Events::hasListener(string $name): bool` checks for matching callbacks.
+
+An array listener can identify `[ClassName::class, 'method']`; Engine bootstrap resolves configured callbacks through its container. Register valid callables and keep handlers short. Dispatcher exception handling is not a substitute for handling failures in the business operation.

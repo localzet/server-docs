@@ -1,0 +1,10 @@
+export const pageTitle = 'WS operations and limits'
+export const description = 'Single worker, in-process broadcast, and network boundaries.'
+
+# WS operations and limits
+
+The current checkout configures `websocket://0.0.0.0:8080`, `Triangle\Ws\App`, `count = 1`, and `max_package_size = 10 * 1024 * 1024`. The README describes the template as an experimental, single-process WebSocket-first project. Restrict the port with a firewall/TLS proxy, enforce message-size expectations, and implement application authentication/origin policy.
+
+`sendToAll()` sends to connections on servers in the current process. `sendToGroup()` uses the current WebSocket request path as its scope; it is not an arbitrary named group. Neither method coordinates broadcasts across processes/nodes or provides shared state. Horizontal scaling needs an external broker/shared-state and routing layer.
+
+Callbacks run in an event-loop context: avoid long blocking network/CPU work. Durable message delivery, retries, replay, and exactly-once behavior are not provided.

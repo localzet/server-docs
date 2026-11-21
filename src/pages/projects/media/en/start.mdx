@@ -1,0 +1,66 @@
+export const pageTitle = 'Triangle Media: installation and first run'
+export const description = 'Install Triangle Media for Triangle Engine 9, connect templates and adapters, install configuration, and verify application readiness.'
+
+# Installation and first run
+
+The latest published Media tag is `v1.1.0`, which requires Engine `^8.1`. This guide describes the preparation of `2.0.0` for Engine 9. Do not install the older published package into an Engine 9 application.
+
+## Requirements
+
+- PHP 8.1 or newer.
+- Triangle Engine 9 and the compatible Localzet Server 7 version resolved by the application's lock file.
+- The PHP extensions `curl`, `fileinfo`, and `imagick`.
+- A writable directory for processed images.
+- Host database and storage adapters that meet the [documented contract](/projects/media/en/configuration).
+
+## Install the package
+
+For the current published `v1.1.0` release on Engine 8:
+
+```sh
+composer require triangle/media:^1.1
+```
+
+After the Engine 9 `2.0.0` release is published:
+
+```sh
+composer require triangle/media:^2.0
+```
+
+Check the resolved packages:
+
+```sh
+composer show triangle/media triangle/engine localzet/server
+```
+
+The plugin calls `view()` for its HTML routes. Install `triangle/view` and provide `index`, `form`, and `image` templates if you use those routes. Otherwise, replace the controllers with the application's own presentation layer or keep those routes private.
+
+## Install configuration
+
+Call `Triangle\Media\Install::install()` from the host application's plugin installation lifecycle. It copies missing defaults from `src/Config` into `config/plugin/triangle/media` and preserves existing application settings.
+
+Before the first upload, verify that:
+
+1. `image_path` points to a writable directory.
+2. `image_uri` is the public base URL and ends in `/`.
+3. `database.images` and `database.projects` match the host adapter's table or collection names.
+4. `project_registration` remains `false` unless public registration is intentional.
+5. The `db()` and `storage()` adapters match the plugin contracts.
+
+## Verify the routes
+
+Engine discovers plugin controllers through Composer autoload. The default plugin prefix is `/app`; check the application's `app.plugin_uri` and configure the reverse proxy so the upload route follows the application's access policy.
+
+The bundled HTML routes require host templates. The package does not create templates, configure the web server, or publish the storage directory automatically.
+
+## Run package checks
+
+From the package directory:
+
+```sh
+composer validate --strict --no-check-publish --no-interaction
+composer run check --no-interaction
+composer audit --locked --no-interaction
+```
+
+The test environment needs all Composer-required extensions, including `imagick`. Package tests do not validate the application's real router, filesystem permissions, database, cache, or templates.

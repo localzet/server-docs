@@ -1,0 +1,32 @@
+export const pageTitle = 'Triangle View configuration and security'
+export const description = 'Configure view.handler and view.options, install optional template engines, escape output, and operate Triangle View.'
+
+# Configuration and security
+
+## Handler and options
+
+`config/view.php` selects `raw` by default. The `VIEW_HANDLER` environment variable can select `raw`, `blade`, `twig`, or `think`. Install third-party engines separately: `jenssegers/blade`, `twig/twig`, or `topthink/think-template`. Composer lists these as optional suggestions.
+
+Main options:
+
+```php
+return [
+    'handler' => Triangle\View\Render\Raw::class,
+    'options' => [
+        'view_suffix' => 'phtml',
+        'vars' => [],
+    ],
+];
+```
+
+For applications and plugins, the handler is read from their Engine configuration namespace. If a configuration file already exists, the installer does not overwrite it; update settings explicitly.
+
+## Escaping and trust
+
+Raw templates execute as PHP and do not escape output automatically. For HTML text and attribute contexts, escape untrusted strings with `htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')`. JavaScript, URL, and CSS contexts have different encoding rules; HTML escaping alone is not suitable for every context.
+
+Do not use user input as a template name or PHP code. Template access is part of the application's trust boundary. Avoid passing secrets to templates unless required, because templates can expose them in the response.
+
+## Limits
+
+View creates a response body and status; it does not replace controllers, authorization, CSRF protection, or application caching rules. Template paths and optional engines depend on each project's configuration.

@@ -1,0 +1,16 @@
+export const pageTitle = 'Middleware compatibility and tests'
+export const description = 'Published v2.0.3 constraints and loader regression coverage.'
+
+# Middleware compatibility and tests
+
+Published v2.0.3 allows PHP `^8.1`, Router `^2.0`, and Engine `^8.1 || ^9.0`. Verify Server/HTTP request types in the consuming application; the interface itself does not type the payload.
+
+The current checkout at `2eade42` is four commits beyond the tag. Its Composer scripts, tests, and CI checks are not part of published v2.0.3; do not assume those commands exist in the installed release.
+
+```sh
+composer validate --no-check-publish --no-interaction
+composer lint
+composer test
+```
+
+The preview checkout regression suite checks global/plugin/app scopes, `withGlobal: false`, malformed config, and a class without `process`; the v2.0.3 tag does not contain this suite. It does not run a complete HTTP request or the application's real middleware. After upgrades, test chain order, attributes, and response handling with an integration test.

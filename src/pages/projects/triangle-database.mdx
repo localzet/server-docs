@@ -1,0 +1,56 @@
+export const pageTitle = 'Triangle Database'
+export const description = 'Eloquent и query builder Illuminate для приложений Triangle Engine.'
+
+# Triangle Database
+
+Triangle Database интегрирует Illuminate Database с Triangle Engine: загружает Eloquent/query builder и соединения из конфигурации, связывает пагинацию с текущим запросом. Релиз [2.0.0](https://github.com/Triangle-org/Database/releases/tag/v2.0.0).
+
+Требования: PHP `^8.2`, Engine `^9.0`, Illuminate Database/Events/Pagination `^12.0`, Symfony VarDumper `^7.4`.
+
+```sh
+composer require triangle/database:^2.0
+composer show triangle/database
+```
+
+## Первое соединение и запрос
+
+Engine читает `config/database.php`. Минимальный пример SQLite:
+
+```php
+return [
+    'default' => 'sqlite',
+    'persistent' => false,
+    'connections' => ['sqlite' => [
+        'driver' => 'sqlite', 'database' => ':memory:', 'prefix' => '',
+    ]],
+];
+```
+
+Путь к постоянному файлу задаётся в конфиге; шаблон использует `base_path`. `Triangle\Database\Install::install()` копирует конфиг только если файл ещё отсутствует.
+
+```php
+use Triangle\Database\Model;
+final class User extends Model {
+    protected $table = 'users';
+    protected $fillable = ['name'];
+    public $timestamps = false;
+}
+$user = User::query()->create(['name' => 'Ada']);
+$rows = Triangle\Database\Manager::table('users')->where('name', 'Ada')->get();
+```
+
+Schema builder доступен через Manager; отдельной migration CLI и автоматического запуска миграций нет.
+
+## Эксплуатация и безопасность
+
+Шаблон содержит SQLite/MySQL/PostgreSQL/SQL Server/MongoDB примеры. SQL требует подходящий PDO extension; MongoDB — совместимый адаптер. `persistent` по умолчанию `true`; при старте с Server планируется MySQL keepalive каждые 55 секунд. Это не пул соединений и не гарантия доступности. Установите `persistent=false`, чтобы отключить. Manager и соединения process-local: каждый worker держит собственный экземпляр.
+
+Пагинаторы Illuminate привязаны к текущему запросу process-wide resolvers; вызывайте их в обработчике, не сохраняйте request-specific данные в долгоживущем состоянии. Используйте минимальные права DB, TLS/таймауты по требованиям драйвера и bindings для raw SQL. Схемы применяйте контролируемой миграцией, не из запроса.
+
+## Совместимость и проверки
+
+Тег `v2.0.0` требует Engine 9 и несовместим с Engine 8 и линией пакета 1.x. Обновляйте связанные Triangle компоненты вместе и проверяйте Composer lock. Команда `composer test` использует SQLite in-memory: проверяет bootstrap, создание таблицы, Eloquent insert/read. Она не покрывает внешние DB, production credentials или failover. Mongo адаптер опционален.
+
+## Практические руководства
+
+[Установка](/projects/triangle-database/install) · [Использование](/projects/triangle-database/usage) · [Эксплуатация](/projects/triangle-database/operations) · [Совместимость и тесты](/projects/triangle-database/compatibility).

@@ -1,0 +1,54 @@
+export const pageTitle = 'Triangle Media: конфигурация и адаптеры'
+export const description = 'Описание настроек Triangle Media, лимитов ImageMagick, database/storage adapters и структуры сохраняемых данных.'
+
+# Конфигурация и адаптеры
+
+Параметры по умолчанию находятся в `src/Config/app.php` и устанавливаются в `config/plugin/triangle/media/app.php`. Установка копирует только отсутствующие файлы: проверяйте конфигурацию вручную после обновления.
+
+## Настройки
+
+| Ключ | По умолчанию | Назначение |
+| --- | --- | --- |
+| `enable` | `true` | Флаг конфигурации плагина. |
+| `project_registration` | `false` | Разрешает `GET` и `POST` на маршруте регистрации проекта. |
+| `image_uri` | `https://example.ru/media/` | Публичный базовый URL; должен завершаться `/`. |
+| `image_path` | `public_path() . '/media/upload/'` | Каталог преобразованных файлов; должен быть доступен на запись. |
+| `max_file_size` | 15 MiB | Максимальный размер исходного файла или скачанного body. |
+| `max_image_pixels` | 40,000,000 | Суммарный лимит пикселей на все кадры. Также ограничивает размеры результата фильтров. |
+| `max_image_frames` | 50 | Максимум кадров в исходном изображении. Проверяется при загрузке и обработке уже сохранённых изображений. |
+| `max_image_memory` | 256 MiB | Лимит ресурсов ImageMagick `MEMORY` и `MAP`. |
+| `max_image_disk` | 512 MiB | Лимит дискового ресурса ImageMagick. |
+| `max_image_time` | 10 s | Лимит времени ImageMagick. |
+| `target_type` / `target_ext` | `image/png` / `png` | MIME-тип ответа и расширение сохранённого изображения. |
+| `mime_types` | JPEG, PNG, GIF, BMP, TIFF | Список допустимых MIME-типов источника. Сверяется с содержимым, а не с заголовком браузера. |
+| `database.images` / `database.projects` | `Media_Images` / `Media_Projects` | Имена таблиц или коллекций в адаптере базы данных. |
+| `rate_limiter.enable` | `false` | Включает встроенный ограничитель запросов. |
+| `rate_limiter.quota` / `cycle` | `3` / `60` | Число запросов за период в секундах. |
+
+Лимиты должны соответствовать памяти, диску и ожиданиям конкретного приложения. Увеличение лимита не заменяет ограничения ImageMagick на уровне системы.
+
+## Контракт адаптеров
+
+Плагин вызывает следующий интерфейс базы данных:
+
+```php
+db()->insert($table, $record);
+$project = db()->where('token', $token)->getOne($projectsTable);
+$duplicate = db()->where('hash', $hash)->getOne($imagesTable);
+```
+
+Запись проекта содержит `name`, `description`, `email` и `token`. Поиск проекта должен вернуть поле `id`, которое использует контроллер загрузки. Запись изображения содержит `author`, `filepath`, `width`, `height`, `color`, `mime`, `size`, `hash` и `projectId`.
+
+Сервис хранения должен поддерживать:
+
+```php
+storage()->get($key);
+storage()->set($key, $value, $ttl); // rate limiter
+storage()->increment($key);
+```
+
+Для кэша обработанных изображений пакет также вызывает `storage()->set($requestUri, $imageBytes)` без TTL. Срок жизни такого кэша определяется адаптером или политикой приложения. Rate limiter выполняет последовательность read/set/increment; проверьте, подходит ли семантика вашего storage для ожидаемой конкурентности.
+
+## Установка представлений
+
+Контроллеры вызывают `view('index')`, `view('form')` и `view('image', $variables)`. Пакет не включает файлы шаблонов. Добавьте их в приложение или замените эти маршруты собственными контроллерами. Для страницы изображения шаблон `image` получает `imageURL`.

@@ -1,0 +1,15 @@
+export const pageTitle = 'Cron installation and release status'
+export const description = 'Published Cron 1.x and the unreleased Engine 9 source line.'
+
+# Cron installation and release status
+
+Packagist publishes `triangle/cron` v1.0.3. Its Composer requirements are PHP `^8.1`, Engine `^8.1`, Events `^1.0`, and Localzet Cron `^1.0`.
+
+```sh
+composer require triangle/cron:^1.0
+composer show triangle/cron triangle/engine triangle/events localzet/cron
+```
+
+This installation is for a compatible Engine 8.1 application. Do not apply the preview examples below to published line 1.x without checking the v1.0.3 source.
+
+The current checkout with Server 7 changes is beyond tag v1.0.3 and has no published/tagged 2.x release. Its `composer.json` requires Engine `^9.0` and Localzet Cron `^2.0`. `composer require triangle/cron:^2.0` is not an installation command for a published package yet. To evaluate preview source, use that checkout and its manifest/lock; do not treat it as a production release.

@@ -1,0 +1,23 @@
+export const pageTitle = 'Triangle OAuth compatibility and checks'
+export const description = 'Differences between published v3.0.9 and the current preview checkout, CI checks, and integration coverage.'
+
+# Versions, compatibility, and checks
+
+## Release and preview are separate states
+
+| Source | Revision | PHP and main requirements |
+| --- | --- | --- |
+| Published release | `v3.0.9` | PHP `^8.2`, `localzet/http:^2.0`, ext-mbstring/json/curl; Engine is not in the tag's runtime `require` |
+| Current checkout preview | `gc66280e` (4 commits after tag) | same requirements plus `triangle/engine:^8.1` |
+
+Install the published release with `composer require triangle/oauth:^3.0`. The current checkout is not a release; inspect its commit and Composer lock separately.
+
+## Automated checks
+
+The checkout has no Composer `test`/`lint` scripts and no test directory. Current CI validates the manifest/lock, installs locked dependencies without scripts, runs PHP syntax checks, and conditionally runs tests only when a Composer test script exists. Provider redirects, callback state, remote API behavior, and credential handling are not covered by package tests.
+
+## Manual integration checklist
+
+With a separate provider app, verify the redirect, user denial, callback with missing or invalid state, authorization-code exchange, session continuity across requests, expired/revoked tokens, and only the required profile fields. Use staging credentials and never publish tokens.
+
+Sources: [v3.0.9 tag manifest](https://github.com/Triangle-org/OAuth/blob/v3.0.9/composer.json), [preview commit `gc66280e`](https://github.com/Triangle-org/OAuth/commit/gc66280e), [OAuth2 state handling](https://github.com/Triangle-org/OAuth/blob/gc66280e/src/OAuth/Adapter/OAuth2.php).

@@ -1,0 +1,34 @@
+export const pageTitle = 'Triangle Events compatibility and tests'
+export const description = 'PHP 8.1 and Engine 9 compatibility, upgrade notes, and checks for Triangle Events 2.0.1.'
+
+# Compatibility, upgrades, and checks
+
+## Requirements for 2.0.1
+
+`triangle/events` 2.0.1 requires PHP `^8.1`, `triangle/engine ^9.0`, and `psr/log ^2.0 || ^3.0`. Engine 8 is outside the supported dependency range. If an application still uses Engine 8, plan the Engine upgrade first; do not bypass the constraint with a forced install.
+
+Install this release with:
+
+```sh
+composer require triangle/events:^2.0
+composer show triangle/events triangle/engine
+```
+
+## Changes in 2.0.1
+
+Version 2.0.0 could access the event logger before safe initialization when a listener threw. Version 2.0.1 fixes logger initialization and extends `tests/engine_compatibility.php` to verify that a listener exception is returned and does not escape `emit()`.
+
+## Integration changes
+
+The 2.x branch uses the Engine 9 bootstrap contract and hooks for registering application and plugin configuration. Review `config/event.php` in the application and its plugins, then verify startup against the exact Engine version in the lock file. Do not copy examples from older branches without checking them; APIs and bootstrap behavior may differ.
+
+## Source checks
+
+```sh
+composer install
+composer test
+```
+
+The v2.0.1 source check is `tests/engine_compatibility.php`. It covers the bootstrap interface, plugin hooks, configured-listener payload delivery, and a throwing listener whose exception must be returned without escaping `emit()`. It is not a load test and does not establish cross-process delivery, durable storage, retries, or production metrics.
+
+**Sources:** [v2.0.1 release](https://github.com/Triangle-org/Events/tree/v2.0.1), [Composer manifest](https://github.com/Triangle-org/Events/blob/v2.0.1/composer.json), [compatibility check](https://github.com/Triangle-org/Events/blob/v2.0.1/tests/engine_compatibility.php).

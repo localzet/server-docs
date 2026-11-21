@@ -1,0 +1,23 @@
+export const pageTitle = 'Совместимость, миграция и тесты'
+export const description = 'Переход на Triangle Console 2 и границы проверок пакета.'
+
+# Совместимость, миграция и тесты
+
+Опубликованный тег `v2.0.0` требует PHP `^8.4.1`, Engine `^9.0`, Localzet Console `^2.2`, Symfony Console/Process `^8.1`. Приложения на Engine 8 не удовлетворяют требованиям этого выпуска: вместе с Triangle Console обновите Engine и связанные зависимости. Проверяйте фактический состав через `composer show triangle/console` и lock-файл приложения.
+
+## Миграция
+
+1. Обновите PHP до 8.4.1+ и Engine до 9.
+2. Выполните `composer update triangle/console --with-all-dependencies` для согласованного пересчёта связанных пакетов.
+3. Сверьте старый `config/console.php` с шаблоном 2.x; установщик не перезаписывает существующий конфиг.
+4. Проверьте `defaultName`, PSR-4 автозагрузку, команды плагинов и собственные сценарии сборки.
+
+## Локальная проверка
+
+```sh
+composer install
+composer validate --strict --no-check-publish
+composer run check
+```
+
+`check` выполняет PHP lint и `tests/run.php`; smoke test проверяет регистрацию Symfony-команды, наличие команды сборки и выполнение Illuminate-команды через bridge. Он не собирает реальный PHAR/binary, не тестирует target OS и не заменяет проверку проектных команд.

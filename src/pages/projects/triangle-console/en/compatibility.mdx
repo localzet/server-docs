@@ -1,0 +1,23 @@
+export const pageTitle = 'Compatibility, migration, and tests'
+export const description = 'Upgrade to Triangle Console 2 and understand package check coverage.'
+
+# Compatibility, migration, and tests
+
+Published tag `v2.0.0` requires PHP `^8.4.1`, Engine `^9.0`, Localzet Console `^2.2`, and Symfony Console/Process `^8.1`. Engine 8 and earlier Triangle Console major lines are not compatible with this release. Check `composer show triangle/console` and the consuming project's lock file.
+
+## Migration
+
+1. Upgrade PHP to 8.4.1+ and Engine to 9.
+2. Run `composer update triangle/console --with-all-dependencies` to resolve related packages together.
+3. Compare old `config/console.php` with the 2.x template; installer does not overwrite existing config.
+4. Verify command `defaultName`, PSR-4 loading, plugin commands, and custom build workflows.
+
+## Local checks
+
+```sh
+composer install
+composer validate --strict --no-check-publish
+composer run check
+```
+
+`check` runs PHP lint and `tests/run.php`; the smoke test covers Symfony command registration, availability of a build command, and running an Illuminate command through the bridge. It does not create a real PHAR/binary, test target operating systems, or replace application-specific command checks.

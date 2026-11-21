@@ -1,0 +1,8 @@
+export const pageTitle = 'Совместимость и проверка WS'
+export const description = 'Сравните constraints v1.0.4 с разрешённой связкой checkout.'
+
+# Совместимость и проверка WS
+
+Опубликованный `v1.0.4` требует Engine `^8.1` + Engine WS `^2.0`, а Engine WS 2.0.0 требует Engine `^9.0`; эти ranges несовместимы. Текущий checkout переходит на Engine WS `^1.1` и имеет lock с Engine 8.1.11 / Engine WS 1.1.1. Это различие нужно разрешить до использования опубликованного пакета.
+
+`composer.json` не объявляет test/lint scripts, автоматизированного package test suite нет. Проверяйте выбранный checkout фактическим приложением: Composer resolution, handshake, callback route, message response, malformed/oversized frames, disconnect/reconnect, authentication и graceful stop. Локальный успешный запуск на одной машине не подтверждает multi-process delivery: send helpers остаются process-local.

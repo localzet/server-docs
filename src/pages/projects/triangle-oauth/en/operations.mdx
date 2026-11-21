@@ -1,0 +1,20 @@
+export const pageTitle = 'Triangle OAuth operations and security'
+export const description = 'OAuth state and token storage, callback checks, credential protection, and adapter API limits.'
+
+# Sessions, secrets, and security
+
+## Session and storage
+
+When no `StorageInterface` is injected, adapters use `Triangle\OAuth\Storage\Session`. Values are stored in the current session under the `OAuthStorage` namespace, and writes call `session()->save()`. The callback must receive the same session that held the authorization state. A custom storage implementation must follow `StorageInterface` and protect values against disclosure or tampering.
+
+Session storage serializes objects and calls `unserialize()` when restoring them. Do not use a store that an untrusted party can modify. Clear tokens on disconnect and at local-session termination according to the application's policy.
+
+## State and callback
+
+OAuth2 adapters store and compare state by default. The `supportRequestState` setting can disable this check; keep it enabled for browser authorization flows. Current source generates state with `str_shuffle`, so it should not be treated as cryptographically strong. This is a material limitation for public production login: verify state protection and use a secure unpredictable nonce in the chosen integration before release.
+
+Validate callback URLs, provider errors, and one-time state matching; do not accept arbitrary redirect destinations from query parameters. Use HTTPS and the exact redirect URI registered with the provider.
+
+## Credentials and access
+
+Keep client secrets in an environment or secret store. Exclude tokens, authorization codes, state, and secrets from logs and errors. Request minimum scopes. A successful provider response establishes an external identity according to that provider's model; the application assigns local roles and permissions.

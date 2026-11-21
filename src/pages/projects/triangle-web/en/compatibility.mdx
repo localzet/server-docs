@@ -1,0 +1,13 @@
+export const pageTitle = 'Web compatibility and checks'
+export const description = 'Engine 8.1 constraints and the limits of package test coverage.'
+
+# Web compatibility and checks
+
+Tag `v8.0.1` and the current Web checkout require Engine `^8.1` and the listed component major lines. Composer constraint `^8.1` does not include Engine 9. Before updating a component, compare its constraints with the application `composer.json` and inspect the lock file.
+
+```sh
+composer validate --strict --no-check-publish
+composer show triangle/web triangle/engine triangle/engine-http
+```
+
+The manifest declares no `test` or `lint` scripts, and the checkout has no test suite. These commands validate metadata/resolution, not HTTP behavior. Add integration checks for routes, static files, middleware, views, sessions, and invalid requests. The current README contains badges only; page facts come from `master`, config, and example controller/route.

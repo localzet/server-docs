@@ -1,0 +1,52 @@
+export const pageTitle = 'Triangle Console'
+export const description = 'CLI-интеграция Triangle Engine с командами Symfony Console и Illuminate.'
+
+# Triangle Console
+
+Triangle Console связывает Triangle Engine с командами Symfony Console и Illuminate. Это компонент Triangle Framework, отдельный от базовой библиотеки Localzet Console. Текущий выпуск — [2.0.0](https://github.com/Triangle-org/Console/releases/tag/v2.0.0).
+
+Требования: PHP `^8.4.1`, Engine `^9.0`, Localzet Console `^2.2`, Symfony Console/Process `^8.1`.
+
+```sh
+composer require triangle/console:^2.0
+composer show triangle/console
+```
+
+## Первая команда
+
+Создайте класс под PSR-4 namespace приложения в `app/command`:
+
+```php
+<?php
+namespace app\command;
+use localzet\Console\Commands\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+final class ReportCommand extends Command
+{
+    protected static string $defaultName = 'app:report';
+    protected static string $defaultDescription = 'Show report status';
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $output->writeln('Report is ready.');
+        return self::SUCCESS;
+    }
+}
+```
+
+После Composer autoload и bootstrap/configuration Engine создайте `new Triangle\Console\Console()` и вызовите `run()`. Engine config должен быть загружен для автопоиска команд из `app/command`, `config/command.php` и включённых плагинов. Классы из config обязаны задавать Symfony-совместимый `defaultName`.
+
+Illuminate-команды добавляются явно: `(new Triangle\Console\Console([], false))->useIlluminate($container)` затем `addIlluminateCommand($command)`. Аргумент `false` отключает автоматические package commands для ручной композиции.
+
+## Конфигурация, сборка и безопасность
+
+`Triangle\Console\Install::install()` копирует отсутствующие шаблоны конфигурации, не перезаписывая существующие. Встроенные команды включают `make:command`, `make:controller`, `make:model`, `app:create`, `plugin:create`, `build:phar`, `build:bin`. Параметры `config/console.php` задают каталоги, исключения, имена артефактов и целевую версию PHP; шаблон бинарной сборки указывает PHP 8.4 и memory limit 256M. Проверьте состав артефакта; упаковка не гарантирует невозможность извлечь исходный код. Приватные ключи PHAR храните вне репозитория; не включайте секреты в исходники и артефакты.
+
+## Совместимость и проверки
+
+Тег `v2.0.0` несовместим с Engine 8: обновите PHP до 8.4.1+ и Engine до 9, затем проверьте обнаружение команд и собственные build workflows. В пакете доступны `composer validate --strict --no-check-publish` и `composer run check`; последний запускает lint и `tests/run.php`, который проверяет Symfony command registration и Illuminate bridge. Он не собирает production PHAR/binary и не проверяет целевую ОС.
+
+## Практические руководства
+
+[Установка](/projects/triangle-console/install) · [Использование](/projects/triangle-console/usage) · [Эксплуатация](/projects/triangle-console/operations) · [Совместимость и тесты](/projects/triangle-console/compatibility).

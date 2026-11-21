@@ -1,0 +1,30 @@
+export const pageTitle = 'Triangle Router compatibility and tests'
+export const description = 'Triangle Router 2.0.7 limits, upgrade notes, PHPUnit commands, and actual test coverage.'
+
+# Compatibility, security, and tests
+
+## Requirements for 2.0.7
+
+The package requires PHP `^8.1` and Triangle Engine `^8.1 || ^9.0`; PHPUnit 10.5 is a development dependency.
+
+```sh
+composer require triangle/router:^2.0
+composer show triangle/router triangle/engine
+```
+
+If using Engine route configuration, verify `config/route.php`, plugin configuration, and component bootstrap. If the application uses standalone helpers, verify dispatcher invocation and your own URI normalization separately.
+
+## Tests
+
+```sh
+composer install
+composer test
+```
+
+The script runs PHPUnit with `tests/phpunit.xml`; `tests/Unit/RouteTest.php` checks route construction and parsing. These tests do not establish authorization, 404/405/HEAD response behavior, or URI normalization for a particular production server.
+
+## Upgrades and scope
+
+Before upgrading, review the changelog and compare configured routes, names, and callbacks. Avoid changing the regular-expression parser and authorization logic at the same time without a route test and an access-control check.
+
+**Sources:** [v2.0.7 release](https://github.com/Triangle-org/Router/tree/v2.0.7), [Composer manifest](https://github.com/Triangle-org/Router/blob/v2.0.7/composer.json), [unit tests](https://github.com/Triangle-org/Router/tree/v2.0.7/tests/Unit).

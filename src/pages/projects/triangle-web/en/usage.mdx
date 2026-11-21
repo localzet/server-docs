@@ -1,0 +1,20 @@
+export const pageTitle = 'Web routes and controllers'
+export const description = 'Add a route and inspect HTML, JSON, and view handlers.'
+
+# Web routes and controllers
+
+`config/route.php` registers routes through `Triangle\Router`:
+
+```php
+use Triangle\Request;
+use Triangle\Response;
+use Triangle\Router;
+
+Router::any('/hello/{name}', function (Request $request, string $name): Response {
+    return response("Hello, $name!");
+});
+```
+
+`Router::any` handles any HTTP method for that route. Template `app/controller/Index.php` demonstrates `response(...)`, `responseJson('ok')`, and `view('index/view', ['name' => 'Triangle'])`. `config/view.php` selects a renderer with `VIEW_HANDLER`; the default is `raw`, and template options include `blade`, `think`, and `twig`.
+
+After `php master start`, check the endpoint from `config/server.php` (default `http://127.0.0.1:8000`). For this example, request `/hello/Ada`. Inspect available commands with `php master list` for the Console version actually resolved.

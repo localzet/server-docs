@@ -1,0 +1,18 @@
+export const pageTitle = 'Triangle Media: тесты и ограничения'
+export const description = 'Проверки Triangle Media, CI-матрица PHP и зависимостей, требования к ImageMagick и непокрытые интеграции приложения.'
+
+# Тесты и ограничения
+
+В репозитории объявлены `lint`, `test` и агрегирующая команда `check`:
+
+```sh
+composer validate --strict --no-check-publish --no-interaction
+composer run check --no-interaction
+composer audit --locked --no-interaction
+```
+
+Набор включает проверки URL-загрузчика, регистрации проекта, контракта Engine request/file, отказа невалидных upload-объектов, MIME результата обработки, обхода каталогов и лимитов изображений. Integration-тест Imagick создаёт анимированный файл и проверяет число кадров, размеры фильтров и восстановление системных resource limits.
+
+GitHub Actions устанавливает `curl`, `intl`, `mbstring`, `pdo_sqlite` и `imagick`, проверяет PHP 8.1 и 8.5 на минимальном и актуальном допустимом наборе зависимостей, затем выполняет Composer audit, lint и тесты.
+
+Зелёный пакетный набор не заменяет интеграцию в приложении. Отдельно проверьте реальные database/storage adapters, маршруты Engine, templates, права `image_path`, proxy и фактические правила ImageMagick. Не выдавайте отсутствие advisory или успешный lint за проверку production-запуска.

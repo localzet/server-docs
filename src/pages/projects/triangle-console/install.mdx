@@ -1,0 +1,19 @@
+export const pageTitle = 'Установка Triangle Console'
+export const description = 'Требования Composer и подключение Triangle Console к Triangle Engine.'
+
+# Установка Triangle Console
+
+Triangle Console 2.0.0 рассчитан на PHP `^8.4.1`, Triangle Engine `^9.0`, Localzet Console `^2.2`, Symfony Console и Process `^8.1`.
+
+```sh
+composer require triangle/console:^2.0
+composer show triangle/console triangle/engine localzet/console symfony/console symfony/process
+```
+
+Ориентируйтесь на lock-файл проекта: `composer show` показывает реально разрешённые версии. Пакет не заменяет базовый CLI: Triangle Console расширяет Localzet Console интеграцией с Engine, командами приложения и plugin discovery.
+
+## Инициализация
+
+Загружайте Composer autoload и конфигурацию/bootstrapping Triangle Engine до создания `Triangle\Console\Console`. При загруженном Engine Console считывает `config/console.php` и `config/command.php`, ищет классы в `app/command` и включённых плагинах. Готовый project entry point обычно уже делает bootstrap; подключайте Console из него, не создавая второй несогласованный bootstrap.
+
+Для ручной установки конфигурации используйте `Triangle\Console\Install::install()` в installer-контексте Engine. Метод копирует отсутствующие шаблоны и не перезаписывает пользовательские файлы. После установки сравните созданный `config/console.php` с нужными настройками проекта.

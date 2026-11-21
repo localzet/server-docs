@@ -1,0 +1,44 @@
+export const pageTitle = 'Install and start Triangle Router'
+export const description = 'Triangle Router 2.0.7 requirements and a minimal standalone dispatcher with a parameterized route.'
+
+# Install and create a standalone dispatcher
+
+Requirements: PHP 8.1+, Composer, and Triangle Engine `^8.1 || ^9.0`.
+
+```sh
+composer require triangle/router:^2.0
+```
+
+Composer autoloads `simpleRouteDispatcher()`. A minimal standalone example:
+
+```php
+<?php
+
+require __DIR__ . '/vendor/autoload.php';
+
+use Triangle\Router\Dispatcher;
+
+$dispatcher = simpleRouteDispatcher(static function (Triangle\Router $router): void {
+    $router->addRoute('GET', '/users/{id:\\d+}', static function (array $params): string {
+        return 'user ' . $params['id'];
+    });
+});
+
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
+$path = rawurldecode($path);
+$result = $dispatcher->dispatch($_SERVER['REQUEST_METHOD'], $path);
+
+if ($result[0] === Dispatcher::FOUND) {
+    [$status, $handler, $params] = $result;
+    $body = $handler($params);
+    // Create and send an HTTP response in the application.
+}
+```
+
+The dispatcher returns match information. It does not call a string handler or write an HTTP response for the application. The application must normalize the URI for its server environment and convert the result into a response.
+
+Run the package tests:
+
+```sh
+composer test
+```

@@ -174,7 +174,7 @@ function NavigationGroup({group, className}) {
 
 const serverNavigation = [
     {
-        title: 'Текущая версия · 7.1.0',
+        title: 'Текущая версия · 7.2.1',
         links: [
             {title: 'Обзор и версия', href: '/'},
             {title: 'Установка и первый сервер', href: '/current/start'},
@@ -289,7 +289,63 @@ const projectNavigation = {
             {title: 'Tests and coverage limits', href: '/projects/engine/en/testing'},
         ]},
     ],
-    console: [{title: 'Console', links: [{title: 'Обзор', href: '/projects/console'}, {title: 'Установка и команды', href: '/projects/console/start'}, {title: 'Laravel bridge и TUI', href: '/projects/console/reference'}]}],
+    console: [{title: 'Localzet Console', links: [{title: 'Обзор', href: '/projects/console'}, {title: 'Установка и команды', href: '/projects/console/start'}, {title: 'Laravel bridge и TUI', href: '/projects/console/reference'}]}],
+    'triangle-console': [{title: 'Triangle Console', links: [{title: 'Обзор и установка', href: '/projects/triangle-console'}, {title: 'Overview and installation', href: '/projects/triangle-console/en'}]}],
+    'triangle-database': [{title: 'Triangle Database', links: [{title: 'Обзор и установка', href: '/projects/triangle-database'}, {title: 'Overview and installation', href: '/projects/triangle-database/en'}]}],
+    'triangle-session': [{title: 'Triangle Session', links: [{title: 'Обзор и установка', href: '/projects/triangle-session'}, {title: 'Overview and installation', href: '/projects/triangle-session/en'}]}],
+    'triangle-cron': [{title: 'Triangle Cron', links: [{title: 'Обзор и статус релиза', href: '/projects/triangle-cron'}, {title: 'Overview and release status', href: '/projects/triangle-cron/en'}]}],
+    'triangle-middleware': [{title: 'Triangle Middleware', links: [{title: 'Обзор и установка', href: '/projects/triangle-middleware'}, {title: 'Overview and installation', href: '/projects/triangle-middleware/en'}]}],
+    'triangle-events': [
+        {title: 'Triangle Events · Русский', links: [
+            {title: 'Обзор и быстрый путь', href: '/projects/triangle-events'},
+            {title: 'Установка', href: '/projects/triangle-events/install'},
+            {title: 'Обработчики и вызов', href: '/projects/triangle-events/usage'},
+            {title: 'Эксплуатация и ограничения', href: '/projects/triangle-events/operations'},
+            {title: 'Совместимость и проверки', href: '/projects/triangle-events/compatibility'},
+        ]},
+        {title: 'Triangle Events · English', links: [
+            {title: 'Overview and quick start', href: '/projects/triangle-events/en'},
+            {title: 'Installation', href: '/projects/triangle-events/en/install'},
+            {title: 'Listeners and dispatch', href: '/projects/triangle-events/en/usage'},
+            {title: 'Operations and limits', href: '/projects/triangle-events/en/operations'},
+            {title: 'Compatibility and checks', href: '/projects/triangle-events/en/compatibility'},
+        ]},
+    ],
+    'triangle-view': [
+        {title: 'Triangle View · Русский', links: [
+            {title: 'Обзор', href: '/projects/triangle-view'},
+            {title: 'Установка', href: '/projects/triangle-view/install'},
+            {title: 'Рендеринг', href: '/projects/triangle-view/usage'},
+            {title: 'Настройка и безопасность', href: '/projects/triangle-view/operations'},
+            {title: 'Совместимость и тесты', href: '/projects/triangle-view/compatibility'},
+        ]},
+        {title: 'Triangle View · English', links: [
+            {title: 'Overview', href: '/projects/triangle-view/en'},
+            {title: 'Installation', href: '/projects/triangle-view/en/install'},
+            {title: 'Rendering', href: '/projects/triangle-view/en/usage'},
+            {title: 'Configuration and security', href: '/projects/triangle-view/en/operations'},
+            {title: 'Compatibility and tests', href: '/projects/triangle-view/en/compatibility'},
+        ]},
+    ],
+    'triangle-router': [
+        {title: 'Triangle Router · Русский', links: [
+            {title: 'Обзор', href: '/projects/triangle-router'},
+            {title: 'Установка', href: '/projects/triangle-router/install'},
+            {title: 'Маршруты и dispatch', href: '/projects/triangle-router/usage'},
+            {title: 'Интеграция Engine', href: '/projects/triangle-router/operations'},
+            {title: 'Совместимость и безопасность', href: '/projects/triangle-router/compatibility'},
+        ]},
+        {title: 'Triangle Router · English', links: [
+            {title: 'Overview', href: '/projects/triangle-router/en'},
+            {title: 'Installation', href: '/projects/triangle-router/en/install'},
+            {title: 'Routes and dispatch', href: '/projects/triangle-router/en/usage'},
+            {title: 'Engine integration', href: '/projects/triangle-router/en/operations'},
+            {title: 'Compatibility and security', href: '/projects/triangle-router/en/compatibility'},
+        ]},
+    ],
+    'triangle-oauth': [{title: 'Triangle OAuth', links: [{title: 'Обзор и опубликованный статус', href: '/projects/triangle-oauth'}, {title: 'Overview and published status', href: '/projects/triangle-oauth/en'}]}],
+    'triangle-web': [{title: 'Triangle Web', links: [{title: 'Обзор и запуск шаблона', href: '/projects/triangle-web'}, {title: 'Overview and getting started', href: '/projects/triangle-web/en'}]}],
+    'triangle-ws': [{title: 'Triangle WS', links: [{title: 'Обзор и ограничения', href: '/projects/triangle-ws'}, {title: 'Overview and limits', href: '/projects/triangle-ws/en'}]}],
     cron: [{title: 'Cron', links: [{title: 'Обзор', href: '/projects/cron'}, {title: 'Установка и расписания', href: '/projects/cron/start'}, {title: 'API и эксплуатация', href: '/projects/cron/reference'}]}],
     httpclient: [{title: 'HTTP Client', links: [{title: 'Обзор', href: '/projects/httpclient'}, {title: 'Первый запрос', href: '/projects/httpclient/start'}, {title: 'Запросы и обработка ответов', href: '/projects/httpclient/reference'}]}],
     mqtt: [{title: 'MQTT', links: [{title: 'Обзор и статус', href: '/projects/mqtt'}, {title: 'Подключение и обмен сообщениями', href: '/projects/mqtt/start'}, {title: 'Параметры и надёжность', href: '/projects/mqtt/reference'}]}],
@@ -300,6 +356,28 @@ const projectNavigation = {
     storage: [{title: 'Storage', links: [{title: 'Обзор и безопасность', href: '/projects/storage'}, {title: 'Сервер и клиент', href: '/projects/storage/start'}, {title: 'Операции и ограничения', href: '/projects/storage/reference'}]}],
     tunnel: [{title: 'Tunnel', links: [{title: 'Обзор и протокол', href: '/projects/tunnel'}, {title: 'События и очереди', href: '/projects/tunnel/start'}, {title: 'Клиент, форматы и доставка', href: '/projects/tunnel/reference'}]}],
     noter: [{title: 'Noter', links: [{title: 'Обзор', href: '/projects/noter'}, {title: 'Установка и отправка заметки', href: '/projects/noter/start'}, {title: 'Настройка сервера-приёмника', href: '/projects/noter/reference'}]}],
+    media: [
+        {title: 'Triangle Media · Русский', links: [
+            {title: 'Обзор', href: '/projects/media'},
+            {title: 'Установка и первый запуск', href: '/projects/media/start'},
+            {title: 'Совместимость и переход', href: '/projects/media/compatibility'},
+            {title: 'Конфигурация и адаптеры', href: '/projects/media/configuration'},
+            {title: 'Загрузка изображений', href: '/projects/media/upload'},
+            {title: 'Обработка и выдача', href: '/projects/media/processing'},
+            {title: 'Безопасность и эксплуатация', href: '/projects/media/security'},
+            {title: 'Тесты и ограничения', href: '/projects/media/testing'},
+        ]},
+        {title: 'Triangle Media · English', links: [
+            {title: 'Overview', href: '/projects/media/en'},
+            {title: 'Installation and first run', href: '/projects/media/en/start'},
+            {title: 'Compatibility and migration', href: '/projects/media/en/compatibility'},
+            {title: 'Configuration and adapters', href: '/projects/media/en/configuration'},
+            {title: 'Uploading images', href: '/projects/media/en/upload'},
+            {title: 'Processing and delivery', href: '/projects/media/en/processing'},
+            {title: 'Security and operations', href: '/projects/media/en/security'},
+            {title: 'Tests and limits', href: '/projects/media/en/testing'},
+        ]},
+    ],
 }
 
 export function getNavigation(pathname) {

@@ -1,0 +1,17 @@
+export const pageTitle = 'Использование сессии'
+export const description = 'Чтение и запись значений через helper текущего HTTP request.'
+
+# Использование сессии
+
+Helper `session()` обращается к session текущего request:
+
+```php
+session(['user_id' => 42, 'preferences' => ['theme' => 'dark']]);
+$userId = session('user_id');
+$theme = session('preferences.theme', 'light');
+$currentSession = session();
+```
+
+Без аргумента helper возвращает объект текущей сессии; строковый ключ читает значение, массив передаёт значения в `put()`. Для вложенного ключа используется dot notation. Храните scalars и arrays: сессионные handlers восстанавливают сериализованные значения без инстанцирования произвольных объектов.
+
+Для выбора backend задайте `SESSION_TYPE` и параметры соответствующей секции `session.config.<driver>` в `config/session.php`. Выберите одно общее хранилище, если несколько workers должны читать и обновлять одну и ту же пользовательскую сессию.

@@ -1,0 +1,52 @@
+export const pageTitle = 'Triangle Console'
+export const description = 'CLI integration for Triangle Engine with Symfony Console and Illuminate commands.'
+
+# Triangle Console
+
+Triangle Console connects Triangle Engine to Symfony Console and Illuminate commands. It is a Triangle Framework component, distinct from the Localzet Console base library. Current release: [2.0.0](https://github.com/Triangle-org/Console/releases/tag/v2.0.0).
+
+Requirements: PHP `^8.4.1`, Engine `^9.0`, Localzet Console `^2.2`, Symfony Console/Process `^8.1`.
+
+```sh
+composer require triangle/console:^2.0
+composer show triangle/console
+```
+
+## First command
+
+Create a PSR-4 mapped class under `app/command`:
+
+```php
+<?php
+namespace app\command;
+use localzet\Console\Commands\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+final class ReportCommand extends Command
+{
+    protected static string $defaultName = 'app:report';
+    protected static string $defaultDescription = 'Show report status';
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $output->writeln('Report is ready.');
+        return self::SUCCESS;
+    }
+}
+```
+
+After Composer autoload and Engine bootstrap/configuration, instantiate `Triangle\Console\Console` and call `run()`. Engine config must be loaded for discovery from `app/command`, `config/command.php`, and enabled plugins. Config-listed commands require Symfony-compatible `defaultName`.
+
+Add Illuminate commands explicitly: `(new Triangle\Console\Console([], false))->useIlluminate($container)`, then call `addIlluminateCommand($command)`. The `false` argument disables automatic package commands for manual composition.
+
+## Configuration, builds, and security
+
+`Triangle\Console\Install::install()` copies missing config templates without overwriting existing files. Built-in commands include `make:command`, `make:controller`, `make:model`, `app:create`, `plugin:create`, `build:phar`, and `build:bin`. `config/console.php` controls directories, exclusions, artifact names, and PHP target; the binary build template targets PHP 8.4 with a 256M memory limit. Inspect build contents; packaging does not make source extraction impossible. Keep PHAR signing keys outside the repository and do not include secrets in sources or artifacts.
+
+## Compatibility and checks
+
+Tag `v2.0.0` is incompatible with Engine 8. Upgrade PHP to 8.4.1+ and Engine to 9, then verify command discovery and custom build workflows. The package provides `composer validate --strict --no-check-publish` and `composer run check`; the latter runs lint and `tests/run.php`, which checks Symfony command registration and the Illuminate bridge. It does not create a production PHAR/binary or test a target OS.
+
+## Practical guides
+
+[Install](/projects/triangle-console/en/install) · [Usage](/projects/triangle-console/en/usage) · [Operations](/projects/triangle-console/en/operations) · [Compatibility and tests](/projects/triangle-console/en/compatibility).

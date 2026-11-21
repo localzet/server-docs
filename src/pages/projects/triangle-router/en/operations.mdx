@@ -1,0 +1,32 @@
+export const pageTitle = 'Triangle Router integration and operations'
+export const description = 'Differences between standalone and Engine bootstrap, route.php configuration, URI normalization, authorization, and HTTP responses.'
+
+# Integration and operations
+
+## Standalone and Engine modes
+
+In standalone mode, the application builds `simpleRouteDispatcher()` or `cachedRouteDispatcher()` and passes normalized HTTP method and path values to it. The functions return a dispatcher whose result the application handles itself.
+
+Engine bootstrap is separate: `Triangle\Router\Bootstrap` collects routes from `config/route.php` and active plugin configurations when a server object is available. A route file can use the static facade, for example:
+
+```php
+<?php
+
+use Triangle\Router;
+
+Router::get('/health', static fn () => response('ok'));
+```
+
+Do not mix standalone data-generator/dispatcher configuration with Engine bootstrap, which collects route configuration and builds its Engine dispatcher.
+
+## Trust and access control
+
+A route is a match rule, not an access policy. Perform authentication and authorization in application middleware or handlers. Protect administrative routes regardless of how specific their paths are.
+
+A standalone caller must separate the query string from the path and select normalization and decoding appropriate to its server environment. Do not decode a URI multiple times: ambiguous normalization can cause authorization checks and route matching to disagree.
+
+## HTTP semantics
+
+The dispatcher reports `NOT_FOUND`, `METHOD_NOT_ALLOWED`, or `FOUND`; the application decides which response to create. For 405, return `Allow`. Do not assume that registering GET provides the required HEAD behavior: register the needed method or handle it explicitly, and verify response body and headers.
+
+The router is not a complete HTTP stack, service-discovery system, authorization system, or replacement for the application's response middleware.

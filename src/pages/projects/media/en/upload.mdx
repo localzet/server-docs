@@ -1,0 +1,67 @@
+export const pageTitle = 'Triangle Media: uploading images'
+export const description = 'Practical guide to multipart uploads, remote image URLs, project registration, and Triangle Media API responses.'
+
+# Uploading images
+
+The default route is `POST /app/media/upload`. It accepts one of two inputs: a multipart file in `file` or a URL in `link`. Both require a project token in the `token` field.
+
+## Get a project token
+
+The `GET/POST /app/media/project` route is disabled by `project_registration = false`. Enable it only when the application protects registration with authentication or another suitable access policy.
+
+When registration is enabled, submit these form fields:
+
+```sh
+curl -X POST 'https://app.example.test/app/media/project' \
+  -H 'Accept: application/json' \
+  -F 'name=My application' \
+  -F 'description=Profile image uploads' \
+  -F 'email=owner@example.test'
+```
+
+The response contains a generated `token`. Treat it as a bearer secret. If public registration is not needed, create the project record from administrative application code; see the [adapter contract](/projects/media/en/configuration) for its fields and collection name.
+
+## Upload a local file
+
+```sh
+curl -X POST 'https://app.example.test/app/media/upload' \
+  -H 'Accept: application/json' \
+  -F 'token=PROJECT_TOKEN' \
+  -F 'file=@./photo.jpg'
+```
+
+Do not set multipart `Content-Type` manually; curl adds the form boundary. The plugin checks the uploaded file status, its actual MIME type, and its size. The browser-provided MIME type is not trusted.
+
+## Upload a public URL
+
+```sh
+curl -X POST 'https://app.example.test/app/media/upload' \
+  -H 'Accept: application/json' \
+  -F 'token=PROJECT_TOKEN' \
+  -F 'link=https://images.example.test/photo.jpg'
+```
+
+HTTP and HTTPS on standard ports are allowed. URLs with userinfo, private or reserved IPs, non-public DNS results, and redirects are rejected. The response body is limited by `max_file_size` and a timeout.
+
+## Response
+
+With `Accept: application/json`, Engine normally wraps the result in an object with `status` and `data`. The successful upload payload contains:
+
+```json
+{
+  "message": "Image uploaded",
+  "id": "generated-image-id",
+  "url": "https://cdn.example.test/media/generated-image-id",
+  "mime": "image/png",
+  "width": 1200,
+  "height": 800,
+  "color": "#aabbcc",
+  "size": 84231
+}
+```
+
+Use `id` with the [image processing route](/projects/media/en/processing). The URL is built from `image_uri`; it does not configure the CDN or web server.
+
+## Request errors
+
+The controller rejects unsupported methods, missing input, invalid tokens, invalid files, invalid project fields, and requests over the rate limit. Typical status codes are 400, 403, 405, 422, and 429. The application's `app.http_always_200` setting may affect the final HTTP status.

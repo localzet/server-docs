@@ -1,0 +1,18 @@
+export const pageTitle = 'Triangle Media: tests and limits'
+export const description = 'Triangle Media checks, PHP and dependency CI matrix, ImageMagick requirements, and application integration gaps.'
+
+# Tests and limits
+
+The repository declares `lint`, `test`, and an aggregate `check` command:
+
+```sh
+composer validate --strict --no-check-publish --no-interaction
+composer run check --no-interaction
+composer audit --locked --no-interaction
+```
+
+The package suite covers the remote URL downloader, project registration, Engine request/file contract, rejection of invalid upload objects, processing response MIME, path traversal, and image limits. The ImageMagick integration check creates an animated image and verifies frame count, filter dimensions, and restoration of process resource limits.
+
+GitHub Actions installs `curl`, `intl`, `mbstring`, `pdo_sqlite`, and `imagick`. It checks PHP 8.1 and 8.5 against the lowest and latest supported dependency sets, then runs Composer audit, lint, and tests.
+
+A green package suite does not prove that the host application is integrated correctly. Verify real database and storage adapters, Engine routes, templates, `image_path` permissions, proxy configuration, and system ImageMagick policy. Do not treat no advisories or successful lint as proof of a production run.

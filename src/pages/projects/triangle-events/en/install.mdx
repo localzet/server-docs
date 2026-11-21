@@ -1,0 +1,59 @@
+export const pageTitle = 'Install Triangle Events'
+export const description = 'Requirements, installation, and a first verifiable example for triangle/events 2.0.1.'
+
+# Install and register a first listener
+
+## Requirements
+
+- PHP 8.1 or later.
+- Triangle Engine 9.x. Engine 8 is unsupported because this component uses Engine 9 plugin lifecycle hooks.
+- Composer.
+
+Install the package in an Engine 9 application:
+
+```sh
+composer require triangle/events:^2.0
+```
+
+## Dispatch an event
+
+Use the package-provided `support\Events` facade:
+
+```php
+<?php
+
+use support\Events;
+
+Events::on('invoice.created', static function (array $invoice, string $event): void {
+    error_log($event . ': ' . $invoice['id']);
+});
+
+Events::emit('invoice.created', ['id' => 42]);
+```
+
+This is synchronous: `emit()` returns after its listeners finish. Register listeners during application startup or through `config/event.php`, not in code that runs on every request; repeated registration adds repeated callbacks.
+
+## Application configuration
+
+Engine bootstrap loads `event.php` for the application and plugin configurations. For example:
+
+```php
+<?php
+
+return [
+    'invoice.created' => [
+        [App\Listeners\InvoiceCreated::class, 'handle'],
+    ],
+];
+```
+
+The Engine container resolves configured listener classes. Put this file in the application's configuration directory. The package template at `src/Config/event.php` returns an empty array.
+
+## Verify
+
+```sh
+composer install
+composer test
+```
+
+The `engine_compatibility.php` check covers the Engine bootstrap contract, plugin reduction hooks, and payload delivery to a configured listener. It does not verify queue deployment or cross-process delivery; the package has no such mechanism.

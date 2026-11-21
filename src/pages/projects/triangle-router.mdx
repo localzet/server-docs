@@ -1,0 +1,15 @@
+export const pageTitle = 'Triangle Router 2.0.7 — маршрутизация HTTP'
+export const description = 'Triangle Router 2.0.7: маршруты и параметры, standalone dispatcher, Engine bootstrap, методы HTTP и границы ответственности.'
+
+# Triangle Router
+
+Triangle Router сопоставляет HTTP-метод и путь с обработчиком и параметрами маршрута. Библиотека может работать как самостоятельный dispatcher либо подключаться к Triangle Engine через bootstrap; эти два способа настройки различаются.
+
+**Версия:** 2.0.7 · **PHP:** 8.1+ · **Engine:** `^8.1 || ^9.0` · **Пакет:** `triangle/router`.
+
+- [Установка и самостоятельный dispatcher](triangle-router/install)
+- [Шаблоны маршрутов и результаты dispatch](triangle-router/usage)
+- [Интеграция Engine и эксплуатация](triangle-router/operations)
+- [Совместимость, безопасность и тесты](triangle-router/compatibility)
+
+Маршрутизатор определяет, какой обработчик соответствует запросу. Само совпадение маршрута не авторизует пользователя и не формирует HTTP-ответ. Приложение отвечает за проверку доступа, нормализацию метода/URI, статусы 404/405 и `Allow`, а также требуемую семантику HEAD.

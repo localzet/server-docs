@@ -1,0 +1,23 @@
+export const pageTitle = 'Defining Cron tasks'
+export const description = 'Task example for the Engine 9 preview and scheduler startup behavior.'
+
+# Defining Cron tasks
+
+The following example applies only to the current Engine 9 preview source:
+
+```php
+<?php
+return [
+    [
+        'name' => 'cleanup-expired-records',
+        'rule' => '*/5 * * * *',
+        'callback' => static function (): void {
+            // Add the application task here.
+        },
+    ],
+];
+```
+
+Place definitions in `config/cron.php`. On managed startup, preview autoload creates a dedicated `Cron` server with one worker. At worker startup it reads `config('cron', [])` and registers only entries with non-empty `rule` and `callback`. `name` is optional.
+
+Five cron fields provide minute precision; six may include seconds according to the preview documentation. Keep callbacks short and non-blocking; send long-running work to a queue or separate process. Registering a task does not run it immediately during config loading.

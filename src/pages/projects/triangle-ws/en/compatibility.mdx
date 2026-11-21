@@ -1,0 +1,8 @@
+export const pageTitle = 'WS compatibility and verification'
+export const description = "Compare v1.0.4 constraints with the checkout's resolved dependency set."
+
+# WS compatibility and verification
+
+Published `v1.0.4` requires Engine `^8.1` plus Engine WS `^2.0`, while Engine WS 2.0.0 requires Engine `^9.0`; these ranges conflict. The current checkout switches to Engine WS `^1.1` and locks Engine 8.1.11 / Engine WS 1.1.1. Resolve this discrepancy before using the published package.
+
+`composer.json` declares no test/lint scripts and the project has no package test suite. Verify the selected checkout in the real application: dependency resolution, handshake, callback routing, message responses, malformed/oversized frames, disconnect/reconnect, authentication, and graceful stop. A successful local run on one machine does not prove multi-process delivery; the send helpers remain process-local.

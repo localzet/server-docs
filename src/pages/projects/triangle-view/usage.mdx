@@ -1,0 +1,29 @@
+export const pageTitle = 'Рендеринг и данные Triangle View'
+export const description = 'Функции view и специализированные render helpers, пути шаблонов и приоритет переменных.'
+
+# Рендеринг и передача данных
+
+## `view()` и шаблоны
+
+```php
+return view('catalog/show', ['product' => $product], app: 'web');
+```
+
+Функция `view($template = null, array $vars = [], ?string $app = null, ?string $plugin = null, int $http_code = 200)` выбирает handler из конфигурации и возвращает `Triangle\Response`. При `null` имя шаблона выводится из controller/action текущего request. Для шаблона приложения `web` базовый путь имеет вид `app/web/view/...`; расширение по умолчанию — `.phtml`.
+
+Для явного выбора адаптера пакет предоставляет `raw_view()`, `blade_view()`, `twig_view()` и `think_view()`. Функции для необязательных движков требуют соответствующий пакет Composer.
+
+## Данные шаблона
+
+`view()` объединяет переменные из текущего request с переданным массивом; явно переданный массив имеет приоритет. Можно назначать значения отдельно:
+
+```php
+Triangle\View\Support\View::assign('section', 'billing');
+return view('account', ['section' => 'profile']); // явное значение profile выигрывает
+```
+
+`View::vars()` возвращает назначенные request-переменные. Для вложенных массивов `View::assign($array, merge_recursive: true)` включает рекурсивное объединение; без этого флага назначение выполняет обычный `array_merge`.
+
+## Составные шаблоны
+
+Raw renderer поддерживает pre-render и post-render шаблоны из параметров конфигурации `view.options.pre_renders` и `view.options.post_renders`. Используйте их для общего layout только после проверки фактического порядка вывода и структуры данных в тесте приложения.

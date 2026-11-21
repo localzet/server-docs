@@ -1,0 +1,15 @@
+export const pageTitle = 'Triangle Router 2.0.7 — HTTP routing'
+export const description = 'Triangle Router 2.0.7 guide: route patterns and parameters, standalone dispatch, Engine bootstrap, HTTP methods, and responsibility boundaries.'
+
+# Triangle Router
+
+Triangle Router matches an HTTP method and path to a handler and route parameters. It can run as a standalone dispatcher or integrate with Triangle Engine through its bootstrap; these setup paths are distinct.
+
+**Version:** 2.0.7 · **PHP:** 8.1+ · **Engine:** `^8.1 || ^9.0` · **Package:** `triangle/router`.
+
+- [Install and create a standalone dispatcher](triangle-router/en/install)
+- [Route patterns and dispatch results](triangle-router/en/usage)
+- [Engine integration and operations](triangle-router/en/operations)
+- [Compatibility, security, and tests](triangle-router/en/compatibility)
+
+The router selects a matching handler. A route match does not authorize a user or create an HTTP response. The application is responsible for access checks, method and URI normalization, 404/405 responses and the `Allow` header, and required HEAD semantics.

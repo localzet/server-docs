@@ -1,0 +1,35 @@
+export const pageTitle = 'Triangle Media: processing and delivery'
+export const description = 'Syntax for crop, resize, pixelize, and cover filters, image frame and pixel limits, and delivery of transformed image bytes.'
+
+# Processing and delivery
+
+The default route is `GET /app/media/processing/{image-id}/{filter}/{parameters}`. Each filter and its parameters occupy one path segment. Multiple filters can be applied in sequence; the URL order is the processing order.
+
+## Filters
+
+| Filter | Format | Example |
+| --- | --- | --- |
+| `resize` | `width` or `widthxheight` | `/image-id/resize/640` |
+| `crop` | `width`, `widthxheight`, or `widthxheight&x,y` | `/image-id/crop/320x240&20,10` |
+| `pixelize` | `pixels` | `/image-id/pixelize/24` |
+| `cover` | 3- or 6-digit hex color without `#` | `/image-id/cover/f2f4f7` |
+
+Example chain:
+
+```text
+/app/media/processing/image-id/resize/640/crop/320x240
+```
+
+`resize` preserves proportions when only width or height is supplied. `crop` without coordinates scales and crops from the center; coordinates define a region in the source image. `cover` creates a fixed-width background. All parameters must fit within `max_image_pixels`.
+
+## Format and cache
+
+The controller returns image bytes with the MIME type from `target_type` (`image/png` by default). Results are cached through `storage()` under the request URI. The plugin does not pass a TTL when writing the processed-image cache, so expiration is controlled by the adapter.
+
+When filters or global settings change, clear the relevant application cache so old output is not reused for the same URI.
+
+## Image limits
+
+Before reading a stored file, the plugin checks its frame count and total pixel limit. ImageMagick also receives memory, map, disk, time, and thread limits. Each `resize`, `crop`, and `cover` output is checked before processing. Tune values for the application and system ImageMagick policy; do not raise limits without reviewing memory and runtime impact.
+
+See [configuration](/projects/media/en/configuration) for all settings and [security](/projects/media/en/security) for the upload threat model.
