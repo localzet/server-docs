@@ -2,10 +2,10 @@
 
 ## Требования
 
-Localzet Console 2.2.1 требует PHP 8.4.1 или новее и Composer 2.
+Localzet Console 2.3.0 требует PHP 8.4.1 или новее и Composer 2.
 
 ```sh
-composer require localzet/console:^2.2
+composer require localzet/console:^2.3
 ```
 
 ## Запуск приложения
@@ -25,4 +25,4 @@ exit($console->run());
 
 Для своей команды расширьте `localzet\Console\Commands\Command` и задайте `$defaultName`. Метод `installCommands($directory, $namespace)` ищет классы команд в указанном каталоге. Приложение должно загрузить эти классы через Composer PSR-4 до их регистрации.
 
-Выпуск [`2.2.1`](https://github.com/localzet/Console/releases/tag/v2.2.1) исправляет расчёт ширины Unicode-текста и укрепляет вывод псевдографических виджетов. Сверьте фактически установленную версию командой `composer show localzet/console`.
+Текущий выпуск [`2.3.0`](https://github.com/localzet/Console/releases/tag/v2.3.0) включает полноэкранную live-панель состояния Localzet Server и сохраняет однократный JSON-вывод для скриптов и систем мониторинга. Сверьте фактически установленную версию командой `composer show localzet/console`.

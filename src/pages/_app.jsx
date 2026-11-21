@@ -11,7 +11,7 @@ import '@/styles/tailwind.css'
 import 'focus-visible'
 
 const SITE_URL = 'https://server.localzet.com'
-const DEFAULT_TITLE = 'Localzet Server 7.2.1 — документация'
+const DEFAULT_TITLE = 'Localzet Server 7.2.2 — документация'
 const DEFAULT_DESCRIPTION = 'Техническая документация Localzet Server и связанных PHP-проектов Localzet и Triangle: установка, архитектура, примеры, безопасность и совместимость.'
 const CLUSTER_TITLE = 'Localzet Cluster — документация'
 const CLUSTER_DESCRIPTION = 'Документация Localzet Cluster: распределённая архитектура Gateway/Business Worker для приложений на PHP, регистрация узлов и маршрутизация клиентских соединений.'
@@ -79,7 +79,7 @@ const RELATED_PROJECTS = {
         'Localzet Console',
         'PHP command-line application library based on Symfony Console, with an opt-in Laravel command bridge and Unicode-safe terminal interfaces.',
         'https://github.com/localzet/Console',
-        'Stable release 2.2.1 requires PHP 8.4.1+.',
+        'Stable release 2.3.0 requires PHP 8.4.1+.',
         [
             'Build CLI applications with Symfony Console APIs',
             'Register Laravel commands explicitly with an existing application container',
@@ -196,16 +196,16 @@ const RELATED_PROJECTS = {
             'Keep connection groups local to each worker process',
         ],
     ],
-    cron: ['Localzet Cron', 'Timer based scheduling for Localzet Server.', 'https://github.com/localzet/Cron'],
-    httpclient: ['Localzet HTTP Client', 'Asynchronous HTTP requests and connection pooling for Localzet Server.', 'https://github.com/localzet/HttpClient'],
-    mqtt: ['Localzet MQTT', 'MQTT 3.1.1 and MQTT 5 client for Localzet Server with TCP/TLS and QoS 0/1/2.', 'https://github.com/localzet/MQTT'],
-    psr7: ['Localzet PSR-7', 'PSR-7 HTTP message objects, streams and URI utilities for Server 7.', 'https://github.com/localzet/PSR-7'],
-    proxy: ['Localzet Proxy', 'Experimental HTTP forward proxy with an empty-by-default exact host and port allowlist. Client authentication and DNS/private-address policy remain deployment responsibilities.', 'https://github.com/localzet/Proxy'],
-    socks5: ['Localzet SOCKS5', 'SOCKS5 TCP CONNECT proxy for Localzet Server with loopback-first configuration.', 'https://github.com/localzet/SOCKS5'],
-    socketio: ['Localzet Socket.IO', 'Socket.IO server implementation for Server 7. Cross-process broadcast uses Tunnel 3; authentication remains application-specific.', 'https://github.com/localzet/SocketIO'],
-    storage: ['Localzet Storage', 'Client/server shared in-memory store for Localzet Server. Object deserialization is disabled by default.', 'https://github.com/localzet/Storage'],
-    tunnel: ['Localzet Tunnel', 'Client/server messaging channel for Localzet Server processes.', 'https://github.com/localzet/Tunnel'],
-    noter: ['Noter', 'Command-line utility for creating and managing notes; it uses Localzet HTTP Client transitively.', 'https://github.com/localzet/Noter'],
+    cron: ['Localzet Cron', 'Timer based scheduling for Localzet Server.', 'https://github.com/localzet/Cron', 'Stable release 2.0.1.'],
+    httpclient: ['Localzet HTTP Client', 'Asynchronous HTTP requests and connection pooling for Localzet Server.', 'https://github.com/localzet/HttpClient', 'Stable release 3.0.2 requires PHP 8.2+.'],
+    mqtt: ['Localzet MQTT', 'MQTT 3.1.1 and MQTT 5 client for Localzet Server with TCP/TLS and QoS 0/1/2.', 'https://github.com/localzet/MQTT', 'Stable release 1.0.3.'],
+    psr7: ['Localzet PSR-7', 'PSR-7 HTTP message objects, streams and URI utilities for Server 7.', 'https://github.com/localzet/PSR-7', 'Stable release 4.0.0.'],
+    proxy: ['Localzet Proxy', 'HTTP forward proxy with Basic authentication, an exact literal-IP and port allowlist, bounded request headers, and a per-worker connection limit. TLS ingress and outbound ACLs remain deployment responsibilities.', 'https://github.com/localzet/Proxy', 'Stable release 1.0.3.'],
+    socks5: ['Localzet SOCKS5', 'SOCKS5 TCP CONNECT proxy for Localzet Server with loopback-first configuration.', 'https://github.com/localzet/SOCKS5', 'Stable release 1.0.1.'],
+    socketio: ['Localzet Socket.IO', 'Socket.IO server implementation for Server 7. Cross-process broadcast uses the optional Tunnel 4 adapter; authentication remains application-specific.', 'https://github.com/localzet/SocketIO', 'Stable release 2.0.3.'],
+    storage: ['Localzet Storage', 'Client/server shared in-memory store for Localzet Server. Object deserialization is disabled by default.', 'https://github.com/localzet/Storage', 'Stable release 2.0.1.'],
+    tunnel: ['Localzet Tunnel', 'Client/server messaging channel for Localzet Server processes.', 'https://github.com/localzet/Tunnel', 'Stable release 4.0.2.'],
+    noter: ['Noter', 'Command-line utility for sending notes to an HTTP receiver; it uses Localzet HTTP Client transitively.', 'https://github.com/localzet/Noter', 'Stable release 0.1.12 requires PHP 8.4.1+.'],
     media: [
         'Triangle Media',
         'Image upload and processing plugin for Triangle Engine 9: validates local files and public HTTP(S) URLs, converts images, applies bounded transformations, and stores metadata through host adapters.',
@@ -263,7 +263,7 @@ export default function App({Component, pageProps}) {
                 codeRepository: cluster ? 'https://github.com/localzet/Cluster' : relatedProject?.[2] ?? 'https://github.com/localzet/Server',
                 programmingLanguage: 'PHP',
                 runtimePlatform: phpVersion ? `PHP ${phpVersion} or newer` : 'PHP 8.1 or newer',
-                version: cluster ? 'current source' : semanticVersion ?? (relatedProject ? 'current source' : '7.2.1'),
+                version: cluster ? '1.1.0' : semanticVersion ?? (relatedProject ? 'current source' : '7.2.2'),
                 license: 'https://spdx.org/licenses/AGPL-3.0-or-later.html',
                 author: {
                     '@type': 'Person',

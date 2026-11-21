@@ -5,6 +5,8 @@ export const description = 'Настройки HTTP forward proxy, allowlist н�
 
 Требуются PHP 8.1+ и Localzet Server `^7.0`. Класс `localzet\Proxy` наследуется от Server и принимает `new Proxy($socketName, $socketContext = [])`. Listener и число worker настраиваются через свойства Server.
 
+Выпуск [`1.0.3`](https://github.com/localzet/Proxy/releases/tag/v1.0.3) задаёт `maxConnections = 256` на worker по умолчанию. Прокси ждёт полный блок HTTP-заголовков: размер не должен превышать 16 КиБ, незавершённые заголовки закрываются через пять секунд. Данные, полученные пока подключается upstream, ограничиваются унаследованным `maxSendBufferSize`; превышение отклоняется с 413.
+
 ## Политика исходящих подключений
 
 ```php
@@ -20,4 +22,4 @@ Basic-аутентификация не шифрует трафик; испол�
 
 ## Границы реализации и проверки
 
-Пакет не является reverse proxy, HTTP/2 proxy или production gateway с полной политикой маршрутизации. Он обрабатывает один запрос на клиентское соединение. Перед реальным трафиком проверьте framing и поведение больших/частичных запросов на целевом Server. Тесты: `composer test`, `composer test:integration`, `composer lint`; loopback integration покрывает Basic auth без передачи proxy-заголовков upstream, HTTP, CONNECT, allowlist, malformed request и upstream failure.
+Пакет не является reverse proxy, HTTP/2 proxy или production gateway с полной политикой маршрутизации. Он обрабатывает один запрос на клиентское соединение. Basic credentials не шифруются без TLS; отдельно ограничивайте входящий listener и исходящие соединения. Тесты: `composer test`, `composer test:integration`, `composer lint`; loopback integration покрывает Basic auth без передачи proxy-заголовков upstream, фрагментированные и медленные заголовки, HTTP, CONNECT, allowlist, malformed request и upstream failure.
