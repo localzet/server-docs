@@ -26,7 +26,7 @@ $server->onMessage = static function (TcpConnection $connection, Request $reques
 
 ## Ответы и файлы
 
-`Response` принимает status, headers и body. Для условных запросов и одиночного byte range используйте `withFileForRequest($request, $path)`: метод учитывает HEAD, ETag и cache validators. Файл передаётся потоком с backpressure. Multipart byte ranges в этой линии не реализованы.
+`Response` принимает status, headers и body. Для условных запросов и одиночного byte range используйте `withFileForRequest($request, $path)`: метод учитывает HEAD, ETag и cache validators. Файл передаётся потоком с backpressure. Multipart byte ranges в текущей версии не реализованы.
 
 Компрессия по заголовку запроса задаётся явно через `withCompressionForRequest($request)`. Не включайте её без учёта размера и типа ответа.
 

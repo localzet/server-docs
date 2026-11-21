@@ -3,7 +3,7 @@ export const description = 'Переход на Triangle Console 2 и грани
 
 # Совместимость, миграция и тесты
 
-Опубликованный тег `v2.0.0` требует PHP `^8.4.1`, Engine `^9.0`, Localzet Console `^2.2`, Symfony Console/Process `^8.1`. Engine 8 и более ранняя линия Triangle Console несовместимы с этим major выпуском. Проверяйте версию через `composer show triangle/console` и lock-файл приложения.
+Опубликованный тег `v2.0.0` требует PHP `^8.4.1`, Engine `^9.0`, Localzet Console `^2.2`, Symfony Console/Process `^8.1`. Приложения на Engine 8 не удовлетворяют требованиям этого выпуска: вместе с Triangle Console обновите Engine и связанные зависимости. Проверяйте фактический состав через `composer show triangle/console` и lock-файл приложения.
 
 ## Миграция
 
