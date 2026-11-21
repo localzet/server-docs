@@ -1,0 +1,10 @@
+export const pageTitle = 'Эксплуатация и безопасность Database'
+export const description = 'Драйверы, соединения по процессам, миграции и безопасные запросы.'
+
+# Эксплуатация и безопасность Database
+
+Шаблон конфигурации содержит SQLite, MySQL, PostgreSQL, SQL Server и MongoDB. SQL подключения требуют соответствующих PDO extensions. MongoDB требует совместимого integration package; он не включён в обязательные требования.
+
+`persistent` по умолчанию `true`. При запуске с Server компонент планирует MySQL keepalive каждые 55 секунд. Это не connection pool, retry policy или гарантия доступности. Установите `persistent => false`, если keepalive не нужен. Manager и connections process-local — каждый worker держит отдельный экземпляр.
+
+Используйте least-privilege DB аккаунт, ограничьте сетевой доступ, настройте TLS/timeouts по требованиям драйвера. В raw SQL связывайте значения через bindings; не конкатенируйте пользовательский ввод. Миграции запускайте отдельным контролируемым deployment шагом; bootstrap не меняет схему автоматически.

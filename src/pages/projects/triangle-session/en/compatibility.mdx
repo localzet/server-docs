@@ -1,0 +1,13 @@
+export const pageTitle = 'Session compatibility and tests'
+export const description = 'Handler contract checks, migration, and external services.'
+
+# Session compatibility and tests
+
+Release `v2.0.0` targets Engine 9 and the Server 7.1+ session API; Engine 8 uses an incompatible earlier contract. During migration, check cookie name/domain/path/SameSite/secure, the selected handler, and whether existing session data needs migration. Do not assume old files/keys are automatically compatible.
+
+```sh
+composer test
+composer test:mongo
+```
+
+`composer test` checks Engine bootstrap, Server session-handler contracts, file-backed round trips, and restoration without object wakeups. `composer test:mongo` is separate; regular checks do not start Redis/Mongo services. A file test does not prove network access, ACLs, or production backend behavior.

@@ -12,9 +12,23 @@ import 'focus-visible'
 
 const SITE_URL = 'https://server.localzet.com'
 const DEFAULT_TITLE = 'Localzet Server 7.2.1 — документация'
-const DEFAULT_DESCRIPTION = 'Официальная документация Localzet Server: асинхронный PHP runtime для HTTP/1.x, WebSocket, TCP и UDP, с event loop и управлением worker-процессами.'
+const DEFAULT_DESCRIPTION = 'Техническая документация Localzet Server и связанных PHP-проектов Localzet и Triangle: установка, архитектура, примеры, безопасность и совместимость.'
 const CLUSTER_TITLE = 'Localzet Cluster — документация'
 const CLUSTER_DESCRIPTION = 'Документация Localzet Cluster: распределённая архитектура Gateway/Business Worker для приложений на PHP, регистрация узлов и маршрутизация клиентских соединений.'
+const BILINGUAL_PROJECTS = new Set([
+    'media',
+    'triangle-console',
+    'triangle-cron',
+    'triangle-database',
+    'triangle-events',
+    'triangle-middleware',
+    'triangle-oauth',
+    'triangle-router',
+    'triangle-session',
+    'triangle-view',
+    'triangle-web',
+    'triangle-ws',
+])
 
 function onRouteChange() {
     useMobileNavigationStore.getState().close()
@@ -37,8 +51,12 @@ function isClusterDocumentation(pathname) {
     return pathname.startsWith('/projects/cluster')
 }
 
-function getMediaLocalePaths(pathname) {
-    const russianRoot = '/projects/media'
+function getProjectLocalePaths(pathname, projectId) {
+    if (!BILINGUAL_PROJECTS.has(projectId)) {
+        return null
+    }
+
+    const russianRoot = `/projects/${projectId}`
     const englishRoot = `${russianRoot}/en`
 
     if (pathname === russianRoot || pathname === englishRoot) {
@@ -57,6 +75,94 @@ function getMediaLocalePaths(pathname) {
 }
 
 const RELATED_PROJECTS = {
+    console: [
+        'Localzet Console',
+        'PHP command-line application library based on Symfony Console, with an opt-in Laravel command bridge and Unicode-safe terminal interfaces.',
+        'https://github.com/localzet/Console',
+        'Stable release 2.2.1 requires PHP 8.4.1+.',
+        [
+            'Build CLI applications with Symfony Console APIs',
+            'Register Laravel commands explicitly with an existing application container',
+            'Render Unicode-aware ANSI tables and bounded terminal dashboards',
+        ],
+    ],
+    'triangle-console': [
+        'Triangle Console',
+        'Console application integration for Triangle Engine with command discovery, application generators, and an explicit Laravel command bridge.',
+        'https://github.com/Triangle-org/Console',
+        'Stable release 2.0.0 targets PHP 8.4.1+ and Triangle Engine 9.',
+        ['Discover Triangle application commands', 'Register framework and plugin commands', 'Bridge existing Illuminate commands when needed'],
+    ],
+    'triangle-database': [
+        'Triangle Database',
+        'Database integration for Triangle Engine applications, including connections, query builder, Eloquent models, events, and pagination.',
+        'https://github.com/Triangle-org/Database',
+        'Stable release 2.0.0 targets PHP 8.2+ and Triangle Engine 9.',
+        ['Configure database connections and drivers', 'Use query builder and Eloquent integration', 'Handle process-local connection lifecycle'],
+    ],
+    'triangle-session': [
+        'Triangle Session',
+        'Session handlers for Triangle Engine applications, with file storage by default and optional Redis, cluster, and MongoDB backends.',
+        'https://github.com/Triangle-org/Session',
+        'Stable release 2.0.0 targets Triangle Engine 9 and Localzet Server 7.1+.',
+        ['Configure session cookies and handlers', 'Share session storage across workers with a shared backend', 'Keep PHP object deserialization disabled by default'],
+    ],
+    'triangle-events': [
+        'Triangle Events',
+        'In-process event dispatch for Triangle Engine applications with exact and prefix listeners.',
+        'https://github.com/Triangle-org/Events',
+        'Stable release 2.0.1 targets PHP 8.1+ and Triangle Engine 9.',
+        ['Register and remove event listeners', 'Dispatch events synchronously in the current process', 'Use prefix listeners for event families'],
+    ],
+    'triangle-view': [
+        'Triangle View',
+        'Template rendering integration for Triangle Engine applications, with PHP templates by default and optional template adapters.',
+        'https://github.com/Triangle-org/View',
+        'Stable release 2.1.0 supports Triangle Engine 8 and 9.',
+        ['Render PHP templates with `.phtml` files', 'Pass request-scoped and explicit template variables', 'Add optional Blade, Twig, or Think adapters'],
+    ],
+    'triangle-router': [
+        'Triangle Router',
+        'HTTP routing for Triangle Engine with method, named, optional, grouped, resource, and middleware routes.',
+        'https://github.com/Triangle-org/Router',
+        'Stable release 2.0.7 supports Triangle Engine 8 and 9.',
+        ['Define method and named routes', 'Compose groups, child routers, and resources', 'Apply route middleware and route caching'],
+    ],
+    'triangle-middleware': [
+        'Triangle Middleware',
+        'Middleware pipeline for Triangle Engine applications, with route integration and explicit execution order.',
+        'https://github.com/Triangle-org/Middleware',
+        'Stable release 2.0.3 targets Triangle Engine 9.',
+        ['Register request and response middleware', 'Control middleware order and scope', 'Integrate middleware with routed requests'],
+    ],
+    'triangle-cron': [
+        'Triangle Cron',
+        'Scheduled job integration for Triangle applications. The published package remains on Engine 8; Engine 9 work is an untagged preview.',
+        'https://github.com/Triangle-org/Cron',
+        'Published release 1.0.3 targets Triangle Engine 8; Engine 9 preview is not released.',
+        ['Review the published Engine 8 package contract', 'Distinguish tagged releases from preview source', 'Check current package constraints before migration'],
+    ],
+    'triangle-oauth': [
+        'Triangle OAuth',
+        'OAuth 1, OAuth 2, and OpenID provider integrations with callback handling and state storage for Triangle applications.',
+        'https://github.com/Triangle-org/OAuth',
+        'Published release 3.0.9 requires PHP 8.2+ and Localzet HTTP 2; current checkout has additional Engine requirements.',
+        ['Configure OAuth and OpenID providers', 'Handle callback and state storage', 'Verify published and current-source dependency constraints'],
+    ],
+    'triangle-web': [
+        'Triangle Web',
+        'MVC application template for Triangle Engine, with HTTP routing, controllers, configuration, and project structure.',
+        'https://github.com/Triangle-org/Web',
+        'Published release 8.0.1 targets PHP 8.2+ and Triangle Engine 8.1.',
+        ['Create an application from the project template', 'Configure server, routes, controllers, and views', 'Inspect the exact dependency lock before migrating to Engine 9'],
+    ],
+    'triangle-ws': [
+        'Triangle WS',
+        'WebSocket-first application template for Triangle Engine, with path-scoped local sends and a single-worker default.',
+        'https://github.com/Triangle-org/WS',
+        'Published release 1.0.4 targets Triangle Engine 8.1 and Engine WS 2; current checkout uses Engine WS 1.1.',
+        ['Create a WebSocket application from the template', 'Register route callbacks and exchange payloads', 'Account for single-process state and version differences'],
+    ],
     engine: [
         'Triangle Engine',
         'PHP application engine for Triangle with request handling, routing integration, service lifecycle, and runtime helpers.',
@@ -126,7 +232,10 @@ export default function App({Component, pageProps}) {
     const description = pageProps.description ?? (cluster ? CLUSTER_DESCRIPTION : relatedProject?.[1] ?? DEFAULT_DESCRIPTION)
     const canonicalPath = router.asPath.split(/[?#]/, 1)[0]
     const currentUrl = `${cluster ? 'https://server.localzet.com' : SITE_URL}${canonicalPath}`
-    const mediaLocalePaths = projectId === 'media' ? getMediaLocalePaths(router.pathname) : null
+    const projectLocalePaths = projectId ? getProjectLocalePaths(router.pathname, projectId) : null
+    const softwareId = `${SITE_URL}/#software-${cluster ? 'cluster' : projectId ?? 'server'}`
+    const semanticVersion = relatedProject?.[3]?.match(/\b\d+\.\d+\.\d+\b/)?.[0]
+    const phpVersion = relatedProject?.[3]?.match(/PHP\s+(\d+(?:\.\d+){1,2})/i)?.[1]
     const robots = current ? 'index,follow' : 'noindex,follow'
     const graph = {
         '@context': 'https://schema.org',
@@ -134,9 +243,9 @@ export default function App({Component, pageProps}) {
             {
                 '@type': 'WebSite',
                 '@id': `${SITE_URL}/#website`,
-                name: cluster ? CLUSTER_TITLE : relatedProject?.[0] ?? 'Localzet Server — документация',
+                name: 'Localzet Server documentation',
                 url: SITE_URL,
-                description,
+                description: DEFAULT_DESCRIPTION,
                 inLanguage: language,
                 publisher: {'@id': `${SITE_URL}/#publisher`},
             },
@@ -148,15 +257,13 @@ export default function App({Component, pageProps}) {
             },
             {
                 '@type': 'SoftwareSourceCode',
-                '@id': `${SITE_URL}/#software`,
+                '@id': softwareId,
                 name: cluster ? 'Localzet Cluster' : relatedProject?.[0] ?? 'Localzet Server',
                 description,
                 codeRepository: cluster ? 'https://github.com/localzet/Cluster' : relatedProject?.[2] ?? 'https://github.com/localzet/Server',
                 programmingLanguage: 'PHP',
-                runtimePlatform: 'PHP 8.1 or newer',
-                version: cluster
-                    ? 'current Cluster source, requires Server ^7.0'
-                    : relatedProject?.[3] ?? (relatedProject ? 'current repository source' : '7.2.1'),
+                runtimePlatform: phpVersion ? `PHP ${phpVersion} or newer` : 'PHP 8.1 or newer',
+                version: cluster ? 'current source' : semanticVersion ?? (relatedProject ? 'current source' : '7.2.1'),
                 license: 'https://spdx.org/licenses/AGPL-3.0-or-later.html',
                 author: {
                     '@type': 'Person',
@@ -184,7 +291,7 @@ export default function App({Component, pageProps}) {
                 url: currentUrl,
                 inLanguage: language,
                 isPartOf: {'@id': `${SITE_URL}/#website`},
-                about: {'@id': `${SITE_URL}/#software`},
+                about: {'@id': softwareId},
                 ...(router.pathname !== '/' && {
                     breadcrumb: {'@id': `${currentUrl}#breadcrumb`},
                 }),
@@ -219,10 +326,10 @@ export default function App({Component, pageProps}) {
                 <title>{router.pathname === '/' ? DEFAULT_TITLE : `${title} — ${cluster ? 'Localzet Cluster' : relatedProject?.[0] ?? 'Localzet Server'}`}</title>
                 <meta name="description" content={description} />
                 <link rel="canonical" href={currentUrl} />
-                {mediaLocalePaths && <>
-                    <link rel="alternate" hrefLang="ru" href={`${SITE_URL}${mediaLocalePaths.ru}`} />
-                    <link rel="alternate" hrefLang="en" href={`${SITE_URL}${mediaLocalePaths.en}`} />
-                    <link rel="alternate" hrefLang="x-default" href={`${SITE_URL}${mediaLocalePaths.ru}`} />
+                {projectLocalePaths && <>
+                    <link rel="alternate" hrefLang="ru" href={`${SITE_URL}${projectLocalePaths.ru}`} />
+                    <link rel="alternate" hrefLang="en" href={`${SITE_URL}${projectLocalePaths.en}`} />
+                    <link rel="alternate" hrefLang="x-default" href={`${SITE_URL}${projectLocalePaths.ru}`} />
                 </>}
                 <link rel="alternate" type="text/plain" href={`${SITE_URL}/llms.txt`} title="AI-readable project guide" />
                 <meta name="author" content="Ivan Zorin" />

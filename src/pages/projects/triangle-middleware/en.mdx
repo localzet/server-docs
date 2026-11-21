@@ -1,0 +1,54 @@
+export const pageTitle = 'Triangle Middleware'
+export const description = 'Triangle HTTP middleware component for application, plugin, route, and controller chains.'
+
+# Triangle Middleware
+
+Triangle Middleware provides a middleware contract and loader for Triangle applications. It collects lists from application/plugin configuration, routes, and controller attributes. The application integration (for example Triangle HTTP) invokes the chain and converts results to HTTP responses; this package is not an HTTP server by itself.
+
+Published release: [2.0.3](https://github.com/Triangle-org/Middleware/releases/tag/v2.0.3). Requirements: PHP `^8.1`, `triangle/router:^2.0`, and `triangle/engine:^8.1 || ^9.0`. The current checkout at `2eade42` is four commits beyond the release tag; it keeps these constraints and adds CI/regression checks that are absent from the tag.
+
+```sh
+composer require triangle/middleware:^2.0
+composer show triangle/middleware triangle/engine triangle/router
+```
+
+## Middleware contract
+
+```php
+<?php
+use Triangle\Middleware\MiddlewareInterface;
+
+final class RequestLogMiddleware implements MiddlewareInterface
+{
+    public function process($request, callable $handler)
+    {
+        // Inspect the request before passing it downstream.
+        return $handler($request);
+    }
+}
+```
+
+`process($request, callable $handler)` may return a result directly without calling the handler, or call `$handler($request)` and return its downstream result. Neither parameter nor result is typed. Despite its name and PSR-15 reference, this interface is not a strict PSR-15/PSR-7 implementation: request/response and handler types differ. Verify types against the HTTP integration in use.
+
+## Registration and scope
+
+The `config/middleware.php` template starts empty. Entries must be arrays of classes with a `process` method; configured classes do not have to implement the interface. Example:
+
+```php
+return [
+    '@' => [RequestLogMiddleware::class],
+    'api' => [ApiAccessMiddleware::class],
+];
+```
+
+`@` is global scope, an empty key is the default application scope, and `api` names an application. Bootstrap also collects Engine static middleware and application/plugin configuration. Routes may add middleware through Router; `#[Triangle\Annotation\Middleware(SomeMiddleware::class)]` is available on controller classes/methods, and a public default `middleware` property is read as well. The attribute class is provided by Engine.
+
+`Bootstrap::getMiddleware($plugin, $app, $controller, $route, $withGlobal)` returns callable `process` entries; `withGlobal: false` omits global entries. The list is cached in process-static state: loading again in the same process appends rather than resets it. Verify the actual order in the integration before relying on side-effect order.
+
+## Checks and limits
+
+The current checkout provides `composer lint` and `composer test`; these scripts were added after published v2.0.3. Its regression suite checks global/plugin/application scope, `withGlobal: false`, malformed config, and missing `process`. The suite is absent from the release tag and does not run a full HTTP request/response cycle. Add an application integration test using the actual Engine, Router, and HTTP versions you deploy. Avoid long blocking work in middleware executed by an event loop.
+
+## Practical guides
+
+[Install](/projects/triangle-middleware/en/install) · [Usage](/projects/triangle-middleware/en/usage) · [Operations](/projects/triangle-middleware/en/operations) · [Compatibility and tests](/projects/triangle-middleware/en/compatibility).

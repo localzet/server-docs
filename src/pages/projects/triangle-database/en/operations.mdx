@@ -1,0 +1,10 @@
+export const pageTitle = 'Database operations and security'
+export const description = 'Drivers, per-process connections, migrations, and safe queries.'
+
+# Database operations and security
+
+The config template contains SQLite, MySQL, PostgreSQL, SQL Server, and MongoDB examples. SQL connections require the corresponding PDO extensions. MongoDB requires a compatible integration package; it is not a mandatory dependency.
+
+`persistent` defaults to `true`. When started with Server, the component schedules a MySQL keepalive every 55 seconds. This is not a connection pool, retry policy, or availability guarantee. Set `persistent => false` to disable it. The manager and connections are process-local, so each worker has a separate instance.
+
+Use a least-privilege DB account, restrict network access, and configure driver-appropriate TLS/timeouts. Bind values in raw SQL; do not concatenate user input. Run migrations as a separate controlled deployment step; bootstrap does not modify the schema automatically.

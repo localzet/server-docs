@@ -1,0 +1,10 @@
+export const pageTitle = 'Сессии: эксплуатация и безопасность'
+export const description = 'Настройка backend/cookie и process-local границы.'
+
+# Сессии: эксплуатация и безопасность
+
+Поддерживаемые `SESSION_TYPE`: `file` (default), `redis`, `redis_cluster`, `mongo`. Настройки подключения берутся из `session.config.<driver>`. Для нескольких workers на разных машинах локальные файлы не являются shared store; используйте Redis/Cluster/Mongo или общую файловую систему, если архитектура это поддерживает.
+
+Cookie параметры шаблона: имя `PHPSID`, `http_only=true`, `secure=false`, пустые domain и SameSite. Для HTTPS включите `SESSION_COOKIE_SECURE=true`. Установите domain, path и SameSite под origins и cross-site flow; не задавайте широкую область cookie без потребности. `SESSION_LIFETIME` и `SESSION_COOKIE_LIFETIME` задают разные сроки.
+
+Ограничьте доступ к session storage, не логируйте значения сессии, используйте только доверенное хранилище. Сессия и request scope не должны сохраняться в долгоживущем worker state.

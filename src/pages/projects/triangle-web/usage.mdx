@@ -1,0 +1,20 @@
+export const pageTitle = 'Маршруты и контроллеры Web'
+export const description = 'Добавьте маршрут и проверьте HTML, JSON и view handlers.'
+
+# Маршруты и контроллеры Web
+
+Файл `config/route.php` регистрирует маршруты через `Triangle\Router`:
+
+```php
+use Triangle\Request;
+use Triangle\Response;
+use Triangle\Router;
+
+Router::any('/hello/{name}', function (Request $request, string $name): Response {
+    return response("Привет, $name!");
+});
+```
+
+`Router::any` обрабатывает любой HTTP method для route. Шаблон `app/controller/Index.php` показывает `response(...)`, `responseJson('ok')` и `view('index/view', ['name' => 'Triangle'])`. `config/view.php` выбирает renderer через `VIEW_HANDLER`; значение по умолчанию `raw`, варианты шаблона — `blade`, `think`, `twig`.
+
+После запуска `php master start` проверьте endpoint по адресу из `config/server.php` (по умолчанию `http://127.0.0.1:8000`). Для примера выше запросите `/hello/Ada`. Команды CLI сверяйте через `php master list` для реально разрешённой версии Console.

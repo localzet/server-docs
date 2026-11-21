@@ -1,0 +1,34 @@
+export const pageTitle = 'Triangle WS'
+export const description = 'Экспериментальный WebSocket-first шаблон Triangle с маршрутами, callback API и локальными рассылками.'
+
+# Triangle WS
+
+Triangle WS — экспериментальный WebSocket-first шаблон приложения на Triangle Engine и Server. Выпущен тег [`v1.0.4`](https://github.com/Triangle-org/WS/releases/tag/v1.0.4). Опубликованный Composer manifest требует PHP `^8.2`, Engine `^8.1` и Engine WS `^2.0`, но Engine WS 2.0.0 требует Engine `^9.0`; эти ограничения несовместимы. Не рассчитывайте на успешную установку `v1.0.4`, пока manifest не исправлен. Текущий checkout отличается: он требует Engine WS `^1.1` и lock разрешает Engine 8.1.11 / Engine WS 1.1.1. Сверяйте метаданные выбранного релиза и исходной ветки отдельно.
+
+## Маршруты и payload
+
+Шаблон запускает Engine через `master`, загружает autoload и `config/route.php`. WebSocket callback роутера получает текущий payload как строку (во время handshake значение может быть `null`); ответ можно вернуть через `response()`:
+
+```php
+use Triangle\Router;
+
+Router::any('/chat', static function (?string $payload) {
+    return response($payload ?? 'connected');
+});
+```
+
+Шаблон `config/server.php` задаёт `websocket://0.0.0.0:8080`, handler `Triangle\Ws\App`, лимит пакета 10 MiB и один worker. В исходном README особо отмечено, что текущая конфигурация рассчитана на один процесс. Проверьте TLS termination, bind address, ограничения сообщения и сетевой ACL в своей среде.
+
+`Triangle\Ws\App::sendToAll($data, $excludeCurrent)` отправляет соединениям серверов текущего процесса. `sendToGroup(...)` в текущей реализации выбирает соединения по пути WebSocket-запроса; это path scope, а не произвольная именованная группа. Эти методы не дают межпроцессной рассылки или общего состояния. Для нескольких процессов/узлов нужен отдельный broker/shared-state слой.
+
+## Ограничения и проверки
+
+Шаблон экспериментальный и не заменяет зрелую HTTP app без оценки сценария. Поддерживайте callbacks неблокирующими; проверьте handshake, маршрутизацию, disconnect, ошибочный/крупный payload и восстановление соединения в собственных integration tests. Текущий `composer.json` не объявляет test/lint scripts. Компонент публикует только однопроцессную модель рассылки из README; delivery guarantees, durable messages и cluster coordination не заявлены.
+
+
+## Практические руководства
+
+- [Установка и статус зависимостей](triangle-ws/install)
+- [Маршруты и payload](triangle-ws/usage)
+- [Эксплуатация и ограничения](triangle-ws/operations)
+- [Совместимость и проверки](triangle-ws/compatibility)

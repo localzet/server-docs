@@ -1,0 +1,25 @@
+export const pageTitle = 'Triangle Events 2.0.1 — in-process events'
+export const description = 'Triangle Events 2.0.1 installation, exact and prefix listeners, Engine 9 configuration, and delivery limits.'
+
+# Triangle Events
+
+Triangle Events registers listeners during Triangle Engine startup and dispatches them synchronously inside the current PHP process. It is an application event dispatcher, not a message queue.
+
+**Current release:** 2.0.1 · **PHP:** 8.1+ · **Engine:** 9.x · **Package:** `triangle/events`.
+
+The package supports exact names such as `invoice.created` and prefix subscriptions such as `invoice.*`. Each listener receives the payload followed by the event name. Events are neither persisted nor delivered between worker processes.
+
+## Guides
+
+- [Install and register a first listener](triangle-events/en/install)
+- [Registration, dispatch, and listener results](triangle-events/en/usage)
+- [Configuration, operations, and security](triangle-events/en/operations)
+- [Compatibility, upgrades, and checks](triangle-events/en/compatibility)
+
+## Intended use
+
+Use this library when components in one process need to react synchronously to an application fact such as `invoice.created`, without direct coupling between the caller and listeners. For background, durable, or cross-process delivery, integrate a separate broker or queue; Events does not provide those features.
+
+## Limits
+
+Listeners run before dispatch returns and can add latency to the calling operation. With `halt: true`, the dispatcher returns the first non-null response; `false` stops normal dispatch. Version 2.0.0 had a logger initialization bug on this path. Version 2.0.1 fixes it and adds a regression check with a throwing listener; see the [API guide](triangle-events/en/usage).

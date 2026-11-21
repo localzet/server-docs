@@ -1,0 +1,34 @@
+export const pageTitle = 'Совместимость и тесты Triangle Events'
+export const description = 'Совместимость Events 2.0.1 с PHP 8.1 и Engine 9, отличия от прежней ветки и точные проверки.'
+
+# Совместимость, обновление и проверки
+
+## Требования версии 2.0.1
+
+`triangle/events` 2.0.1 требует PHP `^8.1`, `triangle/engine ^9.0` и `psr/log ^2.0 || ^3.0`. Engine 8 не входит в диапазон совместимости. Если приложение ещё использует Engine 8, сначала планируйте обновление Engine; ограничение зависимости нельзя безопасно обходить принудительной установкой.
+
+Установка этой версии:
+
+```sh
+composer require triangle/events:^2.0
+composer show triangle/events triangle/engine
+```
+
+## Изменения в 2.0.1
+
+В версии 2.0.0 при исключении listener logger мог использоваться до безопасной инициализации. Версия 2.0.1 исправляет инициализацию и расширяет `tests/engine_compatibility.php`: тест проверяет, что исключение listener возвращается из `emit()` и не выходит наружу.
+
+## Изменение интеграции
+
+Ветка 2.x использует bootstrap contract и хуки регистрации конфигурации приложений и плагинов Engine 9. Сверьте `config/event.php` приложения и plugins, затем проверьте запуск на точной версии Engine из lock-файла. Не переносите примеры из старых веток без проверки: API и bootstrap могли отличаться.
+
+## Проверка исходников
+
+```sh
+composer install
+composer test
+```
+
+Проверка из исходников версии 2.0.1 — `tests/engine_compatibility.php`. Она проверяет совместимость bootstrap-интерфейса, plugin hooks, передачу payload конфигурационному listener и возврат исключения от listener без выхода из `emit()`. Это не нагрузочный тест и не подтверждает доставку между процессами, durable storage, retry или production-метрики.
+
+**Источники:** [релиз v2.0.1](https://github.com/Triangle-org/Events/tree/v2.0.1), [Composer](https://github.com/Triangle-org/Events/blob/v2.0.1/composer.json), [тест совместимости](https://github.com/Triangle-org/Events/blob/v2.0.1/tests/engine_compatibility.php).

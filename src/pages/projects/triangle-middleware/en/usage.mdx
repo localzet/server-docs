@@ -1,0 +1,32 @@
+export const pageTitle = 'Registering and ordering Middleware'
+export const description = 'Create a process handler, configure scopes, and attach middleware to routes/controllers.'
+
+# Registering and ordering Middleware
+
+Middleware receives a request and a callable for the next handler, then returns the downstream result or its own response:
+
+```php
+<?php
+use Triangle\Middleware\MiddlewareInterface;
+
+final class AccessLog implements MiddlewareInterface
+{
+    public function process($request, callable $handler)
+    {
+        return $handler($request);
+    }
+}
+```
+
+Configuration values are arrays of classes; `@` is global scope and an application name selects app scope:
+
+```php
+return [
+    '@' => [AccessLog::class],
+    'api' => [ApiAccess::class],
+];
+```
+
+The loader also collects plugin and Engine static config. Router supplies route middleware. The Engine attribute can be placed on a class/method: `#[Triangle\Annotation\Middleware(AccessLog::class)]`; a public default controller `middleware` property is also read.
+
+`Triangle\Middleware\Bootstrap::getMiddleware($plugin, $app, $controller, $route, $withGlobal)` returns `process` callables to the integrator. `withGlobal: false` excludes global middleware. Which entry executes first depends on how the HTTP integration folds the list into a chain; verify the order with an application test.

@@ -1,0 +1,30 @@
+export const pageTitle = 'Triangle View compatibility and tests'
+export const description = 'View 2.1.0 compatibility, upgrade notes, rendering checks, and test coverage limits.'
+
+# Compatibility and testing
+
+## Supported versions
+
+View 2.1.0 requires PHP `^8.1` and allows `triangle/engine ^8.1 || ^9.0`. Engine 9 targets Localzet Server 7; the Engine 8 range preserves compatibility for existing applications and does not imply support for other major versions.
+
+```sh
+composer require triangle/view:^2.1
+composer show triangle/view triangle/engine
+```
+
+## Upgrade notes
+
+Review the lock file and `view.php` configuration. If the application sets `VIEW_HANDLER`, install the corresponding third-party template engine separately. Verify template paths and views that use request-assigned values: values explicitly passed to the helper override previous assignments.
+
+Switching to `raw` can affect output safety: HTML is not escaped automatically. Review templates that render user-provided values before deployment.
+
+## Checks
+
+```sh
+composer install
+composer test
+```
+
+The `tests/engine_compatibility.php` test checks Engine compatibility and the main rendering path. It does not cover every third-party engine, HTML context, or application template. Add tests for actual pages, especially those that render user-provided text.
+
+**Sources:** [v2.1.0 release](https://github.com/Triangle-org/View/tree/v2.1.0), [Composer manifest](https://github.com/Triangle-org/View/blob/v2.1.0/composer.json), [compatibility test](https://github.com/Triangle-org/View/blob/v2.1.0/tests/engine_compatibility.php).

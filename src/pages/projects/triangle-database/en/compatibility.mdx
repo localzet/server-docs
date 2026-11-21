@@ -1,0 +1,14 @@
+export const pageTitle = 'Database compatibility and tests'
+export const description = 'Upgrade from Engine 8/Database 1 and understand SQLite test coverage.'
+
+# Database compatibility and tests
+
+Tag `v2.0.0` requires PHP `^8.2`, Engine `^9.0`, Illuminate Database/Events/Pagination `^12.0`, and Symfony VarDumper `^7.4`. Line 2.x is incompatible with Engine 8 and package line 1.x. Check `composer show triangle/database` and the lock file, then update related Triangle components together.
+
+```sh
+composer install --no-interaction
+composer validate --strict --no-check-publish
+composer test
+```
+
+`composer test` runs an in-memory SQLite regression covering bootstrap, table creation, and Eloquent insert/read. It does not test remote MySQL/PostgreSQL/SQL Server/MongoDB services, production credentials, TLS, or failover. Mongo support is optional; validate its adapter and target database separately in an integration environment.

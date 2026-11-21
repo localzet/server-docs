@@ -1,0 +1,32 @@
+export const pageTitle = 'Регистрация и порядок Middleware'
+export const description = 'Создайте process handler, задайте уровни и подключите middleware к маршруту/контроллеру.'
+
+# Регистрация и порядок Middleware
+
+Middleware принимает request и callable следующего обработчика, а затем возвращает downstream результат или собственный response:
+
+```php
+<?php
+use Triangle\Middleware\MiddlewareInterface;
+
+final class AccessLog implements MiddlewareInterface
+{
+    public function process($request, callable $handler)
+    {
+        return $handler($request);
+    }
+}
+```
+
+Конфигурация содержит массивы классов; `@` задаёт глобальный scope, ключ с именем app — app scope:
+
+```php
+return [
+    '@' => [AccessLog::class],
+    'api' => [ApiAccess::class],
+];
+```
+
+Загрузчик также собирает plugin и Engine static config. Route middleware приходит через Router. Атрибут Engine можно задать на class/method: `#[Triangle\Annotation\Middleware(AccessLog::class)]`; также учитывается публичное default-свойство controller `middleware`.
+
+`Triangle\Middleware\Bootstrap::getMiddleware($plugin, $app, $controller, $route, $withGlobal)` отдаёт методы `process` для интегратора. `withGlobal: false` пропускает global middleware. Список, фактически применяемый первым/последним, зависит от того, как HTTP интеграция сворачивает его в chain — зафиксируйте порядок тестом в своём приложении.

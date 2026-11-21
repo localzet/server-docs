@@ -1,0 +1,17 @@
+export const pageTitle = 'Using a session'
+export const description = 'Read and write values through the current HTTP request helper.'
+
+# Using a session
+
+The `session()` helper accesses the current request's session:
+
+```php
+session(['user_id' => 42, 'preferences' => ['theme' => 'dark']]);
+$userId = session('user_id');
+$theme = session('preferences.theme', 'light');
+$currentSession = session();
+```
+
+Without arguments it returns the current session object; a string key reads a value and an array is passed to `put()`. Nested keys use dot notation. Store scalars and arrays: session handlers restore serialized values without instantiating arbitrary objects.
+
+Choose a backend with `SESSION_TYPE` and configure its `session.config.<driver>` section in `config/session.php`. Use shared storage when multiple workers must read/update the same user's session.

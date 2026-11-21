@@ -1,0 +1,20 @@
+export const pageTitle = 'Эксплуатация и безопасность Triangle OAuth'
+export const description = 'Хранение OAuth state и токенов, callback validation, защита credentials и ограничения adapter API.'
+
+# Сессии, секреты и безопасность
+
+## Сессия и storage
+
+Без переданного `StorageInterface` adapter использует `Triangle\\OAuth\\Storage\\Session`. Данные лежат в текущей сессии под namespace `OAuthStorage`; запись вызывает `session()->save()`. Callback должен получить ту же сессию, в которой был создан authorization state. Для собственной реализации storage соблюдайте контракт `StorageInterface` и защитите данные от чтения/подмены.
+
+Session storage сериализует объекты, а при чтении вызывает `unserialize()`. Не используйте хранилище, которое может быть изменено недоверенной стороной. Удаляйте/очищайте токены при disconnect и завершении локальной сессии по правилам приложения.
+
+## State и callback
+
+OAuth2 adapter по умолчанию сохраняет state и сравнивает его с callback параметром. Параметр `supportRequestState` может отключить эту проверку; не выключайте её для браузерного authorization flow. Текущая генерация state в исходниках использует `str_shuffle`, поэтому её нельзя считать криптографически надёжной. Для публичного production login это существенное ограничение: проверьте state protection и используйте безопасный непредсказуемый nonce в выбранной интеграции до публикации.
+
+Проверяйте callback URL, provider errors и одноразовое сопоставление `state`; не принимайте произвольные redirect destinations из query. Используйте HTTPS и точный redirect URI, зарегистрированный у провайдера.
+
+## Секреты и права
+
+Храните client secret только в secret store/окружении; исключайте токены, authorization codes, state и секреты из журналов и ошибок. Просите минимальные scopes. Успешный ответ провайдера подтверждает только внешний identity согласно модели провайдера; локальную роль и доступ назначает приложение.

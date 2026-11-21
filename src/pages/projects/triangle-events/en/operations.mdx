@@ -1,0 +1,30 @@
+export const pageTitle = 'Triangle Events configuration and operations'
+export const description = 'Application and plugin event.php loading, synchronous execution, error handling, and security limits.'
+
+# Configuration and operations
+
+## Loading configuration
+
+At startup on Engine 9, the Events bootstrap reads the main `event` configuration, followed by equivalent application and plugin configurations. For each `event name => callback list` entry it registers listeners. Invalid structures or non-callable callbacks raise a `RuntimeException` during loading, so validate configuration before production startup.
+
+```php
+return [
+    'report.generated' => [
+        [App\Listeners\SendReport::class, 'handle'],
+    ],
+];
+```
+
+A plugin may provide its own `config/event.php`. Configured listener classes are resolved through `support\Container`.
+
+## Execution model
+
+`emit()` calls callbacks synchronously in the current process. Listener time contributes to the latency of the operation that emitted the event. The dispatcher stores subscriptions in process-local static structures; it does not replicate them across workers or retain events across restarts.
+
+Use a separate background-processing mechanism for slow I/O, retries, guaranteed delivery, scheduling, or cross-process coordination. Do not include secrets in payloads unless every listener needs them.
+
+## Errors and security
+
+A listener exception is included in `emit()` results and is logged when the Engine logging facility is available. This does not make the business operation successful: callers must inspect the result and decide how to handle failure or retry.
+
+Configuration files and listeners execute as application code. Do not load them from untrusted sources. Events does not implement authorization: callers define the emitted events and payload, and listeners must check their own assumptions and permissions.

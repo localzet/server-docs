@@ -1,0 +1,18 @@
+export const pageTitle = 'Маршруты и WebSocket payload'
+export const description = 'Проверьте route callback на источниках текущего checkout.'
+
+# Маршруты и WebSocket payload
+
+На текущем checkout `master` загружает Engine, после чего маршруты регистрируются в `config/route.php` через `Triangle\Router`. Callback получает строку данных; во время handshake значение может быть `null`:
+
+```php
+use Triangle\Router;
+
+Router::any('/chat', static function (?string $payload) {
+    return response($payload ?? 'connected');
+});
+```
+
+`response()` в интеграции строит `Triangle\Ws\Response`. Payload и формат ответа определяет приложение. Начните с малого текстового payload и проверьте, что handshake и последующие сообщения идут по ожидаемому path. В приложении из шаблона также есть controller action `app/controller/Index.php`.
+
+Сверьте этот API с зависимостью Engine WS, реально разрешённой в lock: published tag требует Engine WS 2.x, а current checkout — 1.1.x. Не переносите поведение одного набора зависимостей на другой без runtime integration check.

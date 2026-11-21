@@ -1,0 +1,27 @@
+export const pageTitle = 'Install Triangle OAuth 3.0.9'
+export const description = 'Install triangle/oauth, inspect published release requirements, and distinguish the current preview checkout.'
+
+# Install and start an OAuth flow
+
+## Published release
+
+Tag `v3.0.9` is published as Composer package `triangle/oauth`. It requires PHP `^8.2`, `ext-mbstring`, `ext-json`, `ext-curl`, and `localzet/http:^2.0`.
+
+```sh
+composer require triangle/oauth:^3.0
+composer show triangle/oauth localzet/http
+```
+
+The v3.0.9 tag does not declare Engine as a runtime dependency, although the code uses Engine request/session/response APIs and support logging. Verify integration with your application; a successful Composer resolution alone does not prove runtime compatibility.
+
+## Current checkout preview
+
+The current source checkout is commit `gc66280e`, four commits after v3.0.9. Its manifest additionally requires `triangle/engine:^8.1`; this is an untagged preview, not the published release's constraint.
+
+If you need this exact source, pin the revision in a private mirror or path repository and verify its lock file. Do not silently substitute the current branch for tag v3.0.9.
+
+## Provider setup
+
+Create an OAuth application with the provider and register an exact HTTPS callback URL. Supply the client ID and secret through environment variables and request only required scopes. Composer lists `localzet/jwt` and `phpseclib/phpseclib` as optional for Apple; Steam needs `ext-libxml` and `ext-simplexml`.
+
+The package declares no `test` or `lint` script. The current CI validates Composer metadata, installs locked dependencies, and runs `php -l`; this does not exercise an external OAuth redirect/callback flow.

@@ -1,0 +1,42 @@
+export const pageTitle = 'Triangle Session'
+export const description = 'HTTP sessions for Triangle Engine using file, Redis, Redis Cluster, or MongoDB storage.'
+
+# Triangle Session
+
+Triangle Session connects Localzet Server HTTP sessions to Triangle Engine and provides the `session()` helper for the current request. Release [2.0.0](https://github.com/Triangle-org/Session/releases/tag/v2.0.0).
+
+Requirements: PHP `^8.1`, Engine `^9.0`; Engine 9 requires the Server 7.1+ session API.
+
+```sh
+composer require triangle/session:^2.0
+composer show triangle/session
+```
+
+## Usage
+
+Engine loads `Triangle\Session\Bootstrap` automatically. If the application does not publish package config, `Triangle\Session\Install::install()` copies a missing template.
+
+```php
+session(['user_id' => 42, 'preferences' => ['theme' => 'dark']]);
+$userId = session('user_id');
+$theme = session('preferences.theme', 'light');
+$currentSession = session();
+```
+
+Without arguments the helper returns the current request session; a string key reads and an array writes. Store scalars/arrays: objects from serialized storage are not instantiated.
+
+## Storage, cookies, and security
+
+Default `SESSION_TYPE=file` stores data under `runtime_path('sessions')`. Supported backends are `file`, `redis`, `redis_cluster`, and `mongo`; Redis needs ext-redis, Mongo needs `mongodb/mongodb` and ext-mongodb. Settings are under `session.config.<driver>`.
+
+Cookie defaults: `PHPSID`, HTTP-only enabled, secure disabled, empty domain and SameSite. For HTTPS set `SESSION_COOKIE_SECURE=true`; configure domain and SameSite for the actual origins and cross-site flow. `SESSION_LIFETIME` and `SESSION_COOKIE_LIFETIME` are independent settings.
+
+A session belongs to a request, not a worker process. Do not retain session objects in long-lived state. Multiple workers need shared storage when they must share sessions; file storage requires a shared filesystem. Restrict backend access and do not log session contents.
+
+## Compatibility and checks
+
+`v2.0.0` requires Engine 9 and the Server 7.1+ API; Engine 8 is incompatible. During migration, review cookie settings and backend; old stored data may need a separate migration. `composer test` checks Engine bootstrap, the Server handler contract, file round trips, and safe restoration without object instantiation. `composer test:mongo` is a separate Mongo scenario; regular tests do not start Redis/Mongo services.
+
+## Practical guides
+
+[Install](/projects/triangle-session/en/install) · [Usage](/projects/triangle-session/en/usage) · [Operations](/projects/triangle-session/en/operations) · [Compatibility and tests](/projects/triangle-session/en/compatibility).

@@ -1,0 +1,16 @@
+export const pageTitle = 'Совместимость и тесты Middleware'
+export const description = 'Условия опубликованного v2.0.3 и покрытие loader regression suite.'
+
+# Совместимость и тесты Middleware
+
+Опубликованный v2.0.3 допускает PHP `^8.1`, Router `^2.0` и Engine `^8.1 || ^9.0`. Проверьте совместимость Server/HTTP request types в конкретном приложении; сам интерфейс не диктует типизацию payload.
+
+Текущий checkout `2eade42` находится на четыре коммита после тега. Его `composer.json`, тесты и CI включают проверки, которых нет в опубликованном v2.0.3; для самого релиза эти scripts запускать нельзя, если их нет в установленном пакете.
+
+```sh
+composer validate --no-check-publish --no-interaction
+composer lint
+composer test
+```
+
+В preview checkout доступны regression checks для scopes global/plugin/app, `withGlobal: false`, malformed config и класса без `process`. Их нет в теге v2.0.3. Проверки не запускают полную HTTP обработку или middleware реального приложения. После обновления проверьте собственный порядок вызова, атрибуты и обработку ответа интеграционным тестом.

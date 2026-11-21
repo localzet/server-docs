@@ -1,0 +1,48 @@
+export const pageTitle = 'Triangle Cron'
+export const description = 'Регистрация периодических задач в Triangle Engine через отдельный scheduler-процесс.'
+
+# Triangle Cron
+
+Triangle Cron подключает планировщик Localzet Cron как отдельный процесс в приложении Triangle Engine. Учитывайте статус релиза: в Packagist опубликован `triangle/cron` **1.0.3**; его ограничения Composer — PHP `^8.1`, Engine `^8.1`, Events `^1.0`, Localzet Cron `^1.0`. Поэтому опубликованный пакет предназначен для старой ветки Engine 8.1.
+
+Исходники checkout `feat/cron-server7` содержат подготовленную несовместимую ветку 2.x для Engine 9 / Server 7 (`triangle/engine:^9.0`, `localzet/cron:^2.0`), но на момент проверки для неё нет тега/публикации. Не устанавливайте `triangle/cron:^2.0` из Packagist до выхода релиза. Текущие исходники preview не являются содержимым опубликованного 1.0.3.
+
+## Использование текущего опубликованного пакета
+
+Для совместимого Engine 8.1 приложения Composer constraint опубликованной линии:
+
+```sh
+composer require triangle/cron:^1.0
+composer show triangle/cron triangle/engine localzet/cron
+```
+
+Проверьте фактические версии по lock-файлу перед запуском. Не переносите пример Engine 9 ниже на версию 1.0.3 без проверки её README/API.
+
+## Engine 9 preview: задача и запуск
+
+Следующий пример описывает только текущую исходную ветку preview, а не установленный релиз:
+
+```php
+<?php
+return [
+    [
+        'name' => 'cleanup-expired-records',
+        'rule' => '*/5 * * * *',
+        'callback' => static function (): void {
+            // Keep this task short and non-blocking.
+        },
+    ],
+];
+```
+
+Preview `Triangle\Cron\Autoload` при управляемой команде запуска регистрирует выделенный `Cron` server с одним worker. На событии старта он читает `config('cron', [])` и создаёт Cron job только для записей, где заданы непустые `rule` и `callback`; `name` необязателен. Пять полей задают расписание с точностью до минуты, шесть могут включать секунды согласно README preview. Callback работает в event loop: передавайте долгие задачи в очередь/отдельный процесс.
+
+## Надёжность и проверки preview
+
+Это in-process scheduler, не durable queue: задания и расписание не переживают перезапуск как сохранённое состояние, а отдельные установки приложения не координируют выполнение между собой. Один worker снижает риск запуска каждой задачи всеми workers одного scheduler; несколько инсталляций всё равно требуют внешней координации, если задача должна исполняться ровно в одном месте.
+
+В preview репозитории `composer run check` запускает PHP lint и `tests/compatibility.php`. Тест проверяет контракт autoload Engine 9, регистрацию выделенного Server 7 процесса и фильтрацию неполных задач. Это не проверка самого расписания под нагрузкой и не доказательство exactly-once. Перед переходом на ветку 2 дождитесь релиза и сверяйте опубликованные constraints и migration notes.
+
+## Практические руководства
+
+[Установка](/projects/triangle-cron/install) · [Использование](/projects/triangle-cron/usage) · [Эксплуатация](/projects/triangle-cron/operations) · [Совместимость и тесты](/projects/triangle-cron/compatibility).

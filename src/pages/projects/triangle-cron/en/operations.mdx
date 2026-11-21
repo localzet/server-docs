@@ -1,0 +1,8 @@
+export const pageTitle = 'Cron reliability and operations'
+export const description = 'Event loop, processes, and preview scheduler guarantees.'
+
+# Cron reliability and operations
+
+The preview runs the scheduler as part of the application's process system; it is not a durable queue. It configures one worker. Increasing the worker count can register duplicate schedules in each worker. Separate installations do not coordinate with one another. Use external coordination/locking for single execution across a cluster if your application provides it; the component does not add this mechanism.
+
+Do not block the event loop with long SQL/HTTP/CPU work in callbacks. Use an external queue or worker for long-running/retryable tasks and implement idempotency at task level. The source does not persist schedule/execution history as durable job state, so process restart does not restore execution history. Verify error/retry behavior against the exact Localzet Cron version and workload.

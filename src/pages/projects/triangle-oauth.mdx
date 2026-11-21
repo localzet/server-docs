@@ -1,0 +1,59 @@
+export const pageTitle = 'Triangle OAuth'
+export const description = 'OAuth 1, OAuth 2 и OpenID адаптеры провайдеров с callback и хранилищем состояния.'
+
+# Triangle OAuth
+
+Triangle OAuth предоставляет менеджер провайдеров и адаптеры OAuth 1, OAuth 2 и OpenID. Опубликован [`v3.0.9`](https://github.com/Triangle-org/OAuth/releases/tag/v3.0.9). Composer-пакет `triangle/oauth` требует PHP `^8.2`, ext-mbstring/json/curl и `localzet/http:^2.0`. В текущем checkout manifest дополнительно требует `triangle/engine:^8.1`; он находится на четыре коммита после тега, поэтому это требование текущего исходного состояния, а не метаданные опубликованного v3.0.9.
+
+Локальный checkout `gc66280e` — preview после тега, не отдельный опубликованный релиз. Сверяйте требования выбранного источника: release package и checkout имеют разные Composer constraints.
+
+```sh
+composer require triangle/oauth:^3.0
+composer show triangle/oauth localzet/http
+```
+
+В текущем Engine-приложении проверьте Composer разрешение и доступность request/session helpers до использования. Для Apple в manifest как optional dependencies указаны `localzet/jwt` и `phpseclib/phpseclib`; Steam требует ext-libxml и ext-simplexml.
+
+## Инициализация и flow
+
+Менеджеру передаётся массив конфигурации или путь к PHP-файлу, а также optional storage/logger. Например для Google:
+
+```php
+$config = [
+    'callback' => 'https://app.example.test/oauth/google',
+    'providers' => [
+        'google' => [
+            'enabled' => true,
+            'keys' => ['id' => getenv('GOOGLE_CLIENT_ID'), 'secret' => getenv('GOOGLE_CLIENT_SECRET')],
+            'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
+        ],
+    ],
+];
+$oauth = new \Triangle\OAuth($config);
+$result = $oauth->authenticate('google');
+if ($result instanceof \Triangle\Engine\Response) {
+    return $result; // redirect response during the authorization start
+}
+$profile = $result->getUserProfile();
+```
+
+Это демонстрация API, а не готовый controller: обработчик callback должен вызывать тот же manager с тем же provider config в пользовательской сессии. Для исходящего шага `authenticate()` возвращает redirect response; после возврата provider callback завершает обмен code на token и возвращает adapter. Провайдеры включаются явно через `enabled`; `callback` можно задать глобально или переопределить в provider config. Пример класса `Google` доступен в исходниках; каталог содержит также GitHub, Microsoft, Apple, Steam и другие адаптеры. Наличие класса не означает, что у каждого провайдера одинаковые scopes, поля профиля или дополнительные зависимости.
+
+Manager также предоставляет `getProviders()`, `getConnectedProviders()`, `getConnectedAdapters()`, `isConnectedWith()` и `disconnectAllAdapters()`. Возможности API профиля и контактов зависят от конкретного адаптера.
+
+## Хранение, безопасность и пределы
+
+По умолчанию адаптер использует `Triangle\OAuth\Storage\Session`; она сохраняет token/state в текущую сессию и вызывает `session()->save()`. Можно передать собственный `StorageInterface`. OAuth2 поддерживает state по умолчанию и сверяет callback state с сохранённым значением; конфигурация может отключить это поведение. Текущая генерация state в исходниках использует `str_shuffle`, поэтому не считайте встроенный state криптографически стойкой защитой. Для production оцените замену/усиление state generation и обязательно сохраняйте и проверяйте state в доверенном session store.
+
+Храните client secrets вне исходников, ограничьте scopes, используйте HTTPS callback и не логируйте tokens/секреты. Session storage восстанавливает сериализованные object значения через `unserialize`; не используйте недоверенное/подменяемое хранилище без оценки риска. Успешная библиотечная авторизация не заменяет локальную проверку прав пользователя в приложении.
+
+## Совместимость и проверки
+
+Тег v3.0.9 manifest отличается от текущего checkout Engine constraint: публикация требует перечисленные PHP extensions и `localzet/http:^2.0`, checkout ещё объявляет Engine `^8.1`. Сверяйте `composer show` и lock перед установкой в Engine приложении. В checkout не найден test directory и нет composer test/lint scripts; отдельный automated test command не заявлен. Проверьте реальные provider redirect/callback flows в интеграционном окружении и на тестовых OAuth credentials.
+
+## Практические руководства
+
+- [Установка и первый OAuth flow](triangle-oauth/install)
+- [Старт авторизации, callback и профиль](triangle-oauth/usage)
+- [Сессии, секреты и границы безопасности](triangle-oauth/operations)
+- [Версии, совместимость и проверки](triangle-oauth/compatibility)

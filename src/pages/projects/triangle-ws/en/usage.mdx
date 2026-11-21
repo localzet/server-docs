@@ -1,0 +1,18 @@
+export const pageTitle = 'Routes and WebSocket payloads'
+export const description = 'Exercise route callbacks against the current checkout source.'
+
+# Routes and WebSocket payloads
+
+In the current checkout, `master` loads Engine, then routes are registered in `config/route.php` through `Triangle\Router`. A callback receives a data string; during handshake the value may be `null`:
+
+```php
+use Triangle\Router;
+
+Router::any('/chat', static function (?string $payload) {
+    return response($payload ?? 'connected');
+});
+```
+
+The integration's `response()` helper creates a `Triangle\Ws\Response`. The application defines the payload and response format. Start with a small text payload and verify the handshake and subsequent messages on the expected path. The template also includes a controller action in `app/controller/Index.php`.
+
+Check this API against the Engine WS dependency actually resolved in the lock: the published tag requires Engine WS 2.x, while the current checkout uses 1.1.x. Do not assume behavior transfers between dependency sets without a runtime integration check.

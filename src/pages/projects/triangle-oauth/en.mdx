@@ -1,0 +1,59 @@
+export const pageTitle = 'Triangle OAuth'
+export const description = 'OAuth 1, OAuth 2, and OpenID provider adapters with callback handling and state storage.'
+
+# Triangle OAuth
+
+Triangle OAuth provides a provider manager and OAuth 1, OAuth 2, and OpenID adapters. Published tag: [`v3.0.9`](https://github.com/Triangle-org/OAuth/releases/tag/v3.0.9). The published `triangle/oauth` Composer package requires PHP `^8.2`, ext-mbstring/json/curl, and `localzet/http:^2.0`. The current checkout additionally requires `triangle/engine:^8.1`; it is four commits beyond the tag, so this is a current source constraint, not metadata for published v3.0.9.
+
+The local checkout at `gc66280e` is an untagged preview after the release, not a separate published version. Check constraints for the exact source you install: the release package and checkout have different Composer requirements.
+
+```sh
+composer require triangle/oauth:^3.0
+composer show triangle/oauth localzet/http
+```
+
+In an Engine application, verify resolved dependencies and availability of request/session helpers before use. The manifest lists `localzet/jwt` and `phpseclib/phpseclib` as optional for Apple; Steam requires ext-libxml and ext-simplexml.
+
+## Initialize and run the flow
+
+Pass the manager an array or PHP config path, with optional storage/logger. Example for Google:
+
+```php
+$config = [
+    'callback' => 'https://app.example.test/oauth/google',
+    'providers' => [
+        'google' => [
+            'enabled' => true,
+            'keys' => ['id' => getenv('GOOGLE_CLIENT_ID'), 'secret' => getenv('GOOGLE_CLIENT_SECRET')],
+            'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
+        ],
+    ],
+];
+$oauth = new \Triangle\OAuth($config);
+$result = $oauth->authenticate('google');
+if ($result instanceof \Triangle\Engine\Response) {
+    return $result; // redirect response during the authorization start
+}
+$profile = $result->getUserProfile();
+```
+
+This demonstrates the API, not a complete controller: the callback handler must call the manager with the same provider config and user's session. On the authorization start, `authenticate()` returns a redirect response; after the provider redirects back, callback handling exchanges the code and returns an adapter. Enable providers explicitly with `enabled`; set `callback` globally or per provider. The source includes Google, GitHub, Microsoft, Apple, Steam, and other adapter classes. Class presence does not imply identical scopes, profile fields, or extra dependencies for every provider.
+
+The manager also exposes `getProviders()`, `getConnectedProviders()`, `getConnectedAdapters()`, `isConnectedWith()`, and `disconnectAllAdapters()`. Profile/contact API support depends on the provider adapter.
+
+## Storage, security, and limits
+
+By default adapters use `Triangle\OAuth\Storage\Session`, which stores token/state in the current session and calls `session()->save()`. A custom `StorageInterface` can be injected. OAuth2 state support is enabled by default and callback state is compared with stored state; config can disable this. Current source generates state with `str_shuffle`, so do not treat the built-in generation as cryptographically strong protection. For production, assess replacing/hardening state generation and keep state in a trusted session store.
+
+Keep client secrets out of source, limit scopes, use HTTPS callbacks, and do not log tokens/secrets. Session storage restores serialized object values with `unserialize`; do not use an untrusted or tamperable store without assessing this risk. Successful provider authentication does not replace application-level authorization checks.
+
+## Compatibility and checks
+
+The v3.0.9 tag manifest differs from the current checkout's Engine constraint: the published package requires the listed PHP extensions and `localzet/http:^2.0`, while checkout also declares Engine `^8.1`. Inspect `composer show` and the lock file when integrating with Engine. No test directory or Composer test/lint scripts were found in the checkout, so no package-provided automated check is declared. Verify actual provider redirects/callbacks in an integration environment with test OAuth credentials.
+
+## Practical guides
+
+- [Install and run a first OAuth flow](triangle-oauth/en/install)
+- [Authorization start, callback, and profile](triangle-oauth/en/usage)
+- [Sessions, secrets, and security boundaries](triangle-oauth/en/operations)
+- [Versions, compatibility, and checks](triangle-oauth/en/compatibility)

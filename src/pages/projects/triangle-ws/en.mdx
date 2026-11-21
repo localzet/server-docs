@@ -1,0 +1,34 @@
+export const pageTitle = 'Triangle WS'
+export const description = 'Experimental WebSocket-first Triangle template with routing, callbacks, and process-local broadcasts.'
+
+# Triangle WS
+
+Triangle WS is an experimental WebSocket-first application template built on Triangle Engine and Server. Published tag: [`v1.0.4`](https://github.com/Triangle-org/WS/releases/tag/v1.0.4). The published Composer manifest requires PHP `^8.2`, Engine `^8.1`, and Engine WS `^2.0`, but Engine WS 2.0.0 requires Engine `^9.0`; these constraints conflict. Do not expect `v1.0.4` installation to succeed until the manifest is corrected. The current checkout differs: it requires Engine WS `^1.1` and its lock resolves Engine 8.1.11 / Engine WS 1.1.1. Check release metadata separately from the source branch.
+
+## Routes and payloads
+
+The template starts Engine through `master`, loads autoloading, and reads `config/route.php`. A WebSocket router callback receives the current payload as a string (during handshake it may be `null`); return a response with `response()`:
+
+```php
+use Triangle\Router;
+
+Router::any('/chat', static function (?string $payload) {
+    return response($payload ?? 'connected');
+});
+```
+
+The source `config/server.php` sets `websocket://0.0.0.0:8080`, handler `Triangle\Ws\App`, a 10 MiB package limit, and one worker. The project README describes the current config as a one-process setup. Review TLS termination, bind address, message size, and network ACLs for your environment.
+
+`Triangle\Ws\App::sendToAll($data, $excludeCurrent)` sends to connections on servers in the current process. `sendToGroup(...)` currently selects connections by the WebSocket request path; it is a path scope, not an arbitrary named group. These methods do not provide cross-process broadcast or shared state. Multi-process/node deployments need a separate broker/shared-state layer.
+
+## Limits and checks
+
+The template is experimental; evaluate the use case before replacing a mature HTTP application. Keep callbacks non-blocking and add application integration tests for handshake, routing, disconnect, invalid/large payloads, and reconnect behavior. The current `composer.json` declares no test/lint scripts. The documented broadcast model is process-local; delivery guarantees, durable messages, and cluster coordination are not provided.
+
+
+## Practical guides
+
+- [Install and dependency status](triangle-ws/en/install)
+- [Routes and payloads](triangle-ws/en/usage)
+- [Operations and limits](triangle-ws/en/operations)
+- [Compatibility and checks](triangle-ws/en/compatibility)

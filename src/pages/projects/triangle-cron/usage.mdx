@@ -1,0 +1,23 @@
+export const pageTitle = 'Определение задач Cron'
+export const description = 'Пример задачи для Engine 9 preview и описание запуска scheduler.'
+
+# Определение задач Cron
+
+Следующий фрагмент относится только к текущему Engine 9 preview source:
+
+```php
+<?php
+return [
+    [
+        'name' => 'cleanup-expired-records',
+        'rule' => '*/5 * * * *',
+        'callback' => static function (): void {
+            // Add the application task here.
+        },
+    ],
+];
+```
+
+Поместите определения в `config/cron.php`. Preview autoload на managed startup создаёт отдельный server `Cron` с одним worker; при старте worker читает `config('cron', [])` и регистрирует только записи с непустыми `rule` и `callback`. Поле `name` необязательно.
+
+Пять полей cron задают минутную точность, шесть могут включать секунды по описанию preview. Прикладной callback должен быть коротким и неблокирующим; длительную работу отправляйте в очередь или отдельный process. Регистрация задачи не означает немедленный запуск при config load.

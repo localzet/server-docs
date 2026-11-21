@@ -1,0 +1,30 @@
+export const pageTitle = 'Eloquent and the query builder'
+export const description = 'Basic model, query, and request-aware pagination examples.'
+
+# Eloquent and the query builder
+
+Application models extend `Triangle\Database\Model`:
+
+```php
+<?php
+use Triangle\Database\Model;
+
+final class User extends Model
+{
+    protected $table = 'users';
+    protected $fillable = ['name'];
+    public $timestamps = false;
+}
+```
+
+Standard Eloquent operations are available after bootstrap:
+
+```php
+$user = User::query()->create(['name' => 'Ada']);
+$found = User::query()->where('id', $user->id)->first();
+$rows = Triangle\Database\Manager::table('users')
+    ->where('name', 'Ada')
+    ->get();
+```
+
+Use `paginate()`, `simplePaginate()`, or `cursorPaginate()` inside the current HTTP request handler: the component connects Illuminate resolvers to the current request context. Do not retain their parameters/results across requests. The Manager exposes the schema builder, but the package does not include a migration CLI or automatically run migrations.

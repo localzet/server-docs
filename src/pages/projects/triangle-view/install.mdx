@@ -1,0 +1,38 @@
+export const pageTitle = 'Установка и первый ответ Triangle View'
+export const description = 'Требования PHP и Engine, установка triangle/view и минимальный пример шаблона phtml.'
+
+# Установка и первый ответ
+
+Требуются PHP 8.1+, Composer и Triangle Engine `^8.1 || ^9.0`.
+
+```sh
+composer require triangle/view:^2.1
+```
+
+Пакет регистрирует helper-функции через Composer autoload. Установщик Engine копирует стандартный `view.php` в конфигурацию, только если такого файла ещё нет.
+
+Создайте шаблон `app/<имя-приложения>/view/page.phtml` и вызовите helper из обработчика Engine:
+
+```php
+<?php
+// Controller action running in a Triangle Engine request
+return view('page', ['title' => 'Каталог', 'items' => $items]);
+```
+
+```php
+<!-- app/shop/view/page.phtml -->
+<h1><?= htmlspecialchars($title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></h1>
+<ul>
+<?php foreach ($items as $item): ?>
+    <li><?= htmlspecialchars($item['name'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></li>
+<?php endforeach ?>
+</ul>
+```
+
+Замените `app/shop` на реальное имя приложения в проекте. `view()` возвращает `Triangle\Response` со статусом по умолчанию 200. В примере предполагается, что `$items` получен и валидирован приложением.
+
+Проверка пакета:
+
+```sh
+composer test
+```

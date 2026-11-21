@@ -1,0 +1,15 @@
+export const pageTitle = 'Установка Triangle Session'
+export const description = 'Требования, автозагрузка Engine и доступные backend зависимости.'
+
+# Установка Triangle Session
+
+Triangle Session 2.0.0 требует PHP `^8.1` и Triangle Engine `^9.0`; Engine 9 использует Session API Localzet Server 7.1+.
+
+```sh
+composer require triangle/session:^2.0
+composer show triangle/session triangle/engine localzet/server
+```
+
+Engine загружает `Triangle\Session\Bootstrap` при старте. Если приложение не публикует package config, выполните `Triangle\Session\Install::install()` в контексте установки. По умолчанию используется file backend с каталогом `runtime_path('sessions')`; каталогу нужны права записи для worker.
+
+Дополнительные backend: Redis/Redis Cluster требуют PHP ext-redis; Mongo требует `mongodb/mongodb` и ext-mongodb. Проверьте выбранные расширения перед конфигурацией и не устанавливайте необязательные driver-зависимости без необходимости.

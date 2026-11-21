@@ -1,0 +1,29 @@
+export const pageTitle = 'Triangle View rendering and data'
+export const description = 'View helpers, template paths, and precedence of variables passed to a template.'
+
+# Render templates and pass data
+
+## `view()` and templates
+
+```php
+return view('catalog/show', ['product' => $product], app: 'shop');
+```
+
+`view($template = null, array $vars = [], ?string $app = null, ?string $plugin = null, int $http_code = 200)` selects the configured handler and returns a `Triangle\Response`. When the template is `null`, it is derived from the current request controller/action. The base path for the `shop` application is `app/shop/view/...`; the default suffix is `.phtml`.
+
+For explicit adapter selection, the package provides `raw_view()`, `blade_view()`, `twig_view()`, and `think_view()`. Helpers for optional engines require the corresponding Composer package.
+
+## Template data
+
+`view()` combines current request-assigned variables with the provided array; explicitly provided values take precedence. You can assign a value separately:
+
+```php
+Triangle\View\Support\View::assign('section', 'billing');
+return view('account', ['section' => 'profile']); // explicit value wins
+```
+
+`View::vars()` returns request-assigned variables. `View::assign($array, merge_recursive: true)` enables recursive merging for nested arrays; without that flag, assignment uses ordinary `array_merge`.
+
+## Composed templates
+
+The raw renderer supports pre-render and post-render templates through `view.options.pre_renders` and `view.options.post_renders`. Use them for shared layouts only after testing the rendered order and data structure in the application.

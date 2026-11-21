@@ -1,0 +1,44 @@
+export const pageTitle = 'Установка и первый запуск Triangle Router'
+export const description = 'Требования Triangle Router 2.0.7 и минимальный самостоятельный dispatcher с маршрутом и параметром.'
+
+# Установка и самостоятельный dispatcher
+
+Требуются PHP 8.1+, Composer и Triangle Engine `^8.1 || ^9.0`.
+
+```sh
+composer require triangle/router:^2.0
+```
+
+Функция `simpleRouteDispatcher()` доступна через Composer autoload. Минимальный standalone пример:
+
+```php
+<?php
+
+require __DIR__ . '/vendor/autoload.php';
+
+use Triangle\Router\Dispatcher;
+
+$dispatcher = simpleRouteDispatcher(static function (Triangle\Router $router): void {
+    $router->addRoute('GET', '/users/{id:\\d+}', static function (array $params): string {
+        return 'user ' . $params['id'];
+    });
+});
+
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
+$path = rawurldecode($path);
+$result = $dispatcher->dispatch($_SERVER['REQUEST_METHOD'], $path);
+
+if ($result[0] === Dispatcher::FOUND) {
+    [$status, $handler, $params] = $result;
+    $body = $handler($params);
+    // Create and send an HTTP response in the application.
+}
+```
+
+Dispatcher отдаёт информацию о совпадении. Он не вызывает строковый handler за приложение и не пишет HTTP-ответ за него. Нормализацию URI под свою серверную среду и преобразование результата в ответ выполняет приложение.
+
+Запустите тесты пакета:
+
+```sh
+composer test
+```

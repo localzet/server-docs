@@ -1,0 +1,14 @@
+export const pageTitle = 'Install Triangle WS'
+export const description = 'Differences between the published Composer manifest and the current checkout.'
+
+# Install Triangle WS
+
+`triangle/ws` is published as project tag `v1.0.4`. Its tagged manifest requires PHP `^8.2`, `triangle/engine:^8.1`, and `triangle/engine-ws:^2.0`. However, `triangle/engine-ws` v2.0.0 itself requires Engine `^9.0`; Engine `^8.1` and that dependency cannot be satisfied together. The published WS manifest therefore has no resolvable dependency set for this combination. Do not expect `composer create-project` to succeed until the release constraints are corrected.
+
+The current checkout differs: its `composer.json` uses `triangle/engine-ws:^1.1`; its lock contains Engine 8.1.11 and Engine WS 1.1.1. That is the source checkout's state, not the v1.0.4 tag manifest.
+
+```sh
+composer show triangle/ws triangle/engine triangle/engine-ws
+```
+
+Check the release manifest and lock file for the selected commit before use. Do not deploy the current preview combination merely because its local lock resolves.

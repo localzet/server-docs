@@ -1,0 +1,15 @@
+export const pageTitle = 'Установка Middleware'
+export const description = 'Установите пакет и проверьте ограничения совместимости.'
+
+# Установка Middleware
+
+Опубликованный `triangle/middleware` v2.0.3 требует PHP `^8.1`, `triangle/router:^2.0` и `triangle/engine:^8.1 || ^9.0`.
+
+```sh
+composer require triangle/middleware:^2.0
+composer show triangle/middleware triangle/router triangle/engine
+```
+
+Пакет — загрузчик и контракт middleware, а не самостоятельный HTTP runtime. Bootstrap запускается Engine при старте Server. Для вызова HTTP цепочки нужна интеграция, например Triangle HTTP, совместимая с типом request/response приложения.
+
+Пакет конфигурации поставляет шаблон `config/middleware.php` с пустым массивом. В Engine приложении добавьте middleware в конфиг и проверьте установленный lock; сам пакет не создаёт универсальный request handler.

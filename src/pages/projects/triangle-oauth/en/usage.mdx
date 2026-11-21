@@ -1,0 +1,40 @@
+export const pageTitle = 'Triangle OAuth authorization and callback'
+export const description = 'Configure a provider, separate authorization start from callback handling, and retrieve a user profile.'
+
+# Start authorization and handle the callback
+
+Construct the manager with a configuration array or PHP file path, plus optional storage and logger. A provider must be listed in `providers` and explicitly enabled.
+
+```php
+$config = [
+    'callback' => 'https://app.example.test/oauth/google/callback',
+    'providers' => [
+        'google' => [
+            'enabled' => true,
+            'keys' => [
+                'id' => getenv('GOOGLE_CLIENT_ID'),
+                'secret' => getenv('GOOGLE_CLIENT_SECRET'),
+            ],
+            'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
+        ],
+    ],
+];
+$oauth = new \Triangle\OAuth($config);
+$result = $oauth->authenticate('google');
+```
+
+On the authorization-start request, `authenticate()` returns a `Triangle\Engine\Response` redirect; return it from the Engine handler. On callback, process the request with the same provider configuration and user's session context. A successful callback returns the provider adapter:
+
+```php
+$result = $oauth->authenticate('google');
+if ($result instanceof \Triangle\Engine\Response) {
+    return $result;
+}
+
+$profile = $result->getUserProfile();
+// Map $profile->identifier to a local account.
+```
+
+This shows the response branch, not a complete controller. The application must provide the callback route, session cookie, provider-denial handling, and local identity mapping. Do not link accounts on email alone without validating the trust model.
+
+Profile/contact methods depend on the specific adapter. Do not assume providers share scopes or profile fields.

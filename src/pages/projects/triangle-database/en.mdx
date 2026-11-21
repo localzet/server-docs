@@ -1,0 +1,56 @@
+export const pageTitle = 'Triangle Database'
+export const description = 'Illuminate Eloquent and query builder for Triangle Engine applications.'
+
+# Triangle Database
+
+Triangle Database integrates Illuminate Database with Triangle Engine: it boots Eloquent/query builder and configured connections, and connects pagination to the current request. Release [2.0.0](https://github.com/Triangle-org/Database/releases/tag/v2.0.0).
+
+Requirements: PHP `^8.2`, Engine `^9.0`, Illuminate Database/Events/Pagination `^12.0`, Symfony VarDumper `^7.4`.
+
+```sh
+composer require triangle/database:^2.0
+composer show triangle/database
+```
+
+## First connection and query
+
+Engine reads `config/database.php`. Minimal SQLite example:
+
+```php
+return [
+    'default' => 'sqlite',
+    'persistent' => false,
+    'connections' => ['sqlite' => [
+        'driver' => 'sqlite', 'database' => ':memory:', 'prefix' => '',
+    ]],
+];
+```
+
+Set a file path for persistent SQLite storage; the template uses `base_path`. `Triangle\Database\Install::install()` copies config only when the target file is absent.
+
+```php
+use Triangle\Database\Model;
+final class User extends Model {
+    protected $table = 'users';
+    protected $fillable = ['name'];
+    public $timestamps = false;
+}
+$user = User::query()->create(['name' => 'Ada']);
+$rows = Triangle\Database\Manager::table('users')->where('name', 'Ada')->get();
+```
+
+The schema builder is available through Manager; the component has no separate migration CLI and does not run migrations automatically.
+
+## Operations and security
+
+The template contains SQLite/MySQL/PostgreSQL/SQL Server/MongoDB examples. SQL requires the matching PDO extension; MongoDB requires a compatible adapter. `persistent` defaults to `true`; when started with Server, a MySQL keepalive is scheduled every 55 seconds. This is not a connection pool or availability guarantee. Set `persistent=false` to disable it. The manager and connections are process-local, so each worker has its own instance.
+
+Illuminate paginators use process-wide resolvers tied to the current request; call them in request handlers and do not retain request-specific state. Use least-privilege DB accounts, driver-appropriate TLS/timeouts, and bindings for raw SQL. Apply schema changes through a controlled migration process.
+
+## Compatibility and checks
+
+Tag `v2.0.0` targets Engine 9 and is incompatible with Engine 8 and package line 1.x. Upgrade related Triangle components together and inspect the Composer lock. `composer test` uses in-memory SQLite to check bootstrap, table creation, and Eloquent insert/read. It does not cover external databases, production credentials, or failover. Mongo integration is optional.
+
+## Practical guides
+
+[Install](/projects/triangle-database/en/install) · [Usage](/projects/triangle-database/en/usage) · [Operations](/projects/triangle-database/en/operations) · [Compatibility and tests](/projects/triangle-database/en/compatibility).

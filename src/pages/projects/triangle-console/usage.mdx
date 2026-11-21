@@ -1,0 +1,43 @@
+export const pageTitle = 'Команды и мост Illuminate'
+export const description = 'Создание Symfony-команд, автопоиск и явное подключение команд Illuminate.'
+
+# Команды и мост Illuminate
+
+Создайте PSR-4 загружаемый класс команды в `app/command`:
+
+```php
+<?php
+
+namespace app\command;
+
+use localzet\Console\Commands\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+final class ReportCommand extends Command
+{
+    protected static string $defaultName = 'app:report';
+    protected static string $defaultDescription = 'Show report status';
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $output->writeln('Report is ready.');
+        return self::SUCCESS;
+    }
+}
+```
+
+После Engine bootstrap запустите `$console = new Triangle\Console\Console(); exit($console->run());`. Аргументы CLI передаются стандартному `run()`; выполните entry point с `list` или `app:report`. Команды из `config/command.php` — массив имен классов; каждый должен иметь Symfony-compatible `defaultName`. Также выполняется поиск в включённых plugin command каталогах.
+
+### Illuminate Console
+
+Мост подключается явно, например при ручном составе приложения:
+
+```php
+$console = (new Triangle\Console\Console([], false))
+    ->useIlluminate(new Illuminate\Container\Container());
+$console->addIlluminateCommand(new App\Console\Commands\ReportCommand());
+$console->run();
+```
+
+Второй аргумент `false` отключает автоматическую регистрацию внутренних команд пакета. Передайте контейнер, ожидаемый вашими Illuminate-командами. Обычные команды остаются на Symfony API.

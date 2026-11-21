@@ -1,0 +1,33 @@
+export const pageTitle = 'Определение и разрешение маршрутов Triangle Router'
+export const description = 'Методы, параметры, необязательные сегменты, группы и ответы FOUND, NOT_FOUND, METHOD_NOT_ALLOWED.'
+
+# Определение маршрутов
+
+## Методы и параметры
+
+```php
+$router->addRoute(['GET', 'POST'], '/users/{id:\\d+}', $handler);
+$router->addGroup('/api', static function (Triangle\Router $router): void {
+    $router->addRoute('GET', '/users/{id}', $showUser);
+});
+```
+
+`$handler` must be callable (or a valid `[ClassName::class, 'method']` pair); a descriptive string alone is not a valid handler.
+
+Стандартный parser использует `{name}` для сегмента без `/`; пользовательский regex задаётся как `{id:\\d+}`. Необязательные сегменты задаются квадратными скобками в конце шаблона, например `/articles[/{id}]`; необязательная часть посреди маршрута не поддерживается. Группы добавляют общий префикс.
+
+Класс Router также предоставляет shortcuts `get`, `post`, `put`, `patch`, `delete`, `head`, `options` и `any`; `resource()` генерирует ресурсные маршруты для действий контроллера. Проверяйте точные методы и имена маршрутов в API вашей версии.
+
+## Разбор результата
+
+`dispatch($method, $path)` возвращает массив с одним из статусов:
+
+- `Dispatcher::FOUND`: `[FOUND, $handler, $params]`.
+- `Dispatcher::NOT_FOUND`: маршрут не найден.
+- `Dispatcher::METHOD_NOT_ALLOWED`: второй элемент содержит допустимые HTTP-методы.
+
+При 405 приложение должно сформировать заголовок `Allow` со списком допустимых методов. При 404 и 405 dispatcher не создаёт response сам. Для `FOUND` приложение разрешает callback и передаёт параметры ему в соответствии со своим контрактом.
+
+## Кэшируемый standalone dispatcher
+
+`cachedRouteDispatcher($definition, ['cacheFile' => $path])` сохраняет сгенерированную структуру маршрутов в PHP-файл и использует её при следующем старте, если `cacheDisabled` не включён. Размещайте кэш в каталоге, доступном приложению на запись и недоступном для HTTP-раздачи; не принимайте содержимое такого PHP-файла от пользователя.

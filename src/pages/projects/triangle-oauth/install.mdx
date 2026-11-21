@@ -1,0 +1,27 @@
+export const pageTitle = 'Установка Triangle OAuth 3.0.9'
+export const description = 'Установка triangle/oauth, зависимости опубликованного релиза и проверка текущего preview checkout.'
+
+# Установка и первый OAuth flow
+
+## Опубликованный релиз
+
+Тег `v3.0.9` опубликован как Composer-пакет `triangle/oauth`. Требуются PHP `^8.2`, `ext-mbstring`, `ext-json`, `ext-curl` и `localzet/http:^2.0`.
+
+```sh
+composer require triangle/oauth:^3.0
+composer show triangle/oauth localzet/http
+```
+
+Выпуск v3.0.9 не объявляет Engine как runtime dependency в манифесте тега, хотя код использует Engine request/session/response API и support logging. Проверяйте фактическую интеграцию своего приложения, а не только успешное разрешение Composer.
+
+## Текущий checkout и preview
+
+Текущая копия исходников — commit `gc66280e`, четыре коммита после v3.0.9. Её manifest уже включает `triangle/engine:^8.1`; это untagged preview, а не constraint опубликованного релиза.
+
+Если задача требует именно этот исходник, зафиксируйте точную ревизию в собственном mirror/path repository и проверяйте его lock-файл. Не подменяйте тег v3.0.9 текущей веткой незаметно.
+
+## Подготовка провайдера
+
+Создайте OAuth application у выбранного провайдера и задайте точный HTTPS callback URL. Идентификатор и secret передавайте из переменных окружения, а scopes ограничьте необходимыми правами. Для Apple в Composer указаны optional `localzet/jwt` и `phpseclib/phpseclib`; для Steam требуются `ext-libxml` и `ext-simplexml`.
+
+Пакет не объявляет скрипт `test` или `lint`. В текущем CI выполняются Composer validation, установка lock-зависимостей и `php -l`; это не проверяет внешний OAuth redirect/callback flow.

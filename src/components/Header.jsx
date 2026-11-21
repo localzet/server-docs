@@ -8,24 +8,47 @@ import {ModeToggle} from '@/components/ModeToggle'
 import {MobileSearch, Search} from '@/components/Search'
 import {useRouter} from 'next/router'
 
-const projects = [
-    {id: 'server', title: 'Server', href: '/'},
-    {id: 'cluster', title: 'Cluster', href: '/projects/cluster'},
-    {id: 'engine', title: 'Triangle Engine', href: '/projects/engine'},
-    {id: 'engine-http', title: 'Engine HTTP', href: '/projects/engine-http'},
-    {id: 'engine-ws', title: 'Engine WS', href: '/projects/engine-ws'},
-    {id: 'cron', title: 'Cron', href: '/projects/cron'},
-    {id: 'httpclient', title: 'HTTP Client', href: '/projects/httpclient'},
-    {id: 'mqtt', title: 'MQTT', href: '/projects/mqtt'},
-    {id: 'psr7', title: 'PSR-7', href: '/projects/psr7'},
-    {id: 'proxy', title: 'Proxy', href: '/projects/proxy'},
-    {id: 'socks5', title: 'SOCKS5', href: '/projects/socks5'},
-    {id: 'socketio', title: 'Socket.IO', href: '/projects/socketio'},
-    {id: 'storage', title: 'Storage', href: '/projects/storage'},
-    {id: 'tunnel', title: 'Tunnel', href: '/projects/tunnel'},
-    {id: 'noter', title: 'Noter', href: '/projects/noter'},
-    {id: 'media', title: 'Media', href: '/projects/media'},
+const projectGroups = [
+    {
+        title: 'Localzet',
+        projects: [
+            {id: 'server', title: 'Server', href: '/'},
+            {id: 'cluster', title: 'Cluster', href: '/projects/cluster'},
+            {id: 'console', title: 'Localzet Console', href: '/projects/console'},
+            {id: 'cron', title: 'Cron', href: '/projects/cron'},
+            {id: 'httpclient', title: 'HTTP Client', href: '/projects/httpclient'},
+            {id: 'mqtt', title: 'MQTT', href: '/projects/mqtt'},
+            {id: 'psr7', title: 'PSR-7', href: '/projects/psr7'},
+            {id: 'proxy', title: 'Proxy', href: '/projects/proxy'},
+            {id: 'socks5', title: 'SOCKS5', href: '/projects/socks5'},
+            {id: 'socketio', title: 'Socket.IO', href: '/projects/socketio'},
+            {id: 'storage', title: 'Storage', href: '/projects/storage'},
+            {id: 'tunnel', title: 'Tunnel', href: '/projects/tunnel'},
+            {id: 'noter', title: 'Noter', href: '/projects/noter'},
+        ],
+    },
+    {
+        title: 'Triangle',
+        projects: [
+            {id: 'engine', title: 'Engine', href: '/projects/engine'},
+            {id: 'engine-http', title: 'Engine HTTP', href: '/projects/engine-http'},
+            {id: 'engine-ws', title: 'Engine WS', href: '/projects/engine-ws'},
+            {id: 'triangle-console', title: 'Console', href: '/projects/triangle-console'},
+            {id: 'triangle-cron', title: 'Cron', href: '/projects/triangle-cron'},
+            {id: 'triangle-database', title: 'Database', href: '/projects/triangle-database'},
+            {id: 'triangle-events', title: 'Events', href: '/projects/triangle-events'},
+            {id: 'triangle-middleware', title: 'Middleware', href: '/projects/triangle-middleware'},
+            {id: 'triangle-oauth', title: 'OAuth', href: '/projects/triangle-oauth'},
+            {id: 'triangle-router', title: 'Router', href: '/projects/triangle-router'},
+            {id: 'triangle-session', title: 'Session', href: '/projects/triangle-session'},
+            {id: 'triangle-view', title: 'View', href: '/projects/triangle-view'},
+            {id: 'triangle-web', title: 'Web', href: '/projects/triangle-web'},
+            {id: 'triangle-ws', title: 'WS', href: '/projects/triangle-ws'},
+            {id: 'media', title: 'Media', href: '/projects/media'},
+        ],
+    },
 ]
+const projects = projectGroups.flatMap((group) => group.projects)
 
 export const Header = forwardRef(function Header({className}, ref) {
     let router = useRouter()
@@ -77,7 +100,13 @@ export const Header = forwardRef(function Header({className}, ref) {
                     value={currentProject}
                     onChange={(event) => router.push(projects.find((project) => project.id === event.target.value)?.href ?? '/')}
                 >
-                    {projects.map((project) => <option key={project.id} value={project.id}>{project.title}</option>)}
+                    {projectGroups.map((group) => (
+                        <optgroup key={group.title} label={group.title}>
+                            {group.projects.map((project) => (
+                                <option key={project.id} value={project.id}>{project.title}</option>
+                            ))}
+                        </optgroup>
+                    ))}
                 </select>
                 <div className="flex shrink-0 items-center gap-3 sm:gap-4">
                     <MobileSearch/>

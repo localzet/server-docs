@@ -1,0 +1,30 @@
+export const pageTitle = 'Совместимость и тесты Triangle View'
+export const description = 'Совместимость View 2.1.0, правила обновления, тест рендеринга и ограничения тестового покрытия.'
+
+# Совместимость и тесты
+
+## Поддерживаемые версии
+
+View 2.1.0 требует PHP `^8.1` и допускает `triangle/engine ^8.1 || ^9.0`. Engine 9 предназначен для Localzet Server 7; наличие Engine 8 в диапазоне сохраняет поддержку существующих приложений, но не означает совместимость с любыми другими major-версиями.
+
+```sh
+composer require triangle/view:^2.1
+composer show triangle/view triangle/engine
+```
+
+## Обновление
+
+Сверьте lock-файл и конфигурацию `view.php`. Если приложение задаёт `VIEW_HANDLER`, установите соответствующий сторонний движок отдельно. Проверьте путь шаблонов и представления, которые используют `request`-assigned values: значения, явно переданные в helper, перекрывают назначенные ранее.
+
+Переход на `raw` может менять безопасность вывода: HTML не экранируется автоматически. Проверьте шаблоны с пользовательскими данными до публикации.
+
+## Проверки
+
+```sh
+composer install
+composer test
+```
+
+Тест `tests/engine_compatibility.php` проверяет совместимость с Engine и основной путь рендеринга. Он не проверяет все сторонние шаблонизаторы, HTML-контексты или шаблоны вашего приложения. Добавьте тесты на фактические страницы, особенно на вывод пользовательского текста.
+
+**Источники:** [релиз v2.1.0](https://github.com/Triangle-org/View/tree/v2.1.0), [Composer](https://github.com/Triangle-org/View/blob/v2.1.0/composer.json), [тест совместимости](https://github.com/Triangle-org/View/blob/v2.1.0/tests/engine_compatibility.php).

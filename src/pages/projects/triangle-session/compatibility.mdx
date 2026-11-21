@@ -1,0 +1,13 @@
+export const pageTitle = 'Совместимость и тесты Session'
+export const description = 'Проверки handler contract, миграция и внешние сервисы.'
+
+# Совместимость и тесты Session
+
+Выпуск `v2.0.0` рассчитан на Engine 9 и Session API Server 7.1+; Engine 8 uses an incompatible earlier contract. При переходе проверьте cookie name/domain/path/SameSite/secure, выбранный handler и перенос существующих session данных. Не считайте старые файлы/ключи автоматически совместимыми.
+
+```sh
+composer test
+composer test:mongo
+```
+
+`composer test` проверяет Engine bootstrap, Server session-handler contracts, file-backed round trip и восстановление данных без выполнения object wakeup. `composer test:mongo` — отдельный сценарий; обычные проверки не поднимают Redis/Mongo сервисы. Проход теста файла не подтверждает сетевую доступность, ACL и поведение production backend.

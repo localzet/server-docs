@@ -3,11 +3,11 @@ export const description = 'Запуск Localzet Storage на loopback и ра�
 
 # Storage: начало работы
 
-Storage — простое общее in-memory хранилище для процессов приложения. Установите пакет вместе с Localzet Server 7:
+Storage 2.0.0 — общее in-memory хранилище для приложений на Localzet Server 7. Пакет доступен через VCS-репозиторий, поскольку ещё не опубликован на Packagist:
 
 ```sh
 composer config repositories.localzet-storage vcs https://github.com/localzet/Storage
-composer require localzet/storage:^1.0
+composer require localzet/storage:^2.0
 ```
 
 Создайте серверное приложение. Storage слушает loopback и использует один worker по умолчанию:
@@ -39,4 +39,4 @@ $cache->increment('counter');
 
 `set`, `get`, `add`, `cas`, `increment` и `delete` работают через клиентский API; прочитайте возвращаемое значение, чтобы обработать отсутствующий ключ или неудачную условную запись. Клиент распределяет ключи между заданными адресами по CRC32, поэтому изменение списка узлов перемещает часть ключей.
 
-Данные теряются при остановке процесса; TTL, персистентности, репликации, аутентификации и шифрования нет. Не открывайте порт наружу. Объектная десериализация выключена; см. [безопасность и wire format](/projects/storage/reference).
+Данные теряются при остановке процесса; TTL, персистентности, репликации, аутентификации и шифрования нет. Не открывайте порт наружу. Версия 2 несовместима с клиентами, которые отправляют объекты или циклические массивы без явного opt-in. См. [безопасность и wire format](/projects/storage/reference).

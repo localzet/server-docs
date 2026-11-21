@@ -1,0 +1,15 @@
+export const pageTitle = 'Install Middleware'
+export const description = 'Install the package and check its compatibility constraints.'
+
+# Install Middleware
+
+Published `triangle/middleware` v2.0.3 requires PHP `^8.1`, `triangle/router:^2.0`, and `triangle/engine:^8.1 || ^9.0`.
+
+```sh
+composer require triangle/middleware:^2.0
+composer show triangle/middleware triangle/router triangle/engine
+```
+
+The package is a loader and middleware contract, not a standalone HTTP runtime. Engine starts the bootstrap with Server. An HTTP integration such as Triangle HTTP must invoke the chain and use request/response types compatible with the application.
+
+The package config template `config/middleware.php` starts with an empty list. Add middleware to the Engine application's config and inspect the resolved lock file; this package does not create a universal request handler.

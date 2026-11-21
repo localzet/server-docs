@@ -1,0 +1,48 @@
+export const pageTitle = 'Triangle Cron'
+export const description = 'Periodic task registration in Triangle Engine through a dedicated scheduler process.'
+
+# Triangle Cron
+
+Triangle Cron integrates Localzet Cron as a separate process in a Triangle Engine application. Release status matters: Packagist publishes `triangle/cron` **1.0.3**, with Composer requirements PHP `^8.1`, Engine `^8.1`, Events `^1.0`, and Localzet Cron `^1.0`. The published package targets the older Engine 8.1 line.
+
+The checked-out `feat/cron-server7` source contains a prepared, incompatible 2.x line for Engine 9 / Server 7 (`triangle/engine:^9.0`, `localzet/cron:^2.0`), but no tag/publication exists for it at this review. Do not install `triangle/cron:^2.0` from Packagist until that release is published. Preview source is not what the published 1.0.3 package contains.
+
+## Use the currently published package
+
+For a compatible Engine 8.1 application, the published Composer constraint is:
+
+```sh
+composer require triangle/cron:^1.0
+composer show triangle/cron triangle/engine localzet/cron
+```
+
+Check resolved versions in the lock file before running. Do not apply the Engine 9 example below to version 1.0.3 without checking its README/API.
+
+## Engine 9 preview: task and startup
+
+The following describes only the current preview source branch, not the published release:
+
+```php
+<?php
+return [
+    [
+        'name' => 'cleanup-expired-records',
+        'rule' => '*/5 * * * *',
+        'callback' => static function (): void {
+            // Keep this task short and non-blocking.
+        },
+    ],
+];
+```
+
+Preview `Triangle\Cron\Autoload` registers a dedicated `Cron` server with one worker for managed startup commands. On server start it reads `config('cron', [])` and creates a Cron job only when both `rule` and `callback` are non-empty; `name` is optional. Five fields provide minute precision; six may include seconds per the preview README. The callback runs on the event loop: send long-running work to a queue or separate process.
+
+## Preview reliability and checks
+
+This is an in-process scheduler, not a durable queue: scheduled state is not persisted across restarts, and separate application installations do not coordinate execution. A single worker avoids each worker in one scheduler running every task; multiple installations still need external coordination when only one execution is desired.
+
+In the preview repository, `composer run check` runs PHP lint and `tests/compatibility.php`. The test checks the Engine 9 autoload contract, dedicated Server 7 process registration, and rejection of incomplete tasks. It does not load-test schedule timing or prove exactly-once execution. Before moving to line 2, wait for a release and verify its published constraints and migration notes.
+
+## Practical guides
+
+[Install](/projects/triangle-cron/en/install) · [Usage](/projects/triangle-cron/en/usage) · [Operations](/projects/triangle-cron/en/operations) · [Compatibility and tests](/projects/triangle-cron/en/compatibility).

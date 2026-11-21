@@ -1,0 +1,16 @@
+export const pageTitle = 'Совместимость и проверки Cron'
+export const description = 'Проверка версии 1.0.3 и Engine 9 preview отдельно.'
+
+# Совместимость и проверки Cron
+
+Опубликованный v1.0.3 требует PHP `^8.1`, Engine `^8.1`, Events `^1.0`, Localzet Cron `^1.0`. Текущий Engine 9 preview source меняет контракт на Engine `^9.0` и Localzet Cron `^2.0`; его пока нельзя считать опубликованным или совместимым с 1.0.3. Для preview сверяйте текущую ветку и её lock; перед миграцией дождитесь tagged release и опубликованных migration notes.
+
+В checkout preview доступны:
+
+```sh
+composer install
+composer validate --strict --no-check-publish
+composer run check
+```
+
+`check` запускает PHP lint и `tests/compatibility.php`. Тест проверяет Engine autoload contract, регистрацию отдельного Server 7 process и отбор полных task definitions. Он не проверяет фактическое время срабатывания, нагрузку, retry/durability или exactly-once. Опубликованный 1.0.3 и source preview нельзя считать взаимозаменяемыми.

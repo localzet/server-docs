@@ -1,0 +1,41 @@
+export const pageTitle = 'API и сценарии Triangle Events'
+export const description = 'Точные и префиксные подписки, снятие listener, порядок вызова и семантика результата Events::emit().'
+
+# Регистрация и вызов
+
+## Точная и префиксная подписка
+
+```php
+use support\Events;
+
+$id = Events::on('user.*', static function (array $data, string $event): void {
+    // event is, for example, user.created
+});
+
+Events::on('user.created', static fn (array $data) => audit($data));
+Events::emit('user.created', ['id' => 7]);
+Events::off('user.*', $id);
+```
+
+Символ `*` задаёт префикс только в конце имени. Совпавшие точные и префиксные listeners вызываются в порядке регистрации. Подпись callback: сначала передаваемые данные, затем фактическое имя события.
+
+## Результат `emit()`
+
+По умолчанию `emit($name, $data)` возвращает массив ответов в порядке выполнения. Ветка `catch` исходника добавляет `Throwable` в этот массив и продолжает обход, но в v2.0.0 здесь была ошибка инициализации logger. В v2.0.1 она исправлена, а тест дополнен listener, который выбрасывает исключение. Если listener возвращает `false`, последующие обработчики не вызываются. При `$halt = true` метод возвращает первый ненулевой ответ, либо `null`, если такого ответа не было.
+
+```php
+$responses = Events::emit('cache.refresh', ['key' => 'catalog']);
+$first = Events::emit('permission.check', $subject, true);
+```
+
+Не используйте `halt` как транзакционную или гарантирующую доставку семантику: это только остановка синхронного обхода listeners.
+
+## Управление подписками
+
+- `Events::on(string $name, callable|array $listener): int` возвращает ID.
+- `Events::off(string $name, int $id): int` снимает обработчик указанного имени; для префикса передайте то же имя с `*`.
+- `Events::getListeners(string $name): array` возвращает совпадающие callbacks.
+- `Events::list(): array` перечисляет подписки и их ID.
+- `Events::hasListener(string $name): bool` проверяет наличие совпадающих callbacks.
+
+В массиве listener можно указать `[ClassName::class, 'method']`; Engine bootstrap для конфигурационных callbacks получает экземпляр через контейнер. Передавайте валидные callbacks и держите обработчики короткими: исключения из самого dispatch не заменяют обработку ошибок бизнес-операции.

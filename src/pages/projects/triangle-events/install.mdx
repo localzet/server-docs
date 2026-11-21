@@ -1,0 +1,59 @@
+export const pageTitle = 'Установка Triangle Events'
+export const description = 'Требования и установка triangle/events 2.0.1, первый запуск и минимальный проверяемый пример.'
+
+# Установка и первый обработчик
+
+## Требования
+
+- PHP 8.1 или новее.
+- Triangle Engine 9.x. Engine 8 не поддерживается: компонент использует plugin lifecycle hooks Engine 9.
+- Composer.
+
+Установите пакет в приложение на Engine 9:
+
+```sh
+composer require triangle/events:^2.0
+```
+
+## Вызов события
+
+В приложении используйте фасад `support\Events`, предоставляемый пакетом:
+
+```php
+<?php
+
+use support\Events;
+
+Events::on('invoice.created', static function (array $invoice, string $event): void {
+    error_log($event . ': ' . $invoice['id']);
+});
+
+Events::emit('invoice.created', ['id' => 42]);
+```
+
+Это синхронный вызов: `emit()` возвращает управление после выполнения обработчиков. В реальном приложении зарегистрируйте listener при старте приложения либо через `config/event.php`, а не внутри кода, который выполняется на каждый запрос: повторная регистрация создаёт дополнительные вызовы.
+
+## Конфигурация приложения
+
+Engine bootstrap загружает `event.php` для приложения и конфигурации плагинов. Пример файла конфигурации:
+
+```php
+<?php
+
+return [
+    'invoice.created' => [
+        [App\Listeners\InvoiceCreated::class, 'handle'],
+    ],
+];
+```
+
+Класс listener разрешается через контейнер Engine. Настройте этот файл в каталоге конфигурации приложения; пакет содержит исходный шаблон `src/Config/event.php`, возвращающий пустой массив.
+
+## Проверка
+
+```sh
+composer install
+composer test
+```
+
+Тест `engine_compatibility.php` проверяет контракт bootstrap с Engine, наличие plugin reduction hooks и передачу payload для обработчика из конфигурации. Он не проверяет развертывание очереди или межпроцессную доставку — таких механизмов в пакете нет.

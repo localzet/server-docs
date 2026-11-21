@@ -1,0 +1,30 @@
+export const pageTitle = 'Совместимость и тесты Triangle Router'
+export const description = 'Ограничения Router 2.0.7, заметки по обновлению, PHPUnit команды и фактическая область тестов.'
+
+# Совместимость, безопасность и тесты
+
+## Требования версии 2.0.7
+
+Пакет требует PHP `^8.1` и Triangle Engine `^8.1 || ^9.0`; PHPUnit 10.5 указан для разработки. Установка:
+
+```sh
+composer require triangle/router:^2.0
+composer show triangle/router triangle/engine
+```
+
+Если используются Engine route configs, проверьте расположение `config/route.php`, конфигурацию плагинов и bootstrap компонентов. Если приложение использует standalone helpers, проверьте вызов dispatcher и собственную нормализацию URI отдельно.
+
+## Тесты
+
+```sh
+composer install
+composer test
+```
+
+Скрипт запускает PHPUnit с `tests/phpunit.xml`; тесты `tests/Unit/RouteTest.php` проверяют построение/разбор маршрутов. Эти тесты не подтверждают авторизацию, отправку 404/405/HEAD ответов или соответствие нормализации URI конкретному production server.
+
+## Обновление и границы
+
+Перед обновлением проверьте changelog и сравните конфигурационные маршруты, имена и callbacks. Не меняйте одновременно regex-парсер и логику авторизации без отдельного теста маршрута и access-control проверки.
+
+**Источники:** [релиз v2.0.7](https://github.com/Triangle-org/Router/tree/v2.0.7), [Composer](https://github.com/Triangle-org/Router/blob/v2.0.7/composer.json), [unit tests](https://github.com/Triangle-org/Router/tree/v2.0.7/tests/Unit).
