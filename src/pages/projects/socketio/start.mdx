@@ -3,7 +3,7 @@ export const description = 'Подключение Socket.IO к локально
 
 # Socket.IO: начало работы
 
-Socket.IO [`2.0.2`](https://github.com/localzet/SocketIO/releases/tag/v2.0.2) добавляет Engine.IO transport и event API поверх Localzet Server 7. Установите пакет:
+Socket.IO [`2.0.3`](https://github.com/localzet/SocketIO/releases/tag/v2.0.3) предоставляет Engine.IO transport и event API поверх Localzet Server 7. Установите пакет:
 
 ```sh
 composer config repositories.localzet-socketio vcs https://github.com/localzet/SocketIO
@@ -36,4 +36,4 @@ Server::runAll();
 
 Запустите как Localzet Server entrypoint: `php socketio.php start`. Тесты проверяют Engine.IO polling, WebSocket handshake, подключение namespace и echo event. Они не подтверждают совместимость со всеми версиями `socket.io-client`, binary payload и reconnect; закрепите клиентскую версию и проверьте нужные transports в приложении.
 
-Параметр origin ограничивает часть браузерных источников, но не заменяет аутентификацию и авторизацию: отсутствующий/нулевой Origin не является доказательством доверия. Проверяйте пользователя и права в приложении, задайте список origins явно и ограничьте listener ingress ACL. Межпроцессные комнаты требуют совместимого adapter; см. [API и ограничения](/projects/socketio/reference).
+Параметр origin ограничивает часть браузерных источников, но не заменяет аутентификацию и авторизацию: отсутствующий/нулевой Origin не является доказательством доверия. Проверяйте пользователя и права в приложении, задайте список origins явно и ограничьте listener ingress ACL. Межпроцессные комнаты требуют совместимого `ChannelAdapter` из Tunnel 4.x; см. [API и ограничения](/projects/socketio/reference).

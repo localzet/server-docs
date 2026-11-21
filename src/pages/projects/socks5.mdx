@@ -4,6 +4,7 @@ export const description = 'SOCKS5 TCP CONNECT proxy для Localzet Server 7 с
 # Localzet SOCKS5
 [Начало работы](/projects/socks5/start) · [API и эксплуатация](/projects/socks5/reference)
 
+Текущий выпуск [`1.0.1`](https://github.com/localzet/SOCKS5/releases/tag/v1.0.1) ограничивает таблицу попыток подключения 10 000 IP-адресами на worker. Учёт ведётся секундными интервалами за скользящее окно 60 секунд; на границе окна запись может оставаться активной ещё до одной секунды.
 
 SOCKS5 TCP CONNECT proxy поддерживает IPv4 назначения и DNS имена. Поставка по умолчанию слушает loopback, требует логин и пароль, а явный anonymous режим разрешён только на loopback. UDP ASSOCIATE отключён; BIND и IPv6 назначения не реализованы.
 

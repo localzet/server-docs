@@ -5,10 +5,10 @@ export const description = 'Асинхронный HTTP-клиент для Loca
 [Начало работы](/projects/httpclient/start) · [API и эксплуатация](/projects/httpclient/reference)
 
 
-HttpClient выполняет HTTP-запросы из event loop Localzet Server и предоставляет connection pooling. Релиз [`3.0.1`](https://github.com/localzet/HttpClient/releases/tag/v3.0.1) требует Server `^7.0`, PHP 8.2+ и расширения cURL/JSON.
+HttpClient выполняет HTTP-запросы из event loop Localzet Server и предоставляет connection pooling. Текущий опубликованный tag — [`3.0.2`](https://github.com/localzet/HttpClient/releases/tag/v3.0.2); он содержит тот же исходный commit, что и 3.0.1. Пакет требует Server `^7.0`, PHP 8.2+ и расширения cURL/JSON.
 
 ```sh
 composer require localzet/http:^3.0
 ```
 
-Релиз `3.0.1` рассчитан на Server 7, PHP 8.2+, PSR-7 4 и `ext-curl`. Проверка TLS-сертификата и имени узла включена по умолчанию; при редиректе на другой origin удаляются `Authorization`, `Cookie` и `Proxy-Authorization`. Перед эксплуатацией проверьте TLS, редиректы, таймауты, ошибки и закрытие соединений в целевом приложении.
+Релиз `3.0.2` рассчитан на Server 7, PHP 8.2+, PSR-7 4 и `ext-curl`. Проверка TLS-сертификата и имени узла включена по умолчанию; при редиректе на другой origin удаляются `Authorization`, `Cookie` и `Proxy-Authorization`. Перед эксплуатацией проверьте TLS, редиректы, таймауты, ошибки и закрытие соединений в целевом приложении.

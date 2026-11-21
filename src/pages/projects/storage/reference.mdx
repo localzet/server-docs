@@ -3,7 +3,7 @@ export const description = 'Клиентский API, hash-based sharding, PHP s
 
 # Storage: API и эксплуатация
 
-Нужны PHP 8.2+ и Localzet Server `^7.0`. `new localzet\Storage\Server($ip = '127.0.0.1', $port = 8008, $allowObjectSerialization = false)` создаёт frame listener с одним worker. `new Client($servers, $allowObjectSerialization = false)` принимает один `host:port` или массив адресов. Текущий выпуск — [`2.0.0`](https://github.com/localzet/Storage/releases/tag/v2.0.0); для установки добавьте VCS-источник, как показано в [начале работы](/projects/storage/start).
+Нужны PHP 8.2+ и Localzet Server `^7.0`. `new localzet\Storage\Server($ip = '127.0.0.1', $port = 8008, $allowObjectSerialization = false)` создаёт frame listener с одним worker. `new Client($servers, $allowObjectSerialization = false)` принимает один `host:port` или массив адресов. Текущий выпуск — [`2.0.1`](https://github.com/localzet/Storage/releases/tag/v2.0.1); для установки добавьте VCS-источник, как показано в [начале работы](/projects/storage/start).
 
 ## Операции и размещение
 
@@ -22,6 +22,6 @@ export const description = 'Клиентский API, hash-based sharding, PHP s
 
 Протокол использует длино-префиксированные PHP serialized frames с максимумом 64 МиБ на фрейм, без аутентификации и шифрования. Значения в сети должны быть совместимы с PHP serialization. Десериализация объектов выключена по умолчанию на клиенте и сервере; объекты и циклические массивы отклоняются. Включение `allowObjectSerialization: true` с обеих сторон разрешено только для доверенной изолированной сети, где каждый peer контролируется тем же владельцем.
 
-Оставляйте listener на loopback или закрывайте его ACL/firewall. Не выставляйте порт 8008 в Интернет и не отправляйте неограниченные payload: протокол не предоставляет клиентской авторизации, TTL API, лимита памяти или долговременного хранения. Все данные в RAM одного процесса; они пропадают при остановке. Масштабирование узлами — шардирование, а не репликация.
+Оставляйте listener на loopback или закрывайте его ACL/firewall. Не выставляйте порт 8008 в Интернет и не отправляйте неограниченные payload: протокол не предоставляет клиентской авторизации, TTL API, общего лимита памяти или долговременного хранения. Перед декодированием безопасный режим ограничивает структуру payload: не более 100 000 значений массива суммарно и не глубже 128 уровней. Все данные в RAM одного процесса; они пропадают при остановке. Масштабирование узлами — шардирование, а не репликация.
 
 Перед внешним использованием отдельно проверьте конкурентные записи, timeout/recovery и поведение при потере узла. Не считайте локальную сериализационную regression-проверку защитой сети.

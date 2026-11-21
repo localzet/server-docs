@@ -3,7 +3,7 @@ export const description = 'События, подписки, очереди, re
 
 # Tunnel: API и эксплуатация
 
-Релиз [`v4.0.0`](https://github.com/localzet/Tunnel/releases/tag/v4.0.0) добавил общий предел 32 МиБ ожидающих данных на процесс брокера к лимиту 10 000 сообщений. Версия также запретила объекты и циклические массивы в PHP-serialized payload по умолчанию. Текущий патч-релиз [`v4.0.1`](https://github.com/localzet/Tunnel/releases/tag/v4.0.1) удаляет содержимое сообщений и сырые исключения из debug-логов, не меняя доставку и формат сообщений.
+Релиз [`v4.0.0`](https://github.com/localzet/Tunnel/releases/tag/v4.0.0) добавил общий предел 32 МиБ ожидающих данных на процесс брокера к лимиту 10 000 сообщений. Версия также запретила объекты и циклические массивы в PHP-serialized payload по умолчанию. В [`v4.0.1`](https://github.com/localzet/Tunnel/releases/tag/v4.0.1) debug-логи перестали содержать сообщения и сырые исключения. Текущий релиз — [`v4.0.2`](https://github.com/localzet/Tunnel/releases/tag/v4.0.2). Перед обновлением проверьте ограничения payload и совместимость компонентов на всех узлах.
 
 Требуются PHP 8.1+ и Localzet Server `^7.0`. Сервер создаётся как `new localzet\Tunnel\Server($socketName, $debug = false, $allowObjectSerialization = false)`; при заданном socket name он регистрирует один worker через bootstrap Server. `Client` — статический API и рассчитан на один соединённый Tunnel endpoint в каждом PHP-процессе. Перед обновлением проверьте payload и приложение: по умолчанию Tunnel отвергает объекты и циклические массивы, если opt-in не включён на обеих доверенных сторонах.
 
