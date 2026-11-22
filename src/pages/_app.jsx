@@ -11,7 +11,7 @@ import '@/styles/tailwind.css'
 import 'focus-visible'
 
 const SITE_URL = 'https://server.localzet.com'
-const DEFAULT_TITLE = 'Localzet Server 7.2.2 — документация'
+const DEFAULT_TITLE = 'Localzet Server 7.2.3 — документация'
 const DEFAULT_DESCRIPTION = 'Техническая документация Localzet Server и связанных PHP-проектов Localzet и Triangle: установка, архитектура, примеры, безопасность и совместимость.'
 const CLUSTER_TITLE = 'Localzet Cluster — документация'
 const CLUSTER_DESCRIPTION = 'Документация Localzet Cluster: распределённая архитектура Gateway/Business Worker для приложений на PHP, регистрация узлов и маршрутизация клиентских соединений.'
@@ -263,7 +263,7 @@ export default function App({Component, pageProps}) {
                 codeRepository: cluster ? 'https://github.com/localzet/Cluster' : relatedProject?.[2] ?? 'https://github.com/localzet/Server',
                 programmingLanguage: 'PHP',
                 runtimePlatform: phpVersion ? `PHP ${phpVersion} or newer` : 'PHP 8.1 or newer',
-                version: cluster ? '1.1.0' : semanticVersion ?? (relatedProject ? 'current source' : '7.2.2'),
+                version: cluster ? '1.1.0' : semanticVersion ?? (relatedProject ? 'current source' : '7.2.3'),
                 license: 'https://spdx.org/licenses/AGPL-3.0-or-later.html',
                 author: {
                     '@type': 'Person',
