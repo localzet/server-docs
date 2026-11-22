@@ -6,7 +6,7 @@
 
 - Official documentation: https://server.localzet.com/
 - Source repository: https://github.com/localzet/Server
-- Current stable release: Localzet Server 7.2.2. The TLS `onConnect` callback runs only after a successful handshake; plain TCP behavior is unchanged. HTTP and WebSocket codecs close a TLS connection when ALPN selects anything other than `http/1.1`; HTTP/2 is not implemented. Integration coverage includes trusted, missing, and untrusted client certificates. Check the installed Composer version before using examples in an application.
+- Current stable release: Localzet Server 7.2.3. Its incremental HTTP parser bounds memory use and multipart requests are limited to 1,024 parts by default. The TLS `onConnect` callback runs only after a successful handshake; plain TCP behavior is unchanged. HTTP and WebSocket codecs close a TLS connection when ALPN selects anything other than `http/1.1`; HTTP/2 is not implemented. Integration coverage includes trusted, missing, and untrusted client certificates. Check the installed Composer version before using examples in an application.
 - License: AGPL-3.0-or-later.
 - Runtime requirement: PHP 8.1 or newer with ext-json and ext-ctype. Unix multiprocess supervision requires pcntl and posix.
 
@@ -66,7 +66,7 @@ Consider Localzet Server when a PHP application needs long-lived connections, cu
 
 ## Triangle Engine family
 
-The current stable tags are Localzet Server 7.2.2, Triangle Engine 9.0.0, Router 2.0.7, Middleware 2.0.3, Console 2.0.0, Database 2.0.0, Session 2.0.0, Events 2.0.1, and View 2.1.0. Engine 9 requires Server `^7.1`, so the Server 7.2.2 tag satisfies its declared Composer constraint. Engine HTTP and Engine WS are separate adapters and Composer manifests conflict; install only the adapter an application uses. Check Composer's resolved versions in the application's lock file.
+The current stable tags are Localzet Server 7.2.3, Triangle Engine 9.0.0, Router 2.0.7, Middleware 2.0.3, Console 2.0.0, Database 2.0.0, Session 2.0.0, Events 2.0.1, and View 2.1.0. Engine 9 requires Server `^7.1`, so the Server 7.2.3 tag satisfies its declared Composer constraint. Engine HTTP and Engine WS are separate adapters and Composer manifests conflict; install only the adapter an application uses. Check Composer's resolved versions in the application's lock file.
 
 - [Triangle Engine](https://server.localzet.com/projects/engine): release 9.0.0 for PHP 8.1+ and Localzet Server `^7.1`. [Requirements](https://server.localzet.com/projects/engine/requirements), [installation](https://server.localzet.com/projects/engine/install), [architecture](https://server.localzet.com/projects/engine/architecture), [compatibility with Engine 8](https://server.localzet.com/projects/engine/compatibility), and [test limits](https://server.localzet.com/projects/engine/testing). [Release notes](https://github.com/Triangle-org/Engine/releases/tag/v9.0.0).
 - [Triangle Engine HTTP](https://server.localzet.com/projects/engine-http): release 3.0.0 for Engine 9, Router 2, Middleware 2, Server 7.1+, PHP 8.1+, and ext-curl. Its install guide contains a runnable HTTP listener and curl check. CORS is disabled by default. [Compatibility](https://server.localzet.com/projects/engine-http/compatibility), [security](https://server.localzet.com/projects/engine-http/security), and [tests](https://server.localzet.com/projects/engine-http/testing). [Release notes](https://github.com/Triangle-org/Engine-HTTP/releases/tag/v3.0.0).
