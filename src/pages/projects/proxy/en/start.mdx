@@ -1,0 +1,51 @@
+export const pageTitle = 'Proxy: getting started'
+export const description = 'Install and run a restricted HTTP forward proxy with destination address and port limits.'
+
+# Proxy: getting started
+
+Localzet Proxy `1.0.3` is an HTTP forward proxy for Server 7 with required Basic authentication and an allowlist of literal IPv4/IPv6 addresses and ports. Install the stable version:
+
+```sh
+composer config repositories.localzet-proxy vcs https://github.com/localzet/Proxy
+composer require localzet/proxy:^1.0
+```
+
+Create `proxy.php`:
+
+```php
+<?php
+
+use localzet\Proxy;
+
+require __DIR__ . '/vendor/autoload.php';
+
+$proxy = new Proxy('tcp://127.0.0.1:8080');
+$proxy->name = 'restricted-forward-proxy';
+$proxy->count = 1;
+$proxy->username = getenv('PROXY_USERNAME') ?: '';
+$proxy->password = getenv('PROXY_PASSWORD') ?: '';
+$proxy->allowedHosts = ['203.0.113.10'];
+$proxy->allowedPorts = [80, 443];
+
+if ($proxy->username === '' || $proxy->password === '') {
+    throw new RuntimeException('Set proxy credentials before starting.');
+}
+
+Proxy::runAll();
+```
+
+Run it locally:
+
+```sh
+php proxy.php start
+```
+
+Check that disallowed hosts and ports are rejected. You can test an allowed CONNECT destination with `curl`:
+
+```sh
+curl --proxy http://127.0.0.1:8080 --proxy-user "$PROXY_USERNAME" http://203.0.113.10/health
+```
+
+When no password is supplied in `--proxy-user`, curl prompts for it instead of placing the password in shell history or process arguments. Replace the documentation-only IP with a reachable, approved literal address; the proxy rejects hostnames.
+
+Basic credentials are sent in clear text inside HTTP. Put the listener on a trusted encrypted network or behind a TLS terminator. Before forwarding an HTTP request, the proxy removes `Proxy-Authorization` and `Proxy-Connection`. Use literal IPv4/IPv6 addresses in `allowedHosts`, not domain names. Keep outbound firewall rules or ACLs in place, and account for the proxy handling one request per client connection. See [API and operations](/projects/proxy/en/reference) for other limitations.

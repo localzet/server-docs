@@ -1,0 +1,30 @@
+export const pageTitle = 'HTTP Client: API and operations'
+export const description = 'Client and ParallelClient methods, connection pool options, errors, and release compatibility.'
+
+# HTTP Client: API and operations
+
+The current published release is [`3.0.2`](https://github.com/localzet/HttpClient/releases/tag/v3.0.2); it points to the same source commit as 3.0.1. The package requires PHP 8.2+, `ext-curl`, `ext-json`, Localzet Server `^7.0`, Localzet PSR-7 `^4.0`, and `psr/http-message:^2.0`. TLS verification is enabled by default; credentials are removed when a redirect changes origin.
+
+## Request methods
+
+- `Client::get($url, $headers = [], $success = null, $error = null)` sends a GET request.
+- `Client::post($url, $data = [], $headers = [], $success = null, $error = null)` sends form data with POST.
+- `Client::request($url, $method = 'GET', $data = [], $headers = [], $options = [])` configures a general request.
+- `ParallelClient::push($url, $options)` and `batch($set)` queue requests; `await($errorThrow = false)` waits for completion and returns the results.
+
+With callbacks, a request completes asynchronously: the response is available in the success callback, and errors are passed to the error callback. On supported Unix event loops, calling `request()` without a callback may suspend the current Fiber and return a result, but application code should handle both callbacks explicitly. An HTTP status code is not considered a transport error by itself.
+
+## Pool and operations
+
+```php
+$client = new \localzet\HTTP\Client([
+    'max_conn_per_addr' => 32,
+    'keepalive_timeout' => 15,
+    'connect_timeout' => 5,
+    'timeout' => 20,
+]);
+```
+
+Pool options apply per address. Set finite timeouts and connection limits for your traffic. These options replace the corresponding defaults, while nested settings are merged by key. Do not block callbacks with long-running work, redact credentials before logging, and do not disable TLS verification in production. Pool closure, redirect policy, cancellation, and streaming need to be checked against the exact code version and target environment.
+
+Before use, verify the TLS trust chain, redirects, response body, slow or interrupted upstream behavior, and connection cleanup in the target environment.

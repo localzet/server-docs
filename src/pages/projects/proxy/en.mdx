@@ -1,0 +1,16 @@
+export const pageTitle = 'Localzet Proxy — installation and access limits'
+export const description = 'HTTP forward proxy for Localzet Server 7 with Basic authentication and an IPv4/IPv6 address and port allowlist.'
+
+# Localzet Proxy
+[Getting started](/projects/proxy/en/start) · [API and operations](/projects/proxy/en/reference)
+
+Proxy [`1.0.3`](https://github.com/localzet/Proxy/releases/tag/v1.0.3) is an HTTP forward proxy for Localzet Server 7 with required Basic authentication and an allowlist of literal IPv4/IPv6 addresses and ports. The proxy buffers a request until the complete header block arrives, removes `Proxy-Authorization` and `Proxy-Connection` before forwarding, and limits headers to 16 KiB with a five-second timeout. The default limit is 256 client connections per worker. The package is not yet registered on Packagist; configure its VCS source and install the stable tag:
+
+```sh
+composer config repositories.localzet-proxy vcs https://github.com/localzet/Proxy
+composer require localzet/proxy:^1.0
+```
+
+Each request requires `Proxy-Authorization: Basic`; outgoing TCP connections are restricted by `allowedHosts` and `allowedPorts`. Allow literal IPv4/IPv6 addresses only. Hostnames are rejected so the proxy does not rely on an unpinned DNS result.
+
+Basic credentials are sent in clear text inside HTTP. Use the proxy only on a trusted encrypted network or behind a TLS terminator, and keep outbound network ACLs as an additional boundary. Integration checks cover authentication, HTTP, CONNECT, the allowlist, malformed requests, and upstream errors. The package handles one request per client connection and is not a full HTTP parser.

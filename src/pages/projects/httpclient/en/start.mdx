@@ -1,0 +1,50 @@
+export const pageTitle = 'HTTP Client: getting started'
+export const description = 'Install HTTP Client for Server 7, make an asynchronous request, and handle errors.'
+
+# HTTP Client: getting started
+
+HTTP Client `3.x` targets Localzet Server 7.
+
+```sh
+composer require localzet/http:^3.0
+```
+
+The client uses the Server event loop. Call it from a running Server process, not from a short-lived PHP CLI invocation.
+
+```php
+<?php
+
+use localzet\HTTP\Client;
+use localzet\Server;
+use localzet\Server\Connection\TcpConnection;
+use localzet\Server\Protocols\Http\Request;
+use localzet\Server\Protocols\Http\Response;
+
+require __DIR__ . '/vendor/autoload.php';
+
+$server = new Server('http://127.0.0.1:8080');
+$client = new Client([
+    'max_conn_per_addr' => 16,
+    'keepalive_timeout' => 15,
+    'connect_timeout' => 5,
+    'timeout' => 10,
+]);
+
+$server->onMessage = static function (TcpConnection $connection, Request $request) use ($client): void {
+    $client->get(
+        'https://example.com/health',
+        success: static function ($response) use ($connection): void {
+            $connection->send(new Response(200, ['Content-Type' => 'text/plain'], (string) $response));
+        },
+        error: static function (Throwable $error) use ($connection): void {
+            $connection->send(new Response(502, [], 'Upstream request failed'));
+        },
+    );
+};
+
+Server::runAll();
+```
+
+For a local check, replace the upstream URL with a local service and request `http://127.0.0.1:8080`. Handle both callbacks: network errors are reported separately from HTTP responses, so also check the status code in the success callback. Do not return private exception details to clients or write secret headers to logs.
+
+Before production deployment, record the verified commit or branch, check TLS and redirect behavior, and run integration checks with the Server and PSR-7 versions used by the application. See [API and limitations](/projects/httpclient/en/reference).

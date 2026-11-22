@@ -1,0 +1,13 @@
+export const pageTitle = 'Localzet HTTP Client'
+export const description = 'Asynchronous HTTP client for Localzet Server 7 with connection reuse.'
+
+# Localzet HTTP Client
+[Getting started](/projects/httpclient/en/start) · [API and operations](/projects/httpclient/en/reference)
+
+HttpClient sends HTTP requests from the Localzet Server event loop and provides connection pooling. The current published release is [`3.0.2`](https://github.com/localzet/HttpClient/releases/tag/v3.0.2), which points to the same source commit as 3.0.1. The package requires Server `^7.0`, PHP 8.2+, and the cURL and JSON extensions.
+
+```sh
+composer require localzet/http:^3.0
+```
+
+Release `3.0.2` targets Server 7, PHP 8.2+, PSR-7 4, and `ext-curl`. TLS certificate and hostname verification are enabled by default. Redirects to a different origin remove `Authorization`, `Cookie`, and `Proxy-Authorization`. Before deployment, check TLS, redirects, timeouts, errors, and connection cleanup in the target application.

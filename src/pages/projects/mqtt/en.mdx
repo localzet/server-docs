@@ -1,0 +1,22 @@
+export const pageTitle = 'Localzet MQTT — MQTT client for PHP'
+export const description = 'MQTT 3.1.1 and MQTT 5 client for Localzet Server 7 with TCP/TLS, QoS 0/1/2, and reconnect support.'
+
+{/* Copyright © 2016-2026 [Localzet Group](https://www.localzet.com/). All rights reserved. Licensed under AGPL-3.0-or-later. */}
+
+# Localzet MQTT
+[Getting started](/projects/mqtt/en/start) · [API and operations](/projects/mqtt/en/reference)
+
+MQTT [`1.0.3`](https://github.com/localzet/MQTT/releases/tag/v1.0.3) is the current release of the MQTT 3.1.1 and MQTT 5 client for Localzet Server 7. Credentials, topics, properties, and message bodies are excluded from debug logs. The checked network scenarios cover TCP/TLS, QoS 0/1/2, and subscription recovery after reconnect.
+
+```sh
+composer config repositories.localzet-mqtt vcs https://github.com/localzet/MQTT
+composer require localzet/mqtt:^1.0
+```
+
+The `localzet/mqtt` package provides an MQTT 3.1.1 and MQTT 5 client for Localzet Server 7. Protocol adapters connect the client to `AsyncTcpConnection`; `mqtt://` and `mqtts://` addresses select TCP and TLS transports.
+
+Protocol regression tests cover partial and combined packet framing, ping encoding, and selection of the MQTT 3 or MQTT 5 adapter. Integration tests start a temporary Mosquitto broker and check username/password authentication, QoS 1/2 for both protocol levels over TCP and TLS, and subscription recovery after reconnecting to a restarted broker.
+
+The test TLS broker uses a self-signed certificate, with client certificate verification disabled: the test confirms the TLS handshake, not validation of a trusted certificate chain.
+
+Dependency: `localzet/server:^7.0`. Project license: AGPL-3.0-or-later.
