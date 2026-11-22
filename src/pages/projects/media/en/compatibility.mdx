@@ -3,9 +3,9 @@ export const description = 'Compare the previous Media integration contract with
 
 # Compatibility and migration
 
-The published `v1.1.0` tag requires `triangle/engine:^8.1`. The prepared next major, `2.0.0`, requires `triangle/engine:^9.0` and targets Engine 9 with Localzet Server 7. PHP 8.1 remains the minimum. These major versions cannot share one Composer dependency graph.
+The published [`v2.0.0`](https://github.com/Triangle-org/Media/releases/tag/v2.0.0) release requires `triangle/engine:^9.0` and targets Engine 9 with Localzet Server 7. The legacy `v1.1.0` release requires `triangle/engine:^8.1`. Both lines require PHP 8.1+, but their major versions cannot share one Composer dependency graph.
 
-Release `2.0.0` has not been published. Check the package version resolved by your lock file and the [repository](https://github.com/Triangle-org/Media) first.
+Before upgrading, check the versions resolved by your lock file and plan the application's move to Engine 9 separately from the Media update.
 
 ## Application changes
 

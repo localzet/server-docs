@@ -210,7 +210,7 @@ const RELATED_PROJECTS = {
         'Triangle Media',
         'Image upload and processing plugin for Triangle Engine 9: validates local files and public HTTP(S) URLs, converts images, applies bounded transformations, and stores metadata through host adapters.',
         'https://github.com/Triangle-org/Media',
-        'Engine 9 migration is under review; no stable Engine 9 package release has been verified.',
+        'Stable release 2.0.0 targets Triangle Engine 9 and Localzet Server 7; legacy 1.x releases target Engine 8.',
         [
             'Accept multipart uploads and remote HTTP(S) image URLs',
             'Validate MIME type, upload size, decoded pixels, and animated frame count',

@@ -3,9 +3,9 @@ export const description = 'Сравнение старого интеграци
 
 # Совместимость и переход
 
-Опубликованный тег `v1.1.0` требует `triangle/engine:^8.1`. Подготавливаемый следующий major `2.0.0` требует `triangle/engine:^9.0` и предназначен для Engine 9 с Localzet Server 7. PHP-минимум остаётся 8.1. Эти major-версии нельзя смешивать в одном Composer dependency graph.
+Опубликованный релиз [`v2.0.0`](https://github.com/Triangle-org/Media/releases/tag/v2.0.0) требует `triangle/engine:^9.0` и предназначен для Engine 9 с Localzet Server 7. Для legacy-релиза `v1.1.0` требуется `triangle/engine:^8.1`. Обе линии требуют PHP 8.1+, но их major-версии нельзя смешивать в одном Composer dependency graph.
 
-Релиз `2.0.0` ещё не опубликован. Сравните фактические версии в lock-файле и статус [репозитория](https://github.com/Triangle-org/Media).
+Перед обновлением проверьте фактические версии в lock-файле и планируйте миграцию приложения на Engine 9 отдельно от обновления Media.
 
 ## Что меняется для приложения
 
