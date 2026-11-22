@@ -3,7 +3,7 @@ export const description = 'Install Triangle Media for Triangle Engine 9, connec
 
 # Installation and first run
 
-The latest published Media tag is `v1.1.0`, which requires Engine `^8.1`. This guide describes the preparation of `2.0.0` for Engine 9. Do not install the older published package into an Engine 9 application.
+Media `v2.0.0` is the published release for Triangle Engine 9 and Localzet Server 7. The older `v1.1.0` release is for Engine 8 applications and is incompatible with the 2.x line.
 
 ## Requirements
 
@@ -15,17 +15,19 @@ The latest published Media tag is `v1.1.0`, which requires Engine `^8.1`. This g
 
 ## Install the package
 
-For the current published `v1.1.0` release on Engine 8:
+Install the release for an Engine 9 application:
+
+```sh
+composer require triangle/media:^2.0
+```
+
+For an existing Engine 8 application, use the legacy line:
 
 ```sh
 composer require triangle/media:^1.1
 ```
 
-After the Engine 9 `2.0.0` release is published:
-
-```sh
-composer require triangle/media:^2.0
-```
+Do not mix Engine 8 and Engine 9 packages in one dependency graph.
 
 Check the resolved packages:
 
