@@ -1,0 +1,29 @@
+export const pageTitle = 'MQTT: API and operations'
+export const description = 'Configure the MQTT 3.1.1 and MQTT 5 client, callbacks, acknowledgements, TLS, and reconnect behavior.'
+
+# MQTT: API and operations
+
+The `localzet/mqtt` package requires Localzet Server `^7.0`. `Client` accepts `mqtt://host[:port]` (default port 1883), `mqtts://host[:port]` (8883), or a TCP address. Set `protocol_level: 4` for MQTT 3.1.1 or `5` for MQTT 5.
+
+## Options and callbacks
+
+Common options:
+
+| Option | Purpose |
+| --- | --- |
+| `client_id` | Broker session identifier; use a unique value for each active process |
+| `username`, `password` | Broker credentials; provide them from a secret store |
+| `connect_timeout` | Maximum time to wait for a connection |
+| `resubscribe` | Re-subscribe to saved topics after reconnect |
+| `ssl` | TLS boolean or stream SSL context |
+| `properties` | MQTT 5 connect properties |
+
+`onConnect`, `onReconnect`, `onMessage`, `onClose`, and `onError` are client callbacks. The usual order is to create the client, register handlers, call `connect()`, subscribe from `onConnect`, and then publish. Main methods include `subscribe($topic, $options, $callback, $properties)`, `unsubscribe(...)`, `publish($topic, $content, $options, $callback, $properties)`, `disconnect()`, and `reconnect()`.
+
+The `mqtts://` address enables TLS transport. Configure the SSL context to verify the peer and hostname, use a trusted CA, and select an acceptable TLS version; do not disable `verify_peer` for convenience. Do not expose passwords, payloads, or sensitive topics in debug logs.
+
+## Delivery and recovery
+
+QoS 1 allows duplicate delivery. Reconnect and automatic resubscription do not make a callback an exactly-once handler. Make consumer operations idempotent, account for the broker's clean or persistent session settings, and handle connection failures and closure. The package does not manage the broker, ACLs, message storage, or retained-message policy.
+
+`composer run test` runs protocol regressions. `composer run test:broker` requires Docker and checks Mosquitto scenarios for MQTT 3.1.1 and MQTT 5, TCP/TLS, credentials, QoS 1/2, and reconnect. The test certificate is self-signed and chain verification is disabled; a passing test confirms the handshake, not production certificate validation.

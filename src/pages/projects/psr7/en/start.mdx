@@ -1,0 +1,30 @@
+export const pageTitle = 'PSR-7: getting started'
+export const description = 'Practical instructions for installing and using PSR-7 for the first time.'
+
+# PSR-7: getting started
+
+## Installation
+
+```sh
+composer require localzet/psr7:^4.0
+```
+
+Package `4.x` targets Localzet Server 7.
+
+## First example
+
+```php
+use localzet\PSR7\Request;
+use localzet\PSR7\Response;
+use localzet\PSR7\Stream;
+
+$body = fopen('php://temp', 'r+');
+fwrite($body, '{"name":"item"}');
+rewind($body);
+$request = (new Request('POST', 'https://api.example.test/items'))
+    ->withHeader('Content-Type', 'application/json')
+    ->withBody(new Stream($body));
+$response = new Response(201, ['Content-Type' => 'application/json']);
+```
+
+Check compatibility and limitations in [API and operations](/projects/psr7/en/reference) before using the package in an application.

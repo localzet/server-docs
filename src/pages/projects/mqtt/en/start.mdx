@@ -1,0 +1,49 @@
+export const pageTitle = 'MQTT: getting started'
+export const description = 'Connect a PHP client to an MQTT 3.1.1 or MQTT 5 broker and receive messages.'
+
+# MQTT: getting started
+
+Install the package in an application running Localzet Server 7. The public client API runs inside the event loop.
+
+```sh
+composer config repositories.localzet-mqtt vcs https://github.com/localzet/MQTT
+composer require localzet/mqtt:^1.0
+```
+
+This example uses a local broker without TLS. In production, provide credentials from a secret manager and connect with `mqtts://` while verifying the certificate.
+
+```php
+<?php
+
+use localzet\MQTT\Client;
+use localzet\Server;
+
+require __DIR__ . '/vendor/autoload.php';
+
+$server = new Server('http://127.0.0.1:8080');
+$server->count = 1;
+$server->onWorkerStart = static function (): void {
+    $client = new Client('mqtt://127.0.0.1:1883', [
+        'client_id' => 'status-listener-' . getmypid(),
+        'protocol_level' => 4,
+        'username' => getenv('MQTT_USERNAME') ?: '',
+        'password' => getenv('MQTT_PASSWORD') ?: '',
+        'connect_timeout' => 10,
+        'resubscribe' => true,
+    ]);
+
+    $client->onMessage = static function (string $topic, string $message): void {
+        echo $topic . ': ' . $message . PHP_EOL;
+    };
+    $client->onConnect = static function (Client $client): void {
+        $client->subscribe('demo/status', ['qos' => 1]);
+    };
+    $client->connect();
+};
+
+Server::runAll();
+```
+
+Use a unique `client_id` for each active client. Choose `protocol_level: 4` for MQTT 3.1.1 or `5` for MQTT 5. Subscribe after a successful connection. On reconnect, the client can restore subscriptions, but the application must still account for duplicate delivery and make handlers idempotent.
+
+Protocol checks run with `composer run test`. The broker integration scenario, `composer run test:broker`, requires Docker and starts a temporary Mosquitto broker. It checks TCP/TLS and QoS 1/2; the test certificate is self-signed, so verify the production trust chain separately. See [API and operations](/projects/mqtt/en/reference).

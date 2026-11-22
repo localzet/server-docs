@@ -1,0 +1,8 @@
+export const pageTitle = 'PSR-7: API and operations'
+export const description = 'PSR-7 API, compatibility, limitations, and operational guidance.'
+
+# PSR-7: API and operations
+
+Release `4.0.0` requires PHP 8.2+, Localzet Server `^7.0`, and `psr/http-message:^2.0`. The main types in `localzet\PSR7` are `Request`, `Response`, `ServerRequest`, `Uri`, `UploadedFile`, and `Stream`. URI utilities include `UriResolver` and `UriNormalizer`. Stream decorators include Buffer, Caching, Limit, Multipart, Append, NoSeek, Inflate, LazyOpen, Dropping, Pump, and Fn.
+
+Methods named `with*()` return a new message; the original object keeps its previous method, URI, headers, protocol version, status, and body stream. Keep the returned object. The stream itself remains a mutable resource: reading, writing, or rewinding through the same `StreamInterface` affects every owner of that stream. Close streams when they are no longer needed. Check URI encoding, stream operations, multipart handling, and compatibility with the consuming package.

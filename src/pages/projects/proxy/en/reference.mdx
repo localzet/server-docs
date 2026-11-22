@@ -1,0 +1,27 @@
+export const pageTitle = 'Proxy: API and operations'
+export const description = 'HTTP forward proxy settings, destination allowlist, CONNECT relay, and known network limitations.'
+
+# Proxy: API and operations
+
+Requires PHP 8.1+ and Localzet Server `^7.0`. The `localzet\Proxy` class extends Server and accepts `new Proxy($socketName, $socketContext = [])`. Configure the listener and worker count through Server properties.
+
+Release [`1.0.3`](https://github.com/localzet/Proxy/releases/tag/v1.0.3) sets `maxConnections = 256` per worker by default. The proxy waits for a complete HTTP header block: headers must not exceed 16 KiB, and incomplete headers are closed after five seconds. Data received while the upstream connection is being established is limited by the inherited `maxSendBufferSize`; if the limit is exceeded, the request is rejected with 413.
+
+## Outbound connection policy
+
+```php
+$proxy->username = getenv('PROXY_USERNAME') ?: '';
+$proxy->password = getenv('PROXY_PASSWORD') ?: '';
+$proxy->allowedHosts = ['203.0.113.10'];
+$proxy->allowedPorts = [443];
+```
+
+Non-empty `username` and `password` values are required. Credentials are checked as HTTP Basic using a constant-time comparison. They are sent in clear text in the HTTP header, so use TLS transport or a trusted network. For ordinary HTTP forwarding, `Proxy-Authorization` and `Proxy-Connection` are removed before the request is sent upstream. For `CONNECT`, the proxy opens a TCP tunnel after the request passes validation.
+
+An empty `allowedHosts` list denies all destinations. Allow literal IPv4/IPv6 addresses; IPv6 in a request URI must be bracketed, for example `[2001:db8::1]`, while the allowlist uses the unbracketed form `2001:db8::1`. Hostnames are rejected. Ports are compared by their exact number. The proxy implements HTTP absolute-form requests and `CONNECT`.
+
+Basic authentication does not encrypt traffic. Use TLS ingress and an outbound network firewall. Do not listen on a public interface without external ACLs.
+
+## Implementation boundaries and checks
+
+The package is not a reverse proxy, an HTTP/2 proxy, or a production gateway with a full routing policy. It handles one request per client connection. Basic credentials are not encrypted without TLS; restrict both the incoming listener and outgoing connections. Tests: `composer test`, `composer test:integration`, and `composer lint`. Loopback integration covers Basic authentication without forwarding proxy headers upstream, fragmented and slow headers, HTTP, CONNECT, the allowlist, malformed requests, and upstream failures.
