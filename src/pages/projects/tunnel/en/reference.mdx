@@ -1,0 +1,24 @@
+export const pageTitle = 'Tunnel: reference and operations'
+export const description = 'Tunnel events, subscriptions, queues, reconnect, wire format, and delivery guarantees.'
+
+# Tunnel: reference and operations
+
+Release [`4.0.0`](https://github.com/localzet/Tunnel/releases/tag/v4.0.0) added a shared 32 MiB pending-data limit per broker process alongside the 10,000-message limit. It also disabled PHP objects and recursive arrays in serialized payloads by default. In [`4.0.1`](https://github.com/localzet/Tunnel/releases/tag/v4.0.1), debug logs stopped including message bodies and raw exceptions. The current release is [`4.0.2`](https://github.com/localzet/Tunnel/releases/tag/v4.0.2). Before upgrading, check payload limits and component compatibility across all nodes.
+
+Tunnel requires PHP 8.1+ and Localzet Server `^7.0`. Create the server with `new localzet\Tunnel\Server($socketName, $debug = false, $allowObjectSerialization = false)`; when a socket name is supplied, it registers one worker through the Server bootstrap. `Client` is a static API designed for one connected Tunnel endpoint per PHP process. By default, Tunnel rejects objects and recursive arrays unless opt-in is enabled on both trusted ends.
+
+## Events
+
+Call `Client::connect($socketName)` first, then register callbacks with `on($event, $callback)`. `on()` also subscribes; use `subscribe()` and `unsubscribe()` for explicit control. `publish($events, $data, $is_loop = false)` sends an event to subscribers. `is_loop` selects round-robin publishing; it does not guarantee one-time processing. `onConnect`, `onClose`, and `onMessage` let the application observe connection lifecycle events.
+
+## Queues
+
+`enqueue($channels, $data)` adds data to a named queue. `watch($channels, $callback, $autoReserve = true)` starts receiving items; with auto-reserve, Tunnel requests the next item after the callback completes. `unwatch()` stops watching, and `reserve()` requests an item manually. Queues exist only in server RAM; they are not durable and are lost on restart. Use idempotent handlers for side effects. There is no built-in retry or dead-letter mechanism.
+
+All queues in one process share a limit of 10,000 pending messages and 32 MiB of pending data. Size is counted from the incoming frame; each copy placed in multiple channels counts that size. If an enqueue would exceed either limit, the server adds none of the request's messages; a multi-channel request is checked as a whole. `Client::enqueue()` does not return an acceptance acknowledgement, so the sender cannot tell from its return value whether the write was rejected. Account for this when designing retries and application-level feedback.
+
+## Format, security, and reliability
+
+The default wire protocol serializes PHP data. Object deserialization is disabled on both server and client. Do not use `new Server(..., allowObjectSerialization: true)` or `Client::allowObjectSerialization()` with untrusted peers. Send scalars and arrays, and ensure both ends agree on the format. The protocol has no built-in authentication or TLS; bind to loopback or use an isolated network with external ACLs.
+
+Reconnect restores the transport, but does not provide durable delivery or exactly-once processing. Debug logs include operation names and statuses, but omit request and message bodies. Test connection loss, resubscription, competing consumers, and shutdown in the target application. For Server 7, use `localzet/tunnel:^4.0`.

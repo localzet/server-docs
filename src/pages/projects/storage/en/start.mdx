@@ -1,0 +1,42 @@
+export const pageTitle = 'Storage: getting started'
+export const description = 'Run Localzet Storage on loopback and access keys from a PHP application.'
+
+# Storage: getting started
+
+Storage 2.0.1 is shared in-memory storage for applications on Localzet Server 7. The package is not yet on Packagist, so add its VCS repository:
+
+```sh
+composer config repositories.localzet-storage vcs https://github.com/localzet/Storage
+composer require localzet/storage:^2.0
+```
+
+Create the server application. Storage listens on loopback and uses one worker by default:
+
+```php
+<?php
+
+use localzet\Server;
+use localzet\Storage\Server as StorageServer;
+
+require __DIR__ . '/vendor/autoload.php';
+
+new StorageServer('127.0.0.1', 8008);
+Server::runAll();
+```
+
+Start it with the Localzet Server CLI, for example `php storage.php start`. From another application process:
+
+```php
+use localzet\Storage\Client;
+
+$cache = new Client('127.0.0.1:8008');
+$cache->set('greeting', 'hello');
+$greeting = $cache->get('greeting');
+
+$cache->add('counter', 0);
+$cache->increment('counter');
+```
+
+`set`, `get`, `add`, `cas`, `increment`, and `delete` use the client API. Check return values to handle missing keys or unsuccessful conditional writes. With multiple servers, the client distributes keys using CRC32; changing the server list moves some keys.
+
+Data is lost when the process stops. There is no TTL, persistence, replication, authentication, or encryption. Do not expose the port publicly. By default, objects, recursive arrays, payloads with more than 100,000 array values, and nesting deeper than 128 levels are rejected before decoding. See [security and wire format](/projects/storage/en/reference).

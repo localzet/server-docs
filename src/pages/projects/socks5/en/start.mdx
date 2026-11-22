@@ -1,0 +1,32 @@
+export const pageTitle = 'SOCKS5: getting started'
+export const description = 'Install the standalone SOCKS5 CONNECT service, configure credentials, and verify it locally.'
+
+# SOCKS5: getting started
+
+SOCKS5 is a standalone service project, not an embeddable package. It requires PHP 8.2+, Composer, and the Linux CLI runtime.
+
+Get the source, install production dependencies, and provide credentials before starting the service:
+
+```sh
+git clone https://github.com/localzet/SOCKS5.git
+cd SOCKS5
+composer install --no-dev --prefer-dist
+
+export SOCKS5_BIND=127.0.0.1
+export SOCKS5_PORT=1080
+export SOCKS5_USERNAME='proxy-user'
+read -rsp 'SOCKS5 password: ' SOCKS5_PASSWORD; export SOCKS5_PASSWORD; echo
+php start.php start -d
+```
+
+The password is not stored in the source. For a service, provide variables through a protected secret-management mechanism. The daemon command above is suitable for local checks and manual operation.
+
+Verify a local TCP `CONNECT` by running the included integration scenario:
+
+```sh
+python3 tests/integration.py
+php start.php status
+php start.php stop
+```
+
+For a manual check, use a client that prompts for the password interactively; do not put credentials in a URL or command arguments. SOCKS username/password authentication is plaintext on the wire. Route remote access through a trusted network or an encrypted tunnel. The server listens on loopback and requires authentication by default. See [reference and operations](/projects/socks5/en/reference) for supported commands and limits.

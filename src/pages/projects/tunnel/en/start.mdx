@@ -1,0 +1,47 @@
+export const pageTitle = 'Tunnel: getting started'
+export const description = 'Start a local Tunnel server, subscribe to an event, and publish a message.'
+
+# Tunnel: getting started
+
+Tunnel 4.0 sends events and queue items between Localzet Server 7 processes. In this release, PHP object and recursive-array deserialization in serialized payloads is disabled by default. The queue is limited to 10,000 messages and 32 MiB of pending data:
+
+```sh
+composer require localzet/tunnel:^4.0
+```
+
+## Start the channel server
+
+Create `tunnel.php`:
+
+```php
+<?php
+
+use localzet\Server;
+use localzet\Tunnel\Server as TunnelServer;
+
+require __DIR__ . '/vendor/autoload.php';
+
+new TunnelServer('frame://127.0.0.1:2206');
+Server::runAll();
+```
+
+Start it with the Server CLI, for example `php tunnel.php start`. The socket binds to loopback. For connections between hosts, choose a private address and configure firewall ACLs.
+
+## Subscribe and publish
+
+Register a callback and connect the client in the application process:
+
+```php
+use localzet\Tunnel\Client;
+
+Client::connect('frame://127.0.0.1:2206');
+Client::on('cache.updated', static function (mixed $data): void {
+    // Update local process state from the event payload.
+});
+
+Client::publish('cache.updated', ['key' => 'item-1']);
+```
+
+Call `connect()` before registering the event: `on()` sends the subscription immediately. Call this once when the process starts inside the Server event loop, not for every request. The default wire format uses PHP serialization, but object deserialization is disabled on the receiving side; send scalars and arrays. Both processes must use a compatible format.
+
+Publishing delivers to active subscribers; it does not provide durable delivery. Connection state and queues are in memory. Verify reconnect, redelivery, and shutdown behavior. More queue methods and serialization settings are covered in [reference and operations](/projects/tunnel/en/reference).

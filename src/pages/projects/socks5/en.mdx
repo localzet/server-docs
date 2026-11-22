@@ -1,0 +1,14 @@
+export const pageTitle = 'Localzet SOCKS5'
+export const description = 'A SOCKS5 TCP CONNECT proxy for Localzet Server 7 with loopback binding by default.'
+
+# Localzet SOCKS5
+
+[Getting started](/projects/socks5/en/start) · [Reference and operations](/projects/socks5/en/reference)
+
+The current release, [`1.0.1`](https://github.com/localzet/SOCKS5/releases/tag/v1.0.1), limits the connection-attempt tracking table to 10,000 IP addresses per worker. Attempts are counted in one-second buckets over a rolling 60-second window. At the window boundary, an entry can remain active for up to one additional second.
+
+The proxy supports SOCKS5 TCP `CONNECT` to IPv4 destinations and DNS names. By default, it listens on loopback and requires username/password authentication. Anonymous mode requires explicit opt-in and is allowed only on a loopback bind. `UDP ASSOCIATE` is disabled; `BIND` and IPv6 destinations are not implemented.
+
+SOCKS credentials are sent in plaintext. Use a trusted network or an encrypted tunnel for remote clients. DNS lookup blocks the worker, so resolver delays affect its event loop. Concurrent connections are limited globally and per IP; connection attempts per IP are limited over a rolling window.
+
+The Python integration suite starts a local server and checks TCP relay, authentication, disabled UDP, global and per-IP concurrent-connection limits, and the attempt limit. It does not test UDP, IPv6, DNS latency, or production load.

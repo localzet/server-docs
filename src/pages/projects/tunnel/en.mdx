@@ -1,0 +1,18 @@
+export const pageTitle = 'Localzet Tunnel'
+export const description = 'In-memory events and queues between Localzet Server 7 processes, delivered to active subscribers.'
+
+# Localzet Tunnel
+
+[Getting started](/projects/tunnel/en/start) · [Reference and operations](/projects/tunnel/en/reference)
+
+The current release, Tunnel [`4.0.2`](https://github.com/localzet/Tunnel/releases/tag/v4.0.2), moves events and queued messages between Localzet Server 7 processes. A `Client` connects to a channel server, which routes messages to active subscribers and keeps queues in memory. Each server process has a shared limit of 10,000 pending messages and 32 MiB of pending data. Debug logs omit request and message bodies and raw exception text.
+
+```sh
+composer require localzet/tunnel:^4.0
+```
+
+Release lines `3.x` and `4.x` target Server 7; `2.x` targets Server 4. Version 4 changes payload limits: objects and recursive arrays are rejected by default, and the queue is bounded by both message count and data size. Before upgrading, check message formats and update the applications and broker together.
+
+Object deserialization is disabled for incoming data by default. The static `Client::allowObjectSerialization()` opt-in and the Server constructor argument are only for trusted peers on an isolated network.
+
+The protocol does not authenticate transport peers. Debug logs include operation names and statuses, but not request or message contents. Restrict network access with external ACLs and evaluate delivery, reconnect, queue limits, memory use, and shutdown in the target deployment.

@@ -1,0 +1,37 @@
+export const pageTitle = 'SOCKS5: reference and operations'
+export const description = 'Configuration variables, supported SOCKS5 commands, service limits, and diagnostics.'
+
+# SOCKS5: reference and operations
+
+This is a standalone Linux PHP CLI service that uses `localzet/server:^7.0`. Start, inspect, and stop it through `start.php`:
+
+```sh
+php start.php start
+php start.php status
+php start.php stop
+```
+
+## Configuration
+
+Set all options in the service process environment:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `SOCKS5_BIND` | `127.0.0.1` | IPv4 listen address |
+| `SOCKS5_PORT` | `1080` | TCP port |
+| `SOCKS5_USERNAME`, `SOCKS5_PASSWORD` | required | SOCKS username/password authentication |
+| `SOCKS5_ALLOW_NO_AUTH` | `0` | Enables anonymous access on loopback only |
+| `SOCKS5_MAX_CONNECTIONS` | `1024` | Concurrent connections per worker |
+| `SOCKS5_MAX_CONNECTIONS_PER_IP` | `32` | Concurrent connections from one IP |
+| `SOCKS5_MAX_ATTEMPTS_PER_MINUTE` | `120` | Connection attempts from one IP per rolling minute |
+| `SOCKS5_PID_FILE`, `SOCKS5_LOG_FILE` | `/tmp/localzet-socks5.*` | PID and log file paths |
+
+Provide credentials through a protected environment, not a publicly readable unit file or shell history. Username/password authentication is unencrypted; restrict network access and use an encrypted tunnel for remote clients. Anonymous access is allowed only with explicit configuration and a loopback bind.
+
+Release 1.0.1 limits the attempt-tracking table to 10,000 unique IP addresses per worker. Counters use one-second buckets over a rolling 60-second window; at the boundary, the oldest entry may remain for up to one additional second. While the table is full, connections from new addresses are rejected. Expired entries are reclaimed on the next request.
+
+## Protocol support
+
+The service implements SOCKS5 TCP `CONNECT` to IPv4 addresses and DNS names. DNS lookup is synchronous and can block the worker. `UDP ASSOCIATE` is disabled; `BIND` and IPv6 destinations are unsupported. This is not a general-purpose SOCKS5 server: verify the exact `CONNECT` flow you need and account for framing and buffer limits.
+
+Run the integration checks with `python3 tests/integration.py` (Python 3 is required). They create temporary local endpoints and check authentication, relay, and limits. They do not check an external production environment, DNS resolution, or network ACLs.
