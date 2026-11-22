@@ -54,6 +54,16 @@ $connection->send(new Response(200, [
 ], (string) $event));
 ```
 
+Multipart parser ограничивает запрос 1 024 частями по умолчанию. Настройте меньший предел до запуска сервера, если приложение принимает только небольшие формы:
+
+```php
+use localzet\Server\Protocols\Http\Request;
+
+Request::$maxMultipartParts = 256;
+```
+
+При превышении лимита `post()` или `file()` выбросит `LengthException`, когда приложение впервые запросит разобранное тело. Если нужен конкретный HTTP-ответ для такой ошибки, обработайте исключение в callback приложения. Число файлов отдельно ограничено `Request::$maxFileUploads`.
+
 Для больших upload задайте `Http::uploadTmpDir()` на существующий writable каталог с подходящими правами. Настройки `maxHeaderLength()` и `maxHeaderCount()` задают общие пределы HTTP parser-а; сверяйте их с лимитами `TcpConnection` и максимальным размером сообщения.
 
 Сессии описаны отдельно в [руководстве по HTTP sessions](/current/sessions).
