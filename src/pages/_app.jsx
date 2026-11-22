@@ -205,7 +205,7 @@ const RELATED_PROJECTS = {
     socketio: ['Localzet Socket.IO', 'Socket.IO server implementation for Server 7. Cross-process broadcast uses the optional Tunnel 4 adapter; authentication remains application-specific.', 'https://github.com/localzet/SocketIO', 'Stable release 2.0.3.'],
     storage: ['Localzet Storage', 'Client/server shared in-memory store for Localzet Server. Object deserialization is disabled by default.', 'https://github.com/localzet/Storage', 'Stable release 2.0.1.'],
     tunnel: ['Localzet Tunnel', 'Client/server messaging channel for Localzet Server processes.', 'https://github.com/localzet/Tunnel', 'Stable release 4.0.2.'],
-    noter: ['Noter', 'Command-line utility for sending notes to an HTTP receiver; it uses Localzet HTTP Client transitively.', 'https://github.com/localzet/Noter', 'Stable release 0.1.12 requires PHP 8.4.1+.'],
+    noter: ['Noter', 'Command-line utility for sending notes to an HTTP receiver; it uses Localzet HTTP Client transitively.', 'https://github.com/localzet/Noter', 'Stable release 0.1.14 requires PHP 8.4.1+.'],
     media: [
         'Triangle Media',
         'Image upload and processing plugin for Triangle Engine 9: validates local files and public HTTP(S) URLs, converts images, applies bounded transformations, and stores metadata through host adapters.',
