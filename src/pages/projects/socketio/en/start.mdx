@@ -1,0 +1,39 @@
+export const pageTitle = 'Socket.IO: getting started'
+export const description = 'Attach Socket.IO to a Localzet Server listener and handle an application event.'
+
+# Socket.IO: getting started
+
+Socket.IO [`2.0.3`](https://github.com/localzet/SocketIO/releases/tag/v2.0.3) provides an Engine.IO transport and event API on Localzet Server 7. Install it from its VCS repository:
+
+```sh
+composer config repositories.localzet-socketio vcs https://github.com/localzet/SocketIO
+composer require localzet/socketio:^2.0
+```
+
+The minimal server below listens on loopback, allows a specific browser origin, and replies with a `pong` event:
+
+```php
+<?php
+
+use localzet\Server;
+use localzet\SocketIO\SocketIO;
+
+require __DIR__ . '/vendor/autoload.php';
+
+$server = new Server('socketio://127.0.0.1:2020');
+$io = new SocketIO();
+$io->origins('https://app.example.org');
+$io->attach($server);
+
+$io->on('connection', static function ($socket): void {
+    $socket->on('ping', static function ($data) use ($socket): void {
+        $socket->emit('pong', $data);
+    });
+});
+
+Server::runAll();
+```
+
+Start it as a Localzet Server entry point: `php socketio.php start`. Tests cover Engine.IO polling, the WebSocket handshake, namespace connection, and event echo. They do not establish compatibility with every `socket.io-client` version, binary payloads, or reconnect behavior. Pin the client version and verify the transports your application uses.
+
+An origin setting limits some browser origins, but it does not replace authentication or authorization: a missing or null Origin is not proof of trust. Authenticate users and check their permissions in the application, set an explicit origin list, and restrict listener ingress with network ACLs. Cross-process rooms require the compatible `ChannelAdapter` from Tunnel 4.x; see [reference and limits](/projects/socketio/en/reference).

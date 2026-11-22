@@ -1,0 +1,19 @@
+export const pageTitle = 'Localzet Socket.IO'
+export const description = 'A Socket.IO server for Localzet Server 7 with polling, WebSocket, and cross-process broadcasts through Tunnel.'
+
+# Localzet Socket.IO
+
+[Getting started](/projects/socketio/en/start) · [Reference and operations](/projects/socketio/en/reference)
+
+Socket.IO [`2.0.3`](https://github.com/localzet/SocketIO/releases/tag/v2.0.3) is the current release for Localzet Server 7. The package is not on Packagist yet; add its Git VCS source and require the stable release:
+
+```sh
+composer config repositories.localzet-socketio vcs https://github.com/localzet/SocketIO
+composer require localzet/socketio:^2.0
+```
+
+In release 2.0.3, `ChannelAdapter` is compatible with Tunnel 4.x. A cross-process room subscription stays active while the process has local sockets in that room. To broadcast between workers, install the compatible Tunnel package separately: `composer require localzet/tunnel:^4.0`.
+
+Socket.IO attaches Engine.IO and Socket.IO handlers to Localzet Server and includes its own WebSocket framing and parsers. The Server 7 integration adds a `ProtocolInterface` adapter and the `socketio://` scheme.
+
+The default adapter keeps state in worker memory and does not require Tunnel. `ChannelAdapter` uses Tunnel 4.x. An end-to-end test starts a Tunnel broker and two independent Socket.IO processes, then checks broadcast delivery between them. It does not cover broker failure, reconnect, persistence, or delivery during a network outage.

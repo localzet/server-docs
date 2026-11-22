@@ -1,0 +1,21 @@
+export const pageTitle = 'Localzet Storage: data and security'
+export const description = 'Shared in-memory storage for Localzet Server 7 with object deserialization disabled by default.'
+
+# Localzet Storage
+
+[Getting started](/projects/storage/en/start) · [Reference and operations](/projects/storage/en/reference)
+
+Storage `2.0.1` is shared in-memory storage for application processes running on Localzet Server 7. It uses bounded framing and rejects objects and recursive arrays by default.
+
+```sh
+composer config repositories.localzet-storage vcs https://github.com/localzet/Storage
+composer require localzet/storage:^2.0
+```
+
+The current stable release is [`2.0.1`](https://github.com/localzet/Storage/releases/tag/v2.0.1). It updates framing for Server 7, handles partial reads and writes, limits a frame to 64 MiB, and accepts only scalars and acyclic arrays by default. The package is not on Packagist, so Composer installs it from VCS.
+
+Storage is a client/server shared in-memory store. It requires PHP 8.2+ and Localzet Server 7. By default, its listener binds to `127.0.0.1:8008`; there is no built-in authentication.
+
+Upgrading from version 1.x requires a coordinated client and server update. Remove objects and recursive arrays from stored values, or set `allowObjectSerialization: true` on both ends only in a trusted, isolated network. Values live in process memory; the store does not provide persistence or replication.
+
+Before binding to an external network interface, configure ACLs. Check frame sizes, service availability, and concurrent client operations for your deployment.

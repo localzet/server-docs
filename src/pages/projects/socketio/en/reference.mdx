@@ -1,0 +1,20 @@
+export const pageTitle = 'Socket.IO: reference and operations'
+export const description = 'Socket.IO namespaces, socket events, rooms, origins, adapters, and implementation limits.'
+
+# Socket.IO: reference and operations
+
+The package requires PHP 8.1+ and Localzet Server `^7.0`. Create `SocketIO`, attach it with `attach($server, $options = [])`, and register handlers before starting server processes. Use `of($namespace)` to select a namespace and `origins($rule)` to configure allowed browser origins.
+
+## Events and rooms
+
+A socket exposes `on($event, $callback)`, `emit($event, ...$data)`, `send()`, `join($room)`, `leave($room)`, and `disconnect()`. A namespace or adapter can broadcast with `to($room)->emit(...)` and `in($room)->emit(...)`. Validate payloads, authenticate the handshake in the application, and check the user's access to each room and event.
+
+In release [`2.0.3`](https://github.com/localzet/SocketIO/releases/tag/v2.0.3), the cross-process `ChannelAdapter` is compatible with Tunnel 4.x. The default `DefaultAdapter` stores connections and rooms in worker memory. A room change in one process is not automatically synchronized with others. An integration test confirms broadcast between two Socket.IO processes through a running Tunnel broker. It does not test broker failure, reconnection, message persistence, room authorization, or delivery during a network interruption.
+
+Install Tunnel separately with `composer require localzet/tunnel:^4.0`. For cross-process operation, configure `ChannelAdapter` and the Tunnel broker address on each worker; restrict the broker to loopback or a trusted network.
+
+## Protocol compatibility and security
+
+The implementation includes its own Engine.IO and Socket.IO parsers and WebSocket framing. Loopback tests cover polling, the WebSocket handshake, namespace connection, event echo, and cross-process broadcast. They do not establish full compatibility with every Socket.IO client version, binary payloads, reconnect, or broker failover. Verify your client version and required transport scenarios on the target platform.
+
+The default origin setting is `*:*`. Configure explicit origins, but remember that CORS/origin policy is not authentication; the code allows requests without an Origin header. Place a public listener behind TLS ingress, authenticate in the application, and limit event size and rate. Before production, verify broker permissions, reconnect behavior, and network restrictions in the target environment.

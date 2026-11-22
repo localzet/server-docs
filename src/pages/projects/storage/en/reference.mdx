@@ -1,0 +1,27 @@
+export const pageTitle = 'Storage: reference and operations'
+export const description = 'Client API, hash-based sharding, PHP serialization, and Storage security boundaries.'
+
+# Storage: reference and operations
+
+Storage requires PHP 8.2+ and Localzet Server `^7.0`. `new localzet\Storage\Server($ip = '127.0.0.1', $port = 8008, $allowObjectSerialization = false)` creates a frame listener with one worker. `new Client($servers, $allowObjectSerialization = false)` accepts one `host:port` address or an array of addresses. The current release is [`2.0.1`](https://github.com/localzet/Storage/releases/tag/v2.0.1). Add the VCS source as shown in [getting started](/projects/storage/en/start).
+
+## Operations and key placement
+
+| Method | Behavior |
+| --- | --- |
+| `set($key, $value)` | Store a value |
+| `get($key)` | Read a value, or `null` when the key is absent |
+| `add($key, $value)` | Store only when the key is not set |
+| `cas($key, $old, $new)` | Replace only when the current value matches `$old` |
+| `increment($key, $step = 1)` | Change a numeric value |
+| `delete($key)` | Remove a value |
+
+The client also supports property access (`$client->key = $value`, `$value = $client->key`), but methods make result handling explicit. With multiple servers, the client selects an address by CRC32 of the key. Changing or reordering the server list changes placement; there is no automatic data migration.
+
+## Wire format and security limits
+
+The protocol uses length-prefixed PHP-serialized frames, up to 64 MiB per frame, without authentication or encryption. Values sent over the wire must be compatible with PHP serialization. Object deserialization is disabled on both client and server by default; objects and recursive arrays are rejected. Enable `allowObjectSerialization: true` on both sides only in a trusted, isolated network where every peer is controlled by the same owner.
+
+Keep the listener on loopback or restrict it with ACLs/firewall rules. Do not expose port 8008 to the Internet or send unbounded payloads: the protocol has no client authentication, TTL API, overall memory limit, or durable storage. In safe mode, payload structure is limited before decoding to 100,000 total array values and 128 nesting levels. Data stays in one process's RAM and is lost when it stops. Scaling across nodes uses sharding, not replication.
+
+Before external use, separately verify concurrent writes, timeout and recovery behavior, and node-loss behavior. A local serialization regression check is not a network security guarantee.
